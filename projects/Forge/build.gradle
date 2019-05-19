@@ -1,0 +1,7 @@
+sourceSets {
+    main.java.srcDir 'src/main/start'
+    main.java.srcDir '/home/gmatrixgames/IdeaProjects/Lava/forge/src/main/java/'
+    main.resources.srcDir '/home/gmatrixgames/IdeaProjects/Lava/forge/src/main/resources/'
+    test.java.srcDir '/home/gmatrixgames/IdeaProjects/Lava/forge/src/test/java/'
+    test.resources.srcDir '/home/gmatrixgames/IdeaProjects/Lava/forge/src/test/resources/'
+}
