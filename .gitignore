@@ -4,6 +4,7 @@ build
 /.vscode
 /eclipse
 /spigot
+/projects/*
 /patches2
 /patches3
 /patchesMCP
