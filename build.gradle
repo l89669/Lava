@@ -74,8 +74,8 @@ minecraft {
 
     projects {
         forge {
-            rootDir "forge/"
-            patchDir "forge/patches/minecraft/"
+            rootDir "MinecraftForge/"
+            patchDir "MinecraftForge/patches/minecraft/"
             patchAfter "clean"
             genPatchesFrom "clean"
             genMcpPatches = false
