@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3+'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.0+'
         classpath 'net.nemerosa:versioning:2.7.1'
     }
 }
