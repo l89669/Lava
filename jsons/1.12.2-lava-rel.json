@@ -209,6 +209,12 @@
       "url" : "http://files.minecraftforge.net/maven/",
       "clientreq":true,
       "serverreq":true
+    },
+    {
+      "name": "org.slf4j:slf4j-api:1.7.25",
+      "url" : "http://repo.maven.apache.org/maven2",
+      "clientreq":true,
+      "serverreq":true
     }
   ]
 },

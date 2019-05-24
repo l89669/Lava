@@ -1,0 +1,89 @@
+--- ../src-base/minecraft/net/minecraft/network/NetworkManager.java
++++ ../src-work/minecraft/net/minecraft/network/NetworkManager.java
+@@ -2,6 +2,7 @@
+ 
+ import com.google.common.collect.Queues;
+ import com.google.common.util.concurrent.ThreadFactoryBuilder;
++import com.mojang.authlib.properties.Property;
+ import io.netty.bootstrap.Bootstrap;
+ import io.netty.channel.Channel;
+ import io.netty.channel.ChannelException;
+@@ -29,6 +30,7 @@
+ import java.net.InetAddress;
+ import java.net.SocketAddress;
+ import java.util.Queue;
++import java.util.UUID;
+ import java.util.concurrent.locks.ReentrantReadWriteLock;
+ import javax.annotation.Nullable;
+ import javax.crypto.SecretKey;
+@@ -46,7 +48,7 @@
+ import org.apache.logging.log4j.Marker;
+ import org.apache.logging.log4j.MarkerManager;
+ 
+-public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >>
++public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>>
+ {
+     private static final Logger LOGGER = LogManager.getLogger();
+     public static final Marker NETWORK_MARKER = MarkerManager.getMarker("NETWORK");
+@@ -74,10 +76,15 @@
+         }
+     };
+     private final EnumPacketDirection direction;
+-    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
++    private final Queue<InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
+     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+-    private Channel channel;
+-    private SocketAddress socketAddress;
++    public Channel channel;
++    // Spigot start // PAIL
++    public SocketAddress socketAddress;
++    public UUID spoofedUUID;
++    public Property[] spoofedProfile;
++    // Spigot end
++    public boolean preparing = true; // Spigot
+     private INetHandler packetListener;
+     private ITextComponent terminationReason;
+     private boolean isEncrypted;
+@@ -98,6 +105,7 @@
+         super.channelActive(p_channelActive_1_);
+         this.channel = p_channelActive_1_.channel();
+         this.socketAddress = this.channel.remoteAddress();
++        this.preparing = false; // Spigot
+ 
+         try
+         {
+@@ -298,9 +306,12 @@
+ 
+     public void closeChannel(ITextComponent message)
+     {
++        this.preparing = false; // Spigot
+         if (this.channel.isOpen())
+         {
+-            this.channel.close().awaitUninterruptibly();
++            // We can't wait as this may be called from an event loop
++            // this.channel.close().awaitUninterruptibly();
++            this.channel.close();
+             this.terminationReason = message;
+         }
+     }
+@@ -410,7 +421,7 @@
+             }
+             else
+             {
+-                this.channel.pipeline().addBefore("decoder", "decompress", new NettyCompressionDecoder(threshold));
++                this.channel.pipeline().addAfter("splitter", "decompress", new NettyCompressionDecoder(threshold));
+             }
+ 
+             if (this.channel.pipeline().get("compress") instanceof NettyCompressionEncoder)
+@@ -476,4 +487,11 @@
+                 this.futureListeners = inFutureListeners;
+             }
+         }
++
++    // Spigot start
++    public SocketAddress getRawAddress()
++    {
++        return this.channel.remoteAddress();
++    }
++    // Spigot end
+ }
