@@ -15,6 +15,11 @@
       "url" : "http://repo.maven.apache.org/maven2"
     },
     {
+      "name": "jline:jline:2.13",
+      "children": ["sources"],
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
       "name": "com.google.code.findbugs:jsr305:1.3.9",
       "children": ["sources"],
       "url" : "http://repo.maven.apache.org/maven2"
@@ -80,6 +85,16 @@
       "url" : "http://repo.maven.apache.org/maven2"
     },
     {
+      "name" : "com.googlecode.json-simple:json-simple:1.1.1",
+      "children" : ["sources"],
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
+      "name" : "org.yaml:snakeyaml:1.23",
+      "children" : ["sources"],
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
       "name": "lzma:lzma:0.0.1"
     },
     {
@@ -87,6 +102,41 @@
     },
     {
       "name": "net.sf.trove4j:trove4j:3.0.3"
+    },
+    {
+      "name": "org.xerial:sqlite-jdbc:3.21.0.1",
+      "children" : ["sources"],
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
+      "name": "mysql:mysql-connector-java:5.1.46",
+      "children" : ["sources"],
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
+      "name": "net.md-5:SpecialSource:1.8.5",
+      "children" : ["sources"],
+      "url" : "https://hub.spigotmc.org/nexus/content/groups/public/"
+    },
+    {
+      "name": "net.md-5:bungeecord-chat:1.12-SNAPSHOT",
+      "children" : ["sources"],
+      "url" : "https://hub.spigotmc.org/nexus/content/groups/public/"
+    },
+    {
+      "name": "org.apache.commons:commons-lang3:3.5",
+      "children" : ["sources"],
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
+      "name": "commons-lang:commons-lang:2.6",
+      "children" : ["sources"],
+      "url" : "http://repo.maven.apache.org/maven2"
+    },
+    {
+      "name": "co.aikar:fastutil-lite:1.0",
+      "children" : ["sources"],
+      "url" : "https://papermc.io/repo/repository/maven-public/"
     },
     {
       "name": "org.apache.maven:maven-artifact:3.5.3",
