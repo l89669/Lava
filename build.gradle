@@ -43,8 +43,8 @@ configurations {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile 'net.md-5:SpecialSource:1.8.5'
     compile 'org.lavapowered.lava:lava-bukkit:1.12.2-R0.2-SNAPSHOT'
+    compile 'net.md-5:SpecialSource:1.8.5'
 }
 
 jar {
