@@ -367,15 +367,7 @@
          itemstack.setAnimationsToGo(this.getAnimationsToGo());
  
          if (this.stackTagCompound != null)
-@@ -896,7 +1124,6 @@
-         return this.getItem().hasEffect(this);
-     }
- 
--    @Deprecated // use Forge version on item
-     public EnumRarity getRarity()
-     {
-         return this.getItem().getRarity(this);
-@@ -1043,6 +1270,14 @@
+@@ -1043,6 +1271,14 @@
          nbttaglist.appendTag(nbttagcompound);
      }
  
@@ -390,12 +382,3 @@
      public ITextComponent getTextComponent()
      {
          TextComponentString textcomponentstring = new TextComponentString(this.getDisplayName());
-@@ -1058,7 +1293,7 @@
-         {
-             NBTTagCompound nbttagcompound = this.writeToNBT(new NBTTagCompound());
-             itextcomponent.getStyle().setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponentString(nbttagcompound.toString())));
--            itextcomponent.getStyle().setColor(this.getItem().getForgeRarity(this).getColor());
-+            itextcomponent.getStyle().setColor(this.getRarity().rarityColor);
-         }
- 
-         return itextcomponent;

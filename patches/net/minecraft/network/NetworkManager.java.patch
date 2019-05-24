@@ -1,89 +1,70 @@
 --- ../src-base/minecraft/net/minecraft/network/NetworkManager.java
 +++ ../src-work/minecraft/net/minecraft/network/NetworkManager.java
-@@ -2,6 +2,7 @@
- 
- import com.google.common.collect.Queues;
- import com.google.common.util.concurrent.ThreadFactoryBuilder;
-+import com.mojang.authlib.properties.Property;
- import io.netty.bootstrap.Bootstrap;
- import io.netty.channel.Channel;
- import io.netty.channel.ChannelException;
-@@ -29,6 +30,7 @@
- import java.net.InetAddress;
- import java.net.SocketAddress;
- import java.util.Queue;
-+import java.util.UUID;
- import java.util.concurrent.locks.ReentrantReadWriteLock;
- import javax.annotation.Nullable;
- import javax.crypto.SecretKey;
-@@ -46,7 +48,7 @@
- import org.apache.logging.log4j.Marker;
- import org.apache.logging.log4j.MarkerManager;
- 
--public class NetworkManager extends SimpleChannelInboundHandler < Packet<? >>
-+public class NetworkManager extends SimpleChannelInboundHandler<Packet<?>>
- {
-     private static final Logger LOGGER = LogManager.getLogger();
-     public static final Marker NETWORK_MARKER = MarkerManager.getMarker("NETWORK");
-@@ -74,10 +76,15 @@
+@@ -74,10 +74,14 @@
          }
      };
      private final EnumPacketDirection direction;
 -    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
-+    private final Queue<InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
++    private final Queue<InboundHandlerTuplePacketListener> outboundPacketsQueue = Queues.<InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
      private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
--    private Channel channel;
+     private Channel channel;
 -    private SocketAddress socketAddress;
-+    public Channel channel;
-+    // Spigot start // PAIL
++    // Spigot Start // PAIL
 +    public SocketAddress socketAddress;
-+    public UUID spoofedUUID;
-+    public Property[] spoofedProfile;
-+    // Spigot end
-+    public boolean preparing = true; // Spigot
++    public java.util.UUID spoofedUUID;
++    public com.mojang.authlib.properties.Property[] spoofedProfile;
++    // Spigot End
      private INetHandler packetListener;
      private ITextComponent terminationReason;
      private boolean isEncrypted;
-@@ -98,6 +105,7 @@
-         super.channelActive(p_channelActive_1_);
-         this.channel = p_channelActive_1_.channel();
-         this.socketAddress = this.channel.remoteAddress();
-+        this.preparing = false; // Spigot
+@@ -173,7 +177,7 @@
  
-         try
-         {
-@@ -298,9 +306,12 @@
+             try
+             {
+-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, new GenericFutureListener[0]));
++                this.outboundPacketsQueue.add(new InboundHandlerTuplePacketListener(packetIn, new GenericFutureListener[0]));
+             }
+             finally
+             {
+@@ -195,7 +199,7 @@
  
-     public void closeChannel(ITextComponent message)
+             try
+             {
+-                this.outboundPacketsQueue.add(new NetworkManager.InboundHandlerTuplePacketListener(packetIn, (GenericFutureListener[])ArrayUtils.add(listeners, 0, listener)));
++                this.outboundPacketsQueue.add(new InboundHandlerTuplePacketListener(packetIn, (GenericFutureListener[])ArrayUtils.add(listeners, 0, listener)));
+             }
+             finally
+             {
+@@ -265,7 +269,7 @@
+             {
+                 while (!this.outboundPacketsQueue.isEmpty())
+                 {
+-                    NetworkManager.InboundHandlerTuplePacketListener networkmanager$inboundhandlertuplepacketlistener = this.outboundPacketsQueue.poll();
++                    InboundHandlerTuplePacketListener networkmanager$inboundhandlertuplepacketlistener = this.outboundPacketsQueue.poll();
+                     this.dispatchPacket(networkmanager$inboundhandlertuplepacketlistener.packet, networkmanager$inboundhandlertuplepacketlistener.futureListeners);
+                 }
+             }
+@@ -300,7 +304,9 @@
      {
-+        this.preparing = false; // Spigot
          if (this.channel.isOpen())
          {
 -            this.channel.close().awaitUninterruptibly();
-+            // We can't wait as this may be called from an event loop
++            // We can't wait as this may be called from an event loop.
 +            // this.channel.close().awaitUninterruptibly();
 +            this.channel.close();
              this.terminationReason = message;
          }
      }
-@@ -410,7 +421,7 @@
-             }
-             else
-             {
--                this.channel.pipeline().addBefore("decoder", "decompress", new NettyCompressionDecoder(threshold));
-+                this.channel.pipeline().addAfter("splitter", "decompress", new NettyCompressionDecoder(threshold));
-             }
- 
-             if (this.channel.pipeline().get("compress") instanceof NettyCompressionEncoder)
-@@ -476,4 +487,11 @@
+@@ -476,4 +482,12 @@
                  this.futureListeners = inFutureListeners;
              }
          }
 +
-+    // Spigot start
++    // Spigot Start
 +    public SocketAddress getRawAddress()
 +    {
 +        return this.channel.remoteAddress();
 +    }
-+    // Spigot end
++    // Spigot End
++
  }

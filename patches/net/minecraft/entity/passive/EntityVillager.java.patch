@@ -81,12 +81,8 @@
      {
          return false;
      }
-@@ -651,10 +664,10 @@
-             this.populateBuyingList();
-         }
- 
--        return net.minecraftforge.event.ForgeEventFactory.listTradeOffers(this, player, buyingList);
-+        return this.buyingList;
+@@ -654,7 +667,7 @@
+         return net.minecraftforge.event.ForgeEventFactory.listTradeOffers(this, player, buyingList);
      }
  
 -    private void populateBuyingList()
