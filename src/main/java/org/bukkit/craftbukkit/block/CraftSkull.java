@@ -7,6 +7,7 @@ import net.minecraft.tileentity.TileEntitySkull;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+
 import org.bukkit.SkullType;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -166,7 +167,7 @@ public class CraftSkull extends CraftBlockEntityState<TileEntitySkull> implement
             return false;
         }
 
-        GameProfile profile = MinecraftServer.getServerInst().getPlayerProfileCache().getGameProfileForUsername(name);
+        GameProfile profile = MinecraftServer.getServerCB().getPlayerProfileCache().getGameProfileForUsername(name);
         if (profile == null) {
             return false;
         }

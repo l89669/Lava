@@ -1,11 +1,13 @@
 package org.bukkit.craftbukkit.inventory;
 
+import java.util.Iterator;
+
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.item.crafting.IRecipe;
 import org.bukkit.inventory.Recipe;
-
-import java.util.Iterator;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 
 public class RecipeIterator implements Iterator<Recipe> {
     private final Iterator<IRecipe> recipes;
@@ -27,10 +29,10 @@ public class RecipeIterator implements Iterator<Recipe> {
         if (recipes.hasNext()) {
             removeFrom = recipes;
             IRecipe recipe = recipes.next();
-            try {
+            if (recipe instanceof ShapedRecipe || recipe instanceof ShapelessRecipe) {
                 return recipe.toBukkitRecipe();
-         	} catch (AbstractMethodError ex) {
-                return recipe == null ? null :new CraftCustomModRecipe(recipe, recipe.getRegistryName());
+            } else {
+                return new CraftCustomModRecipe(recipe);
             }
         } else {
             net.minecraft.item.ItemStack item;

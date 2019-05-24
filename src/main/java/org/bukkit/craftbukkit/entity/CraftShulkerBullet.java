@@ -39,11 +39,6 @@ public class CraftShulkerBullet extends AbstractProjectile implements ShulkerBul
     }
 
     @Override
-    public String toString() {
-        return "CraftShulkerBullet";
-    }
-	
-    @Override
     public EntityType getType() {
         return EntityType.SHULKER_BULLET;
     }

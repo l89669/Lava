@@ -1,0 +1,25 @@
+--- ../src-base/minecraft/net/minecraft/item/Item.java
++++ ../src-work/minecraft/net/minecraft/item/Item.java
+@@ -368,7 +368,6 @@
+         return stack.isItemEnchanted();
+     }
+ 
+-    @Deprecated // use Forge version
+     public EnumRarity getRarity(ItemStack stack)
+     {
+         return stack.isItemEnchanted() ? EnumRarity.RARE : EnumRarity.COMMON;
+@@ -1211,13 +1210,8 @@
+     public void setTileEntityItemStackRenderer(@Nullable net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer teisr)
+     {
+     	this.teisr = teisr;
+-    }
++    }  
+ 
+-    public net.minecraftforge.common.IRarity getForgeRarity(ItemStack stack)
+-    {
+-        return this.getRarity(stack);
+-    }
+-
+     /* ======================================== FORGE END   =====================================*/
+ 
+     public static void registerItems()

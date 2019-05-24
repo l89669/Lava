@@ -1,7 +1,12 @@
 package org.bukkit.craftbukkit.inventory;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
+
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.inventory.InventoryMerchant;
@@ -14,17 +19,12 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.tileentity.TileEntityShulkerBox;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.ListIterator;
+import org.bukkit.Material;
 
 public class CraftInventory implements Inventory {
     protected final IInventory inventory;
@@ -42,9 +42,7 @@ public class CraftInventory implements Inventory {
     }
 
     public String getName() {
-    	String name = getInventory().getName();
-        String modname = getInventory().getClass().getSimpleName();
-        return name != null ? name : modname;
+        return getInventory().getName();
     }
 
     public ItemStack getItem(int index) {
@@ -75,12 +73,7 @@ public class CraftInventory implements Inventory {
     }
 
     public ItemStack[] getContents() {
-    	List<net.minecraft.item.ItemStack> mcItems = null;
-        try {
-            mcItems = getInventory().getContents();
-        } catch (AbstractMethodError e) {
-            return new ItemStack[0];
-        }
+        List<net.minecraft.item.ItemStack> mcItems = getInventory().getContents();
 
         return asCraftMirror(mcItems);
     }
@@ -442,17 +435,11 @@ public class CraftInventory implements Inventory {
     }
 
     public List<HumanEntity> getViewers() {
-    	try {
-            return this.inventory.getViewers();
-        } catch (AbstractMethodError e) {
-            return new java.util.ArrayList<HumanEntity>();
-        }
+        return this.inventory.getViewers();
     }
 
     public String getTitle() {
-        String name = getInventory().getName();
-        String modname = getInventory().getClass().getSimpleName();
-        return name != null ? name : modname;
+        return inventory.getName();
     }
 
     public InventoryType getType() {
@@ -491,17 +478,7 @@ public class CraftInventory implements Inventory {
     }
 
     public InventoryHolder getHolder() {
-        try {
-            return inventory.getOwner();
-        } catch (AbstractMethodError e) {
-            if (inventory instanceof net.minecraft.tileentity.TileEntity) {
-                net.minecraft.tileentity.TileEntity tileentity = (net.minecraft.tileentity.TileEntity) inventory;
-                BlockState state = tileentity.getWorld().getWorld().getBlockAt(tileentity.getPos().getX(), tileentity.getPos().getY(), tileentity.getPos().getZ()).getState();
-                return (state instanceof InventoryHolder ? (InventoryHolder) state : null);
-            }else{
-                return null;
-            }
-        }
+        return inventory.getOwner();
     }
 
     public int getMaxStackSize() {

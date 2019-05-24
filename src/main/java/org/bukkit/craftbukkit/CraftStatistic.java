@@ -1,18 +1,20 @@
 package org.bukkit.craftbukkit;
 
-import com.google.common.base.CaseFormat;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
+
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
-import org.bukkit.Material;
 import org.bukkit.Statistic;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
+
+import com.google.common.base.CaseFormat;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 
 public class CraftStatistic {
     private static final BiMap<String, Statistic> statistics;
@@ -122,7 +124,7 @@ public class CraftStatistic {
         }
         Block block = Block.REGISTRY.getObject(new ResourceLocation(val));
         if (block != null) {
-            return Material.getBlockMaterial(Block.getIdFromBlock(block));
+            return Material.getMaterial(Block.getIdFromBlock(block));
         }
         try {
             return Material.getMaterial(Integer.parseInt(val));

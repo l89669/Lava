@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemBlockSpecial.java
++++ ../src-work/minecraft/net/minecraft/item/ItemBlockSpecial.java
+@@ -41,7 +41,7 @@
+ 
+         ItemStack itemstack = player.getHeldItem(hand);
+ 
+-        if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(this.block, pos, false, facing, player))
++        if (!itemstack.isEmpty() && player.canPlayerEdit(pos, facing, itemstack) && worldIn.mayPlace(this.block, pos, false, facing, (Entity)null))
+         {
+             IBlockState iblockstate1 = this.block.getStateForPlacement(worldIn, pos, facing, hitX, hitY, hitZ, 0, player, hand);
+ 

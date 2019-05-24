@@ -1,18 +1,19 @@
 package org.bukkit.craftbukkit.help;
 
-import com.google.common.base.Charsets;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.help.HelpTopic;
-import red.mohist.Mohist;
+
+import com.google.common.base.Charsets;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * HelpYamlReader is responsible for processing the contents of the help.yml file.
@@ -39,10 +40,10 @@ public class HelpYamlReader {
                     helpYaml.save(helpYamlFile);
                 }
             } catch (IOException ex) {
-                Mohist.LOGGER.error("Could not save " + helpYamlFile, ex);
+                server.getLogger().log(Level.SEVERE, "Could not save " + helpYamlFile, ex);
             }
         } catch (Exception ex) {
-            Mohist.LOGGER.error("Failed to load help.yml. Verify the yaml indentation is correct. Reverting to default help.yml.");
+            server.getLogger().severe("Failed to load help.yml. Verify the yaml indentation is correct. Reverting to default help.yml.");
             helpYaml = defaultConfig;
         }
     }

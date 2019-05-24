@@ -1,24 +1,26 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.google.common.collect.ImmutableMap;
+import static org.bukkit.craftbukkit.inventory.CraftMetaItem.ENCHANTMENTS;
+import static org.bukkit.craftbukkit.inventory.CraftMetaItem.ENCHANTMENTS_ID;
+import static org.bukkit.craftbukkit.inventory.CraftMetaItem.ENCHANTMENTS_LVL;
+
+import java.util.Map;
+
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.Item;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.enchantments.CraftEnchantment;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Map;
-
-import static org.bukkit.craftbukkit.inventory.CraftMetaItem.ENCHANTMENTS;
-import static org.bukkit.craftbukkit.inventory.CraftMetaItem.ENCHANTMENTS_ID;
-import static org.bukkit.craftbukkit.inventory.CraftMetaItem.ENCHANTMENTS_LVL;
+import com.google.common.collect.ImmutableMap;
+import org.bukkit.craftbukkit.enchantments.CraftEnchantment;
 
 @DelegateDeserialization(ItemStack.class)
 public final class CraftItemStack extends ItemStack {
@@ -38,9 +40,12 @@ public final class CraftItemStack extends ItemStack {
             return net.minecraft.item.ItemStack.EMPTY;
         }
 
-        net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item, original.getAmount(), original.getDurability());
+        net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(item, original.getAmount(), original.getDurability(), false);
         if (original.hasItemMeta()) {
             setItemMeta(stack, original.getItemMeta());
+        } else {
+            // Converted after setItemMeta
+            stack.convertStack();
         }
         return stack;
     }
@@ -58,7 +63,17 @@ public final class CraftItemStack extends ItemStack {
         if (original.isEmpty()) {
             return new ItemStack(Material.AIR);
         }
+        
+        // Kettle start - don't use strict Bukkit stacks as we don't have Bukkit Materials for modded item stacks, create wrapper? (Cauldron)
         return asCraftMirror(copyNMSStack(original, original.getCount()));
+        /*
+        ItemStack stack = new ItemStack(CraftMagicNumbers.getMaterial(original.getItem()), original.getCount(), (short) original.getMetadata());
+        if (hasItemMeta(original)) {
+            stack.setItemMeta(getItemMeta(original));
+        }
+        return stack;
+        */
+        // Kettle end
     }
 
     public static CraftItemStack asCraftMirror(net.minecraft.item.ItemStack original) {
@@ -165,9 +180,9 @@ public final class CraftItemStack extends ItemStack {
         }
     }
 
-	@Override
+    @Override
     public int getMaxStackSize() {
-        return (handle == null) ? Material.AIR.getMaxStackSize() : handle.getItem().getItemStackLimit(this.handle);
+        return (handle == null) ? Material.AIR.getMaxStackSize() : handle.getItem().getItemStackLimit();
     }
 
     @Override
@@ -210,7 +225,7 @@ public final class CraftItemStack extends ItemStack {
         return true;
     }
 
-	@Override
+    @Override
     public boolean containsEnchantment(Enchantment ench) {
         return getEnchantmentLevel(ench) > 0;
     }
@@ -346,7 +361,7 @@ public final class CraftItemStack extends ItemStack {
                 return new CraftMetaSpawnEgg(item.getTagCompound());
             case KNOWLEDGE_BOOK:
                 return new CraftMetaKnowledgeBook(item.getTagCompound());
-         case FURNACE:
+            case FURNACE:
             case CHEST:
             case TRAPPED_CHEST:
             case JUKEBOX:
@@ -420,6 +435,7 @@ public final class CraftItemStack extends ItemStack {
         item.setTagCompound(tag);
 
         ((CraftMetaItem) itemMeta).applyToItem(tag);
+        item.convertStack();
 
         return true;
     }

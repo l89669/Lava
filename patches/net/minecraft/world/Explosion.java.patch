@@ -1,0 +1,66 @@
+--- ../src-base/minecraft/net/minecraft/world/Explosion.java
++++ ../src-work/minecraft/net/minecraft/world/Explosion.java
+@@ -27,6 +27,7 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
+ 
+ public class Explosion
+ {
+@@ -37,12 +38,14 @@
+     private final double x;
+     private final double y;
+     private final double z;
+-    private final Entity exploder;
++    public final Entity exploder;
+     private final float size;
+     private final List<BlockPos> affectedBlockPositions;
+     private final Map<EntityPlayer, Vec3d> playerKnockbackMap;
+     private final Vec3d position;
+ 
++    public boolean wasCancelled = false;
++
+     @SideOnly(Side.CLIENT)
+     public Explosion(World worldIn, Entity entityIn, double x, double y, double z, float size, List<BlockPos> affectedPositions)
+     {
+@@ -63,7 +66,8 @@
+         this.playerKnockbackMap = Maps.<EntityPlayer, Vec3d>newHashMap();
+         this.world = worldIn;
+         this.exploder = entityIn;
+-        this.size = size;
++        // this.size = size;
++        this.size = (float) Math.max(size, 0.0); // CraftBukkit - clamp bad values
+         this.x = x;
+         this.y = y;
+         this.z = z;
+@@ -74,6 +78,9 @@
+ 
+     public void doExplosionA()
+     {
++        if (this.size < 0.1F) {
++            return;
++        }
+         Set<BlockPos> set = Sets.<BlockPos>newHashSet();
+         int i = 16;
+ 
+@@ -108,7 +115,7 @@
+                                 f -= (f2 + 0.3F) * 0.3F;
+                             }
+ 
+-                            if (f > 0.0F && (this.exploder == null || this.exploder.canExplosionDestroyBlock(this, this.world, blockpos, iblockstate, f)))
++                            if (f > 0.0F && (this.exploder == null || this.exploder.canExplosionDestroyBlock(this, this.world, blockpos, iblockstate, f)) && blockpos.getY() < 256 && blockpos.getY() >= 0) // CraftBukkit - don't wrap explosions
+                             {
+                                 set.add(blockpos);
+                             }
+@@ -156,7 +163,9 @@
+                         d9 = d9 / d13;
+                         double d14 = (double)this.world.getBlockDensity(vec3d, entity.getEntityBoundingBox());
+                         double d10 = (1.0D - d12) * d14;
+-                        entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
++                        // entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
++                        CraftEventFactory.entityDamage = exploder;
++                        entity.forceE
+                         double d11 = d10;
+ 
+                         if (entity instanceof EntityLivingBase)

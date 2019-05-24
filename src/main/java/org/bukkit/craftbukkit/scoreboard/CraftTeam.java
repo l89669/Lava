@@ -1,17 +1,19 @@
 package org.bukkit.craftbukkit.scoreboard;
 
-import com.google.common.collect.ImmutableSet;
+import java.util.Set;
+
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team.EnumVisible;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
+
+import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.util.CraftChatMessage;
 
 final class CraftTeam extends CraftScoreboardComponent implements Team {
     private final ScorePlayerTeam team;

@@ -1,5 +1,8 @@
 package org.bukkit.craftbukkit.block;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntity;
@@ -12,9 +15,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class CraftBeacon extends CraftContainer<TileEntityBeacon> implements Beacon {
 

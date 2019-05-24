@@ -4,12 +4,11 @@
  */
 package org.bukkit.craftbukkit.generator;
 
+import java.util.Arrays;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.material.MaterialData;
-
-import java.util.Arrays;
 
 /**
  * Data to be used for the block types and data in a newly generated chunk.
@@ -58,7 +57,7 @@ public final class CraftChunkData implements ChunkGenerator.ChunkData {
 
     @Override
     public Material getType(int x, int y, int z) {
-        return Material.getBlockMaterial(getTypeId(x, y, z));
+        return Material.getMaterial(getTypeId(x, y, z));
     }
 
     @Override

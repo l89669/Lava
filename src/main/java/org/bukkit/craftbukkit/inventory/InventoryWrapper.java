@@ -2,6 +2,9 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -13,17 +16,13 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class InventoryWrapper implements IInventory {
 
     private final Inventory inventory;
-    private final List<HumanEntity> viewers;
+    private final List<HumanEntity> viewers = new ArrayList<HumanEntity>();
 
     public InventoryWrapper(Inventory inventory) {
         this.inventory = inventory;
-        this.viewers = new ArrayList<HumanEntity>();
     }
 
     @Override
@@ -137,18 +136,18 @@ public class InventoryWrapper implements IInventory {
     }
 
     @Override
-    public void onOpen(final CraftHumanEntity who) {
-        this.viewers.add(who);
+    public void onOpen(CraftHumanEntity who) {
+        viewers.add(who);
     }
 
     @Override
-    public void onClose(final CraftHumanEntity who) {
-        this.viewers.remove(who);
+    public void onClose(CraftHumanEntity who) {
+        viewers.remove(who);
     }
 
     @Override
     public List<HumanEntity> getViewers() {
-        return this.viewers;
+        return viewers;
     }
 
     @Override

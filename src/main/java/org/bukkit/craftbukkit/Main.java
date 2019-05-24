@@ -1,24 +1,24 @@
 package org.bukkit.craftbukkit;
 
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import org.apache.logging.log4j.LogManager;
-import red.mohist.Mohist;
-import red.mohist.i18n.Message;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+//import org.fusesource.jansi.AnsiConsole;
 
 public class Main {
     public static boolean useJline = true;
     public static boolean useConsole = true;
+
     public static OptionSet main(String[] args) {
-        Mohist.LOGGER = LogManager.getLogger("Mohist");
         // Todo: Installation script
         OptionParser parser = new OptionParser() {
             {
@@ -117,8 +117,6 @@ public class Main {
 
                 acceptsAll(asList("demo"), "Demo mode");
 
-                acceptsAll(asList("mixin"), "This argument is needed for proper Mixin Framework work in the test env");
-
                 // Spigot Start
                 acceptsAll(asList("S", "spigot-settings"), "File for spigot settings")
                         .withRequiredArg()
@@ -127,22 +125,7 @@ public class Main {
                         .describedAs("Yml file");
                 // Spigot End
 
-                // Mohist Start
-                acceptsAll(asList("mohist", "mohist-settings"), "File for mohist settings")
-                        .withRequiredArg()
-                        .ofType(File.class)
-                        .defaultsTo(new File("mohist.yml"))
-                        .describedAs("Yml file");
-                // Mohist End
-
-
-                // Paper start
-                acceptsAll(asList("server-name"), "Name of the server")
-                        .withRequiredArg()
-                        .ofType(String.class)
-                        .defaultsTo("Unknown Server")
-                        .describedAs("Name");
-                // Paper end
+                acceptsAll(asList("mixin"), "This argument is needed for proper Mixin Framework work in the test env");
             }
         };
 
@@ -164,9 +147,10 @@ public class Main {
             // Do you love Java using + and ! as string based identifiers? I sure do!
             String path = new File(".").getAbsolutePath();
             if (path.contains("!") || path.contains("+")) {
-                System.err.println(Message.getString(Message.ERROR_START_DIRECTORY));
+                System.err.println("Cannot run server in a directory with ! or + in the pathname. Please rename the affected folders and try again.");
                 return null;
             }
+
             try {
                 // This trick bypasses Maven Shade's clever rewriting of our getProperty call when using String literals
                 String jline_UnsupportedTerminal = new String(new char[] {'j','l','i','n','e','.','U','n','s','u','p','p','o','r','t','e','d','T','e','r','m','i','n','a','l'});
@@ -179,13 +163,34 @@ public class Main {
                     useJline = false;
                 }
 
-
+                /*
+                if (useJline) {
+                    AnsiConsole.systemInstall();
+                } else {
+                    // This ensures the terminal literal will always match the jline implementation
+                    System.setProperty(jline.TerminalFactory.JLINE_TERMINAL, jline.UnsupportedTerminal.class.getName());
+                }
+                */
 
                 if (options.has("noconsole")) {
                     useConsole = false;
                 }
-				
-                Mohist.LOGGER.info(Message.getString(Message.Load_libraries));
+
+                if (Main.class.getPackage().getImplementationVendor() != null && System.getProperty("IReallyKnowWhatIAmDoingISwear") == null) {
+                    Date buildDate = new SimpleDateFormat("yyyyMMdd-HHmm").parse(Main.class.getPackage().getImplementationVendor());
+
+                    Calendar deadline = Calendar.getInstance();
+                    deadline.add(Calendar.DAY_OF_YEAR, -14);
+                    if (buildDate.before(deadline.getTime())) {
+                        System.err.println("*** Error, this build is outdated ***");
+                        System.err.println("*** Please download a new build as per instructions from https://www.spigotmc.org/ ***");
+                        System.err.println("*** Server will start in 15 seconds ***");
+                        Thread.sleep(TimeUnit.SECONDS.toMillis(15));
+                    }
+                }
+
+                System.out.println("Loading libraries, please wait...");
+                // MinecraftServer.main(options);
             } catch (Throwable t) {
                 t.printStackTrace();
             }

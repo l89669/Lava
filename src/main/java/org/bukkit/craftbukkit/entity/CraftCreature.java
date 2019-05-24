@@ -9,8 +9,8 @@ public class CraftCreature extends CraftLivingEntity implements Creature {
     public CraftCreature(CraftServer server, EntityCreature entity) {
         super(server, entity);
     }
-	
-	public void setTarget(LivingEntity target) {
+
+    public void setTarget(LivingEntity target) {
         EntityCreature entity = getHandle();
         if (target == null) {
             entity.setAttackTarget(null, null, false);
@@ -32,6 +32,6 @@ public class CraftCreature extends CraftLivingEntity implements Creature {
 
     @Override
     public String toString() {
-        return "CraftCreature{name=" + this.entityName + "}";
+        return "CraftCreature";
     }
 }

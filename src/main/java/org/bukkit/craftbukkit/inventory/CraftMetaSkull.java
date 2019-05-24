@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.authlib.GameProfile;
+import java.util.Map;
+
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTUtil;
@@ -10,11 +10,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Map;
+import com.google.common.collect.ImmutableMap.Builder;
+import com.mojang.authlib.GameProfile;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
@@ -75,7 +76,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
         if (profile != null) {
             // Fill in textures
-            profile = com.google.common.util.concurrent.Futures.getUnchecked(TileEntitySkull.updateGameprofile(profile, com.google.common.base.Predicates.alwaysTrue(), true)); // Spigot
+            profile = TileEntitySkull.updateGameprofile(profile);
 
             NBTTagCompound owner = new NBTTagCompound();
             NBTUtil.writeGameProfile(owner, profile);
@@ -138,7 +139,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
         if (name == null) {
             profile = null;
         } else {
-			profile = new GameProfile(null, name);
+            profile = new GameProfile(null, name);
         }
 
         return true;

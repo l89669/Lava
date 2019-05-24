@@ -1,0 +1,27 @@
+--- ../src-base/minecraft/net/minecraft/client/settings/GameSettings.java
++++ ../src-work/minecraft/net/minecraft/client/settings/GameSettings.java
+@@ -726,7 +726,6 @@
+ 
+     public void loadOptions()
+     {
+-        FileInputStream fileInputStream = null; // Forge: fix MC-151173
+         try
+         {
+             if (!this.optionsFile.exists())
+@@ -735,7 +734,7 @@
+             }
+ 
+             this.soundLevels.clear();
+-            List<String> list = IOUtils.readLines(fileInputStream = new FileInputStream(this.optionsFile), StandardCharsets.UTF_8); // Forge: fix MC-117449, MC-151173
++            List<String> list = IOUtils.readLines(new FileInputStream(this.optionsFile));
+             NBTTagCompound nbttagcompound = new NBTTagCompound();
+ 
+             for (String s : list)
+@@ -1108,7 +1107,6 @@
+         {
+             LOGGER.error("Failed to load options", (Throwable)exception);
+         }
+-        finally { IOUtils.closeQuietly(fileInputStream); } // Forge: fix MC-151173
+     }
+ 
+     private NBTTagCompound dataFix(NBTTagCompound p_189988_1_)

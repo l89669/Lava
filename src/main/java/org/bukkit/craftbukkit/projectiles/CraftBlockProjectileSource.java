@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit.projectiles;
 
+import java.util.Random;
+
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.dispenser.IBlockSource;
@@ -44,8 +46,6 @@ import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.util.Vector;
-
-import java.util.Random;
 
 public class CraftBlockProjectileSource implements BlockProjectileSource {
     private final TileEntityDispenser dispenserBlock;

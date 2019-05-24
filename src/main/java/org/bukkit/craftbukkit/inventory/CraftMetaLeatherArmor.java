@@ -1,6 +1,9 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.google.common.collect.ImmutableMap.Builder;
+import static org.bukkit.craftbukkit.inventory.CraftItemFactory.DEFAULT_LEATHER_COLOR;
+
+import java.util.Map;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
 import org.bukkit.Color;
@@ -9,13 +12,13 @@ import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import java.util.Map;
+import com.google.common.collect.ImmutableMap.Builder;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaLeatherArmor extends CraftMetaItem implements LeatherArmorMeta {
     static final ItemMetaKey COLOR = new ItemMetaKey("color");
 
-    private Color color = CraftItemFactory.DEFAULT_LEATHER_COLOR;
+    private Color color = DEFAULT_LEATHER_COLOR;
 
     CraftMetaLeatherArmor(CraftMetaItem meta) {
         super(meta);
@@ -32,11 +35,7 @@ class CraftMetaLeatherArmor extends CraftMetaItem implements LeatherArmorMeta {
         if (tag.hasKey(DISPLAY.NBT)) {
             NBTTagCompound display = tag.getCompoundTag(DISPLAY.NBT);
             if (display.hasKey(COLOR.NBT)) {
-				// Fix SPIGOT-4363
-				try {
-                	color = Color.fromRGB(display.getInteger(COLOR.NBT));
- 				} catch (IllegalArgumentException ex) {
-				}
+                color = Color.fromRGB(display.getInteger(COLOR.NBT));
             }
         }
     }
@@ -87,11 +86,11 @@ class CraftMetaLeatherArmor extends CraftMetaItem implements LeatherArmorMeta {
     }
 
     public void setColor(Color color) {
-        this.color = color == null ? CraftItemFactory.DEFAULT_LEATHER_COLOR : color;
+        this.color = color == null ? DEFAULT_LEATHER_COLOR : color;
     }
 
     boolean hasColor() {
-        return !CraftItemFactory.DEFAULT_LEATHER_COLOR.equals(color);
+        return !DEFAULT_LEATHER_COLOR.equals(color);
     }
 
     @Override

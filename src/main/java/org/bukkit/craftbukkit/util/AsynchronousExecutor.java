@@ -1,7 +1,5 @@
 package org.bukkit.craftbukkit.util;
 
-import org.apache.commons.lang3.Validate;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +11,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+
+import org.apache.commons.lang3.Validate;
 
 /**
  * Executes tasks using a multi-stage process executor. Synchronous executions are via {@link AsynchronousExecutor#finishActive()} or the {@link AsynchronousExecutor#get(Object)} methods.
@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  */
 public final class AsynchronousExecutor<P, T, C, E extends Throwable> {
 
-    public static interface CallBackProvider<P, T, C, E extends Throwable> extends ThreadFactory {
+    public interface CallBackProvider<P, T, C, E extends Throwable> extends ThreadFactory {
 
         /**
          * Normally an asynchronous call, but can be synchronous

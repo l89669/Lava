@@ -1,5 +1,11 @@
 package org.bukkit.craftbukkit.scoreboard;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketScoreboardObjective;
 import net.minecraft.network.play.server.SPacketTeams;
@@ -10,17 +16,12 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
+
 import org.apache.commons.lang3.Validate;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.util.WeakCollection;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.ScoreboardManager;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 
 public final class CraftScoreboardManager implements ScoreboardManager {
     private final CraftScoreboard mainScoreboard;
@@ -28,7 +29,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     private final Collection<CraftScoreboard> scoreboards = new WeakCollection<CraftScoreboard>();
     private final Map<CraftPlayer, CraftScoreboard> playerBoards = new HashMap<CraftPlayer, CraftScoreboard>();
 
-    public CraftScoreboardManager(MinecraftServer minecraftserver, net.minecraft.scoreboard.Scoreboard scoreboardServer) {
+    public CraftScoreboardManager(MinecraftServer minecraftserver, Scoreboard scoreboardServer) {
         mainScoreboard = new CraftScoreboard(scoreboardServer);
         server = minecraftserver;
         scoreboards.add(mainScoreboard);
@@ -55,8 +56,8 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         Validate.isTrue(bukkitScoreboard instanceof CraftScoreboard, "Cannot set player scoreboard to an unregistered Scoreboard");
 
         CraftScoreboard scoreboard = (CraftScoreboard) bukkitScoreboard;
-        net.minecraft.scoreboard.Scoreboard oldboard = getPlayerBoard(player).getHandle();
-        net.minecraft.scoreboard.Scoreboard newboard = scoreboard.getHandle();
+        Scoreboard oldboard = getPlayerBoard(player).getHandle();
+        Scoreboard newboard = scoreboard.getHandle();
         EntityPlayerMP entityplayer = player.getHandle();
 
         if (oldboard == newboard) {

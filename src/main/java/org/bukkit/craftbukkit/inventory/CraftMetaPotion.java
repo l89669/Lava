@@ -1,26 +1,27 @@
 package org.bukkit.craftbukkit.inventory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap.Builder;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
-import org.bukkit.craftbukkit.potion.CraftPotionUtil;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.craftbukkit.inventory.CraftMetaItem.SerializableMeta;
+import org.bukkit.craftbukkit.potion.CraftPotionUtil;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap.Builder;
 
 @DelegateDeserialization(SerializableMeta.class)
 class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
@@ -68,10 +69,6 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
             for (int i = 0; i < length; i++) {
                 NBTTagCompound effect = list.getCompoundTagAt(i);
                 PotionEffectType type = PotionEffectType.getById(effect.getByte(ID.NBT));
-                // SPIGOT-4047: Vanilla just disregards these
-                if (type == null) {
-                    continue;
-                }
                 int amp = effect.getByte(AMPLIFIER.NBT);
                 int duration = effect.getInteger(DURATION.NBT);
                 boolean ambient = effect.getBoolean(AMBIENT.NBT);

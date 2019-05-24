@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit;
 
-import net.minecraft.world.biome.Biome;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
+import net.minecraft.world.biome.Biome;
 import org.bukkit.craftbukkit.block.CraftBlock;
 
 /**
@@ -53,7 +53,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
 
     @Override
     public Material getBlockType(int x, int y, int z) {
-        return Material.getBlockMaterial(getBlockTypeId(x, y, z));
+        return Material.getMaterial(getBlockTypeId(x, y, z));
     }
 
     public final int getBlockTypeId(int x, int y, int z) {

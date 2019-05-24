@@ -7,6 +7,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.util.BlockSnapshot;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -50,7 +52,7 @@ public class CraftBlockState implements BlockState {
         }
         else nbt = null;
     }
-	
+
 	public CraftBlockState(final Block block, int flag) {
         this(block);
         this.flag = flag;

@@ -3,12 +3,17 @@ package org.bukkit.craftbukkit.entity;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityFlying;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLeashKnot;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.boss.EntityDragon;
@@ -36,39 +41,7 @@ import net.minecraft.entity.item.EntityMinecartTNT;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.monster.AbstractIllager;
-import net.minecraft.entity.monster.AbstractSkeleton;
-import net.minecraft.entity.monster.EntityBlaze;
-import net.minecraft.entity.monster.EntityCaveSpider;
-import net.minecraft.entity.monster.EntityCreeper;
-import net.minecraft.entity.monster.EntityElderGuardian;
-import net.minecraft.entity.monster.EntityEnderman;
-import net.minecraft.entity.monster.EntityEndermite;
-import net.minecraft.entity.monster.EntityEvoker;
-import net.minecraft.entity.monster.EntityGhast;
-import net.minecraft.entity.monster.EntityGiantZombie;
-import net.minecraft.entity.monster.EntityGolem;
-import net.minecraft.entity.monster.EntityGuardian;
-import net.minecraft.entity.monster.EntityHusk;
-import net.minecraft.entity.monster.EntityIllusionIllager;
-import net.minecraft.entity.monster.EntityIronGolem;
-import net.minecraft.entity.monster.EntityMagmaCube;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.monster.EntityPigZombie;
-import net.minecraft.entity.monster.EntityPolarBear;
-import net.minecraft.entity.monster.EntityShulker;
-import net.minecraft.entity.monster.EntitySilverfish;
-import net.minecraft.entity.monster.EntitySlime;
-import net.minecraft.entity.monster.EntitySnowman;
-import net.minecraft.entity.monster.EntitySpellcasterIllager;
-import net.minecraft.entity.monster.EntitySpider;
-import net.minecraft.entity.monster.EntityStray;
-import net.minecraft.entity.monster.EntityVex;
-import net.minecraft.entity.monster.EntityVindicator;
-import net.minecraft.entity.monster.EntityWitch;
-import net.minecraft.entity.monster.EntityWitherSkeleton;
-import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.monster.EntityZombieVillager;
+import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.AbstractChestHorse;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityAmbientCreature;
@@ -112,9 +85,8 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
+
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.util.FakePlayerFactory;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -132,10 +104,6 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.ServerOperator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 public abstract class CraftEntity implements org.bukkit.entity.Entity {
     private static PermissibleBase perm;
@@ -156,11 +124,9 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         if (entity instanceof EntityLivingBase) {
             // Players
             if (entity instanceof EntityPlayer) {
-                if (entity instanceof EntityPlayerMP) { return new CraftPlayer(server, (EntityPlayerMP) entity); }
-                else {
-                    return new CraftPlayer(server, FakePlayerFactory.get(DimensionManager.getWorld(entity.world.provider.getDimension()), ((EntityPlayer) entity).getGameProfile()));
-                }            
-			}
+                if (entity instanceof EntityPlayerMP) { return new CraftPlayer(server, (EntityPlayer) entity); }
+                else { return new CraftHumanEntity(server, (EntityPlayer) entity); } // TODO add support fake player classes from mods( using FakePlayerFactory.class)
+            }
             // Water Animals
             else if (entity instanceof EntityWaterMob) {
                 if (entity instanceof EntitySquid) { return new CraftSquid(server, (EntitySquid) entity); }
@@ -241,7 +207,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                     if (entity instanceof EntitySnowman) { return new CraftSnowman(server, (EntitySnowman) entity); }
                     else if (entity instanceof EntityIronGolem) { return new CraftIronGolem(server, (EntityIronGolem) entity); }
                     else if (entity instanceof EntityShulker) { return new CraftShulker(server, (EntityShulker) entity); }
-                    else { return new CraftLivingEntity(server, (net.minecraft.entity.EntityLivingBase) entity); }
+                    else { return new CraftLivingEntity(server, (EntityLivingBase) entity); }
                 }
                 else if (entity instanceof EntityVillager) { return new CraftVillager(server, (EntityVillager) entity); }
                 else { return new CraftCreature(server, (EntityCreature) entity); }
@@ -265,7 +231,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                 else { return new CraftAmbient(server, (EntityAmbientCreature) entity); }
             }
             else if (entity instanceof EntityArmorStand) { return new CraftArmorStand(server, (EntityArmorStand) entity); }
-            else  { return new CraftLivingEntity(server, (EntityLivingBase) entity); }
+            else  { return new CraftLivingEntity(server, (EntityLiving) entity); }
         }
         else if (entity instanceof MultiPartEntityPart) {
             MultiPartEntityPart part = (MultiPartEntityPart) entity;
@@ -315,7 +281,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             else if (entity instanceof EntityMinecartMobSpawner) { return new CraftMinecartMobSpawner(server, (EntityMinecartMobSpawner) entity); }
             else if (entity instanceof EntityMinecartEmpty) { return new CraftMinecartRideable(server, (EntityMinecartEmpty) entity); }
             else if (entity instanceof EntityMinecartCommandBlock) { return new CraftMinecartCommand(server, (EntityMinecartCommandBlock) entity); }
-            else { return new CraftMinecart(server, (net.minecraft.entity.item.EntityMinecart) entity); }
+            else { return new CraftMinecart(server, (EntityMinecart) entity); }
         } else if (entity instanceof EntityHanging) {
             if (entity instanceof EntityPainting) { return new CraftPainting(server, (EntityPainting) entity); }
             else if (entity instanceof EntityItemFrame) { return new CraftItemFrame(server, (EntityItemFrame) entity); }
@@ -406,7 +372,6 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         // SPIGOT-619: Force sync head rotation also
         entity.setRotationYawHead(location.getYaw());
-		 entity.world.updateEntityWithOptionalForce(entity, false); // Spigot - register to new chunk
 
         return true;
     }
@@ -420,7 +385,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     public List<org.bukkit.entity.Entity> getNearbyEntities(double x, double y, double z) {
-        List<Entity> notchEntityList = entity.world.getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().grow(x, y, z), null);
+        List<Entity> notchEntityList = entity.world.getEntitiesWithinAABB(entity.getClass(), entity.getEntityBoundingBox().grow(x, y, z), null);
         List<org.bukkit.entity.Entity> bukkitEntityList = new java.util.ArrayList<org.bukkit.entity.Entity>(notchEntityList.size());
 
         for (Entity e : notchEntityList) {
@@ -586,7 +551,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         return (this.getEntityId() == other.getEntityId());
     }
 
-	@Override
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 29 * hash + this.getEntityId();
@@ -644,7 +609,6 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         String name = getHandle().getCustomNameTag();
 
         if (name == null || name.length() == 0) {
-            if (getType().getEntityClass() == CraftCustomEntity.class && this instanceof CraftLivingEntity) return ((CraftLivingEntity) this).entity.getName();
             return null;
         }
 
@@ -848,7 +812,17 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         @Override
         public boolean isInvulnerable()
         {
-            return getHandle().isEntityInvulnerable(net.minecraft.util.DamageSource.GENERIC);
+            return getHandle().isEntityInvulnerable(DamageSource.GENERIC);
+        }
+
+        @Override
+        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent component)
+        {
+        }
+
+        @Override
+        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent... components)
+        {
         }
     };
 

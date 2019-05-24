@@ -26,7 +26,6 @@ import org.bukkit.craftbukkit.CraftStatistic;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
-import red.mohist.Mohist;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings("deprecation")
 public final class CraftMagicNumbers implements UnsafeValues {
     public static final UnsafeValues INSTANCE = new CraftMagicNumbers();
 
@@ -46,16 +46,20 @@ public final class CraftMagicNumbers implements UnsafeValues {
         return getBlock(block.getType());
     }
 
+    @Deprecated
+    // A bad method for bad magic.
     public static Block getBlock(int id) {
-        return getBlock(Material.getBlockMaterial(id));
+        return getBlock(Material.getMaterial(id));
     }
 
+    @Deprecated
+    // A bad method for bad magic.
     public static int getId(Block block) {
         return Block.getIdFromBlock(block);
     }
 
     public static Material getMaterial(Block block) {
-        return Material.getBlockMaterial(Block.getIdFromBlock(block));
+        return Material.getMaterial(Block.getIdFromBlock(block));
     }
 
     public static Item getItem(Material material) {
@@ -64,10 +68,14 @@ public final class CraftMagicNumbers implements UnsafeValues {
         return item;
     }
 
+    @Deprecated
+    // A bad method for bad magic.
     public static Item getItem(int id) {
         return Item.getItemById(id);
     }
 
+    @Deprecated
+    // A bad method for bad magic.
     public static int getId(Item item) {
         return Item.getIdFromItem(item);
     }
@@ -84,8 +92,9 @@ public final class CraftMagicNumbers implements UnsafeValues {
     }
 
     public static Block getBlock(Material material) {
-		material = material == null ? Material.AIR : material;
-
+        if (material == null) {
+            return null;
+        }
         // TODO: Don't use ID
         Block block = Block.getBlockById(material.getId());
 
@@ -160,16 +169,16 @@ public final class CraftMagicNumbers implements UnsafeValues {
             Advancement bukkit = Bukkit.getAdvancement(key);
 
             if (bukkit != null) {
-                File file = new File(MinecraftServer.getServerInst().getAdvancementManager().advancementsDir, key.getNamespace() + File.separator + key.getKey() + ".json");
+                File file = new File(MinecraftServer.getServerCB().getAdvancementManager().advancementsDir, key.getNamespace() + File.separator + key.getKey() + ".json");
                 file.getParentFile().mkdirs();
 
                 try {
                     Files.write(advancement, file, Charsets.UTF_8);
                 } catch (IOException ex) {
-                    Mohist.LOGGER.error( "Error saving advancement " + key, ex);
+                    Bukkit.getLogger().log(Level.SEVERE, "Error saving advancement " + key, ex);
                 }
 
-                MinecraftServer.getServerInst().getPlayerList().reloadResources();
+                MinecraftServer.getServerCB().getPlayerList().reloadResources();
 
                 return bukkit;
             }
@@ -180,10 +189,15 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
     @Override
     public boolean removeAdvancement(NamespacedKey key) {
-        File file = new File(MinecraftServer.getServerInst().getAdvancementManager().advancementsDir, key.getNamespace() + File.separator + key.getKey() + ".json");
+        File file = new File(MinecraftServer.getServerCB().getAdvancementManager().advancementsDir, key.getNamespace() + File.separator + key.getKey() + ".json");
         return file.delete();
     }
 
+    /**
+     * This helper class represents the different NBT Tags.
+     * <p>
+     * These should match NBTBase#getTypeId
+     */
     public static class NBT {
 
         public static final int TAG_END = 0;

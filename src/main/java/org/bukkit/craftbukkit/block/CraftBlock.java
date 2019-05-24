@@ -1,5 +1,10 @@
 package org.bukkit.craftbukkit.block;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import net.minecraft.block.BlockCocoa;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockRedstoneWire;
@@ -9,6 +14,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySkull;
@@ -26,17 +32,13 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.craftbukkit.CraftChunk;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BlockVector;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class CraftBlock implements Block {
     private final CraftChunk chunk;
@@ -116,7 +118,7 @@ public class CraftBlock implements Block {
         net.minecraft.world.World world = chunk.getHandle().getWorld();
         BlockPos position = new BlockPos(x, y, z);
         IBlockState blockData = world.getBlockState(position);
-        world.setBlockState(position, blockData.getBlock().getStateFromMeta(data), flag);
+        world.setBlockState(position, blockData.getBlock().getDefaultState(), flag);
     }
 
     private IBlockState getData0() {
@@ -147,7 +149,7 @@ public class CraftBlock implements Block {
     }
 
     public boolean setTypeIdAndData(final int type, final byte data, final boolean applyPhysics) {
-        IBlockState blockData = getNMSBlock(type).getStateFromMeta(data);
+        IBlockState blockData = getNMSBlock(type).getDefaultState();
         BlockPos position = new BlockPos(x, y, z);
 
         // SPIGOT-611: need to do this to prevent glitchiness. Easier to handle this here (like /setblock) than to fix weirdness in tile entity cleanup
@@ -173,7 +175,7 @@ public class CraftBlock implements Block {
     }
 
     public Material getType() {
-        return Material.getBlockMaterial(getTypeId());
+        return Material.getMaterial(getTypeId());
     }
 
     @Deprecated
@@ -276,14 +278,21 @@ public class CraftBlock implements Block {
 
     public BlockState getState() {
         Material material = getType();
-        if (material == null) {
-            TileEntity tileEntity = chunk.getCraftWorld().getTileEntityAt(x, y, z);
-            if (tileEntity != null) {
-                return new CraftBlockEntityState<TileEntity>(this, (Class<TileEntity>) tileEntity.getClass());
-            } else {
-                return new CraftBlockState(this);
+        // Kettle start - if null, check for TE that implements IInventory (cauldron stuff)
+        if (material == null)
+        {
+            TileEntity te = ((CraftWorld)this.getWorld()).getHandle().getTileEntity(new BlockPos(this.getX(), this.getY(), this.getZ()));
+            if (te != null && te instanceof IInventory)
+            {
+                // In order to allow plugins to properly grab the container location, we must pass a class that extends CraftBlockState and implements InventoryHolder.
+                // Note: This will be returned when TileEntity.getOwner() is called
+                return new CraftCustomContainer(this);
             }
+            // pass default state
+            return new CraftBlockState(this);
         }
+        // Kettle end
+
         switch (material) {
         case SIGN:
         case SIGN_POST:
@@ -358,7 +367,7 @@ public class CraftBlock implements Block {
             return new CraftBed(this);
         default:
             TileEntity tileEntity = chunk.getCraftWorld().getTileEntityAt(x, y, z);
-            if (tileEntity != null && tileEntity instanceof IInventory) {
+            if (tileEntity != null) {
                 // block with unhandled TileEntity:
                 return new CraftBlockEntityState<TileEntity>(this, (Class<TileEntity>) tileEntity.getClass());
             } else {
@@ -463,12 +472,12 @@ public class CraftBlock implements Block {
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getById(getNMSBlock().getMobilityFlag(getNMSBlock().getStateFromMeta(this.getData())).ordinal());
+        return PistonMoveReaction.getById(getNMSBlock().getMobilityFlag(getNMSBlock().getDefaultState()).ordinal());
     }
 
     private boolean itemCausesDrops(ItemStack item) {
         net.minecraft.block.Block block = this.getNMSBlock();
-        net.minecraft.item.Item itemType = item != null ? net.minecraft.item.Item.getItemById(item.getTypeId()) : null;
+        Item itemType = item != null ? Item.getItemById(item.getTypeId()) : null;
         return block != null && (block.getDefaultState().getMaterial().isToolNotRequired() || (itemType != null && itemType.canHarvestBlock(block.getDefaultState())));
     }
 
@@ -479,7 +488,7 @@ public class CraftBlock implements Block {
         boolean result = false;
 
         if (block != null && block != Blocks.AIR) {
-            block.dropBlockAsItemWithChance(chunk.getHandle().getWorld(), new BlockPos(x, y, z), block.getStateFromMeta(data), 1.0F, 0);
+            block.dropBlockAsItemWithChance(chunk.getHandle().getWorld(), new BlockPos(x, y, z), block.getDefaultState(), 1.0F, 0);
             result = true;
         }
 

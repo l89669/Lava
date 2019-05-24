@@ -1,6 +1,9 @@
 package org.bukkit.craftbukkit.entity;
 
 import com.google.common.base.Preconditions;
+
+import java.util.Set;
+
 import net.minecraft.block.BlockAnvil;
 import net.minecraft.block.BlockWorkbench;
 import net.minecraft.entity.Entity;
@@ -12,6 +15,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.NBTTagCompound;
+
 import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.tileentity.TileEntity;
@@ -30,29 +34,32 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.inventory.MainHand;
+import org.bukkit.inventory.Merchant;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
-import org.bukkit.craftbukkit.inventory.*;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MainHand;
-import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.event.CraftEventFactory;
+import org.bukkit.craftbukkit.inventory.CraftContainer;
+import org.bukkit.craftbukkit.inventory.CraftInventory;
+import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
+import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftMerchant;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
-
-import java.util.Set;
 
 public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     private CraftInventoryPlayer inventory;
@@ -197,16 +204,16 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     }
 
     public InventoryView getOpenInventory() {
-        return getHandle().openContainer.getBukkitView();
+        return getHandle().inventoryContainer.getBukkitView();
     }
 
     public InventoryView openInventory(Inventory inventory) {
         if(!(getHandle() instanceof EntityPlayerMP)) return null;
         EntityPlayerMP player = (EntityPlayerMP) getHandle();
         InventoryType type = inventory.getType();
-        Container formerContainer = getHandle().openContainer;
+        Container formerContainer = getHandle().inventoryContainer;
 
-        IInventory iinventory = (inventory instanceof CraftInventory) ? ((CraftInventory) inventory).getInventory() : new InventoryWrapper(inventory);
+        IInventory iinventory = (inventory instanceof CraftInventory) ? ((CraftInventory) inventory).getInventory() : new org.bukkit.craftbukkit.inventory.InventoryWrapper(inventory);
 
         switch (type) {
             case PLAYER:
@@ -282,11 +289,11 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
             case CRAFTING:
                 throw new IllegalArgumentException("Can't open a " + type + " inventory!");
         }
-        if (getHandle().openContainer == formerContainer) {
+        if (getHandle().inventoryContainer == formerContainer) {
             return null;
         }
-        getHandle().openContainer.checkReachable = false;
-        return getHandle().openContainer.getBukkitView();
+        getHandle().inventoryContainer.checkReachable = false;
+        return getHandle().inventoryContainer.getBukkitView();
     }
 
     private void openCustomInventory(Inventory inventory, EntityPlayerMP player, String windowType) {
@@ -308,8 +315,8 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         }
 
         player.connection.sendPacket(new SPacketOpenWindow(container.windowId, windowType, new TextComponentString(title), size));
-        getHandle().openContainer = container;
-        getHandle().openContainer.addListener(player);
+        getHandle().inventoryContainer = container;
+        getHandle().inventoryContainer.addListener(player);
     }
 
     public InventoryView openWorkbench(Location location, boolean force) {
@@ -324,9 +331,9 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         }
         getHandle().displayGui(new BlockWorkbench.InterfaceCraftingTable(getHandle().world, new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
         if (force) {
-            getHandle().openContainer.checkReachable = false;
+            getHandle().inventoryContainer.checkReachable = false;
         }
-        return getHandle().openContainer.getBukkitView();
+        return getHandle().inventoryContainer.getBukkitView();
     }
 
     public InventoryView openEnchanting(Location location, boolean force) {
@@ -351,17 +358,17 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         getHandle().displayGui((TileEntityLockable) container);
 
         if (force) {
-            getHandle().openContainer.checkReachable = false;
+            getHandle().inventoryContainer.checkReachable = false;
         }
-        return getHandle().openContainer.getBukkitView();
+        return getHandle().inventoryContainer.getBukkitView();
     }
 
     public void openInventory(InventoryView inventory) {
-        if (!(getHandle() instanceof EntityPlayerMP)) return;
+        if (!(getHandle() instanceof EntityPlayerMP)) return; // TODO: NPC support?
         if (((EntityPlayerMP) getHandle()).connection == null) return;
-        if (getHandle().openContainer != getHandle().openContainer) {
+        if (getHandle().inventoryContainer != getHandle().inventoryContainer) {
             // fire INVENTORY_CLOSE if one already open
-            ((EntityPlayerMP)getHandle()).connection.processCloseWindow(new CPacketCloseWindow(getHandle().openContainer.windowId));
+            ((EntityPlayerMP)getHandle()).connection.processCloseWindow(new CPacketCloseWindow(getHandle().inventoryContainer.windowId));
         }
         EntityPlayerMP player = (EntityPlayerMP) getHandle();
         Container container;
@@ -383,8 +390,8 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         String title = inventory.getTitle();
         int size = inventory.getTopInventory().getSize();
         player.connection.sendPacket(new SPacketOpenWindow(container.windowId, windowType, new TextComponentString(title), size));
-        player.openContainer = container;
-        player.openContainer.addListener(player);
+        player.inventoryContainer = container;
+        player.inventoryContainer.addListener(player);
     }
 
     @Override
@@ -417,11 +424,11 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         mcMerchant.setCustomer(this.getHandle());
         this.getHandle().displayVillagerTradeGui(mcMerchant);
 
-        return this.getHandle().openContainer.getBukkitView();
+        return this.getHandle().inventoryContainer.getBukkitView();
     }
 
     public void closeInventory() {
-		getHandle().closeScreen();
+        getHandle().closeScreen();
     }
 
     public boolean isBlocking() {

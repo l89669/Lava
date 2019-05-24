@@ -1,17 +1,15 @@
 package org.bukkit.craftbukkit.inventory;
 
-import net.minecraft.item.crafting.IRecipe;
+import java.util.List;
+
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipes;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
-
-import java.util.List;
 
 public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe {
     // TODO: Could eventually use this to add a matches() method or some such
@@ -22,7 +20,7 @@ public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe
     }
 
     public CraftShapelessRecipe(ItemStack result, ShapelessRecipes recipe) {
-        this(recipe.key != null ? CraftNamespacedKey.fromMinecraft(recipe.key) : NamespacedKey.randomKey(), result);
+        this(CraftNamespacedKey.fromMinecraft(recipe.key), result);
         this.recipe = recipe;
     }
 
@@ -44,11 +42,7 @@ public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe
             data.set(i, Ingredient.fromStacks(new net.minecraft.item.ItemStack[]{CraftItemStack.asNMSCopy(ingred.get(i))}));
         }
         // TODO: Check if it's correct way to register recipes
-        ShapelessRecipes recipe = new ShapelessRecipes("", CraftItemStack.asNMSCopy(this.getResult()), data);
-        recipe.setKey(CraftNamespacedKey.toMinecraft(this.getKey()));
-        recipe.setRegistryName(recipe.key);
-        ((ForgeRegistry<IRecipe>) ForgeRegistries.RECIPES).unfreeze();
-        ForgeRegistries.RECIPES.register(recipe);
-        ((ForgeRegistry <IRecipe>) ForgeRegistries.RECIPES).freeze();
+        ForgeRegistries.RECIPES.register(new ShapelessRecipes("", CraftItemStack.asNMSCopy(this.getResult()), data));
+        // CraftingManager.a(CraftNamespacedKey.toMinecraft(this.getKey()), new ShapelessRecipes("", CraftItemStack.asNMSCopy(this.getResult()), data));
     }
 }

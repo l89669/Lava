@@ -2,7 +2,6 @@ package org.bukkit.craftbukkit.util;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import red.mohist.Mohist;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +24,7 @@ public class ForwardLogHandler extends ConsoleHandler {
 
     @Override
     public void publish(LogRecord record) {
-        Logger logger = Mohist.LOGGER;
+        Logger logger = getLogger(String.valueOf(record.getLoggerName())); // See SPIGOT-1230
         Throwable exception = record.getThrown();
         Level level = record.getLevel();
         String message = getFormatter().formatMessage(record);

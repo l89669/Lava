@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/client/entity/AbstractClientPlayer.java
++++ ../src-work/minecraft/net/minecraft/client/entity/AbstractClientPlayer.java
+@@ -135,7 +135,7 @@
+             f = 1.0F;
+         }
+ 
+-        if (this.isHandActive() && this.getActiveItemStack().getItem() instanceof net.minecraft.item.ItemBow)
++        if (this.isHandActive() && this.getActiveItemStack().getItem() == Items.BOW)
+         {
+             int i = this.getItemInUseMaxCount();
+             float f1 = (float)i / 20.0F;

@@ -1,5 +1,11 @@
 package org.bukkit.craftbukkit.entity;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -25,7 +31,6 @@ import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.fml.common.registry.EntityRegistry;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -69,15 +74,8 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     private CraftEntityEquipment equipment;
-	public String entityName;
 
     public CraftLivingEntity(final CraftServer server, final EntityLivingBase entity) {
         super(server, entity);
@@ -85,9 +83,6 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         if (entity instanceof EntityLiving || entity instanceof EntityArmorStand) {
             equipment = new CraftEntityEquipment(this);
         }
-        this.entityName = EntityRegistry.entityTypeMap.get(entity.getClass());
-        if (entityName == null)
-            entityName = entity.getName();
     }
 
     public double getHealth() {
@@ -97,10 +92,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     public void setHealth(double health) {
         health = (float) health;
         if ((health < 0) || (health > getMaxHealth())) {
-            // Paper - Be more informative
-            throw new IllegalArgumentException("Health must be between 0 and " + getMaxHealth() + ", but was " + health
-                    + ". (attribute base value: " + this.getHandle().getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()
-                    + (this instanceof CraftPlayer ? ", player: " + this.getName() + ')' : ')'));
+            throw new IllegalArgumentException("Health must be between 0 and " + getMaxHealth() + "(" + health + ")");
         }
 
         getHandle().setHealth((float) health);
@@ -248,7 +240,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public String toString() {
-        return "CraftLivingEntity{" + "id=" + getEntityId() + ", name=" + this.entityName + "}";
+        return "CraftLivingEntity{" + "id=" + getEntityId() + '}';
     }
 
     public Player getKiller() {
@@ -383,13 +375,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public EntityType getType() {
-        // Cauldron start
-        EntityType type = EntityType.fromName(this.entityName);
-        if (type != null) {
-            return type;
-        }
-        return EntityType.FORGE_MOD;
-        // Cauldron end
+        return EntityType.UNKNOWN;
     }
 
     public boolean hasLineOfSight(Entity other) {
@@ -411,11 +397,11 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public void setCanPickupItems(boolean pickup) {
-        getHandle().canPickUpLoot1 = pickup;
+        getHandle().thisisatest = pickup;
     }
 
     public boolean getCanPickupItems() {
-        return getHandle().canPickUpLoot1;
+        return getHandle().thisisatest;
     }
 
     @Override

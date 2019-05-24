@@ -22,15 +22,17 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
         CraftWorld world = (CraftWorld) this.getWorld();
         this.tileEntity = tileEntityClass.cast(world.getTileEntityAt(this.getX(), this.getY(), this.getZ()));
 
+        // copy tile entity data:
         this.snapshot = this.createSnapshot(tileEntity);
         this.load(snapshot);
     }
-	
+
     public CraftBlockEntityState(Material material, T tileEntity) {
         super(material);
 
         this.tileEntityClass = (Class<T>) tileEntity.getClass();
         this.tileEntity = tileEntity;
+
         // copy tile entity data:
         this.snapshot = this.createSnapshot(tileEntity);
         this.load(snapshot);
@@ -58,7 +60,7 @@ public class CraftBlockEntityState<T extends TileEntity> extends CraftBlockState
     }
 
     // gets the wrapped TileEntity
-    public T getTileEntity() { // Paper - protected -> public
+    public T getTileEntity() {
         return tileEntity;
     }
 

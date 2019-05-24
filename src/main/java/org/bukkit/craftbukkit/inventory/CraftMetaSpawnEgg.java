@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap.Builder;
+import java.util.Map;
+
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -11,8 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.meta.SpawnEggMeta;
-
-import java.util.Map;
 
 @DelegateDeserialization(CraftMetaItem.SerializableMeta.class)
 public class CraftMetaSpawnEgg extends CraftMetaItem implements SpawnEggMeta {
@@ -60,7 +60,7 @@ public class CraftMetaSpawnEgg extends CraftMetaItem implements SpawnEggMeta {
 
         if (tag.hasKey(ENTITY_TAG.NBT)) {
             entityTag = tag.getCompoundTag(ENTITY_TAG.NBT);
-            MinecraftServer.getServerInst().getDataFixer().process(FixTypes.ENTITY, entityTag); // PAIL: convert TODO: identify DataConverterTypes after implementation
+            MinecraftServer.getServerCB().getDataFixer().process(FixTypes.ENTITY, entityTag); // PAIL: convert TODO: identify DataConverterTypes after implementation
 
             if (entityTag.hasKey(ENTITY_ID.NBT)) {
                 this.spawnedType = EntityType.fromName(new ResourceLocation(entityTag.getString(ENTITY_ID.NBT)).getResourcePath());

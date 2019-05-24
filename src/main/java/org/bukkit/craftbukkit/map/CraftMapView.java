@@ -1,5 +1,12 @@
 package org.bukkit.craftbukkit.map;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+
 import net.minecraft.world.storage.MapData;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -7,13 +14,6 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
-import red.mohist.Mohist;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public final class CraftMapView implements MapView {
 
@@ -146,7 +146,7 @@ public final class CraftMapView implements MapView {
             try {
                 renderer.render(this, canvas, player);
             } catch (Throwable ex) {
-                Mohist.LOGGER.error("Could not render map using renderer " + renderer.getClass().getName(), ex);
+                Bukkit.getLogger().log(Level.SEVERE, "Could not render map using renderer " + renderer.getClass().getName(), ex);
             }
 
             byte[] buf = canvas.getBuffer();
