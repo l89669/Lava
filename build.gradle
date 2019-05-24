@@ -32,7 +32,7 @@ repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://libraries.minecraft.net/' }
     maven { url 'https://mvnrepository.com/artifact/' }
-    // maven { url 'https://dev.matrixdevteam.ml/ci/plugin/repository/everything' }
+    maven { url 'http://josephworks.ddns.net:8081/artifactory/lavapowered/' }
     flatDir { dirs 'src/main/resources' }
 }
 
