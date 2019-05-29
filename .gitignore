@@ -3,14 +3,7 @@ build
 
 /.vscode
 /eclipse
-/spigot
 /projects/*
-/patches2
-/patches3
-/patchesMCP
-/projects2
-/projects3
-/projects4
 /classes
 .DS_Store
 
@@ -25,3 +18,7 @@ build
 **/.settings
 **/.classpath
 *.project
+
+# For some reason these patches keep getting generated. Join our discord if you know why
+Side.java.patch
+SideOnly.java.patch
