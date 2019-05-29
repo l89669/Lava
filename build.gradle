@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3+'
         classpath 'net.nemerosa:versioning:2.7.1'
     }
 }
@@ -154,7 +154,7 @@ outputJar {
     manifest.attributes([
             "Implementation-Title": "Lava",
             "Implementation-Version": version,
-            "Main-Class": "org.lavapowered.lava.LavaServer",
+            "Main-Class": "net.minecraftforge.fml.relauncher.ServerLaunchWrapper",
             "TweakClass": "net.minecraftforge.fml.common.launcher.FMLTweaker",
             "Class-Path": getServerClasspath(file("jsons/${minecraft.version}-lava-rel.json"))
     ])
@@ -172,9 +172,8 @@ processJson {
     ])
 }
 
-extractForgeSources {
-    exclude "**/SideOnly.java", "**/Side.java"
-}
+extractForgeSources { exclude "**/SideOnly.java", "**/Side.java" }
+extractForgeResources { exclude "**/log4j2.xml" }
 
 genGradleProjects {
     addCompileDep "junit:junit:4.12"
