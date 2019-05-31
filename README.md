@@ -3,7 +3,7 @@
   <img width="400" height="400" src="https://cdn.discordapp.com/attachments/362654848711262208/544740693743108105/LB.png">
 </p>
 
-[![Build Status](http://dev.matrixdevteam.ml/ci/job/LavaPowered/job/Lava/badge/icon?style=popout-square)](http://dev.matrixdevteam.ml/ci/job/LavaPowered/job/Lava/)
+[![Build Status](http://dev.matrixdevteam.ml/ci/job/LavaPowered/job/Lava/badge/icon?style=flat-square)](http://dev.matrixdevteam.ml/ci/job/LavaPowered/job/Lava/)
 ![](https://img.shields.io/github/last-commit/LavaPowered/Lava.svg?style=popout-square)
 ![](https://img.shields.io/github/stars/LavaPowered/Lava.svg?label=Stars&style=popout-square)
 [![](https://img.shields.io/discord/558776046166474773.svg?label=Join%20us%20on%20Discord&style=popout-square)](https://discord.gg/QuEhEXY)
