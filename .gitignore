@@ -20,5 +20,5 @@ build
 *.project
 
 # For some reason these patches keep getting generated. Join our discord if you know why
-Side.java.patch
-SideOnly.java.patch
+# Side.java.patch
+# SideOnly.java.patch
