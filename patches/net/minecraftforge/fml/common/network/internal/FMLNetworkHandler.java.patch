@@ -60,7 +60,7 @@
 -            if (remoteGuiContainer != null)
 -            {
 +            if (remoteGuiContainer != null) {
-+                // Kettle start
++                // Lava start
 +                if (remoteGuiContainer.getBukkitView() == null) {
 +                    TileEntity te = entityPlayer.world.getTileEntity(new BlockPos(x, y, z));
 +                    if (te instanceof IInventory) {
@@ -73,7 +73,7 @@
 +                        return;
 +                    }
 +                }
-+                // Kettle end
++                // Lava end
                  entityPlayerMP.getNextWindowId();
                  entityPlayerMP.closeContainer();
                  int windowId = entityPlayerMP.currentWindowId;

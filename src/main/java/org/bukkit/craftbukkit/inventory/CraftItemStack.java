@@ -64,7 +64,7 @@ public final class CraftItemStack extends ItemStack {
             return new ItemStack(Material.AIR);
         }
         
-        // Kettle start - don't use strict Bukkit stacks as we don't have Bukkit Materials for modded item stacks, create wrapper? (Cauldron)
+        // Lava start - don't use strict Bukkit stacks as we don't have Bukkit Materials for modded item stacks, create wrapper? (Cauldron)
         return asCraftMirror(copyNMSStack(original, original.getCount()));
         /*
         ItemStack stack = new ItemStack(CraftMagicNumbers.getMaterial(original.getItem()), original.getCount(), (short) original.getMetadata());
@@ -73,7 +73,7 @@ public final class CraftItemStack extends ItemStack {
         }
         return stack;
         */
-        // Kettle end
+        // Lava end
     }
 
     public static CraftItemStack asCraftMirror(net.minecraft.item.ItemStack original) {
