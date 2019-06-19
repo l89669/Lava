@@ -9,7 +9,7 @@ import java.util.zip.ZipInputStream;
 
 /**
  * Class used from the Lava project
- * https://github.com/LavaFoundation/Lava/blob/master/src/main/java/Lavafoundation/Lava/downloads/DownloadServerFiles.java
+ * https://github.com/KettleFoundation/Kettle/blob/master/src/main/java/kettlefoundation/kettle/downloads/DownloadServerFiles.java
  *
  * @author Hexeption
  */
@@ -41,7 +41,7 @@ public class AutoLibraryDownloader {
      */
     public static void downloadServerLibraries() {
         String fileName = "libraries.zip";
-        String downloadLink = "https://raw.githubusercontent.com/LavaFoundation/Lava/master/release/libraries.zip";
+        String downloadLink = "https://raw.githubusercontent.com/LavaPowered/Lava/libraries/1.12.2/libraries.zip";
 
         File minecraftlibraries = new File(fileName);
         if (!minecraftlibraries.exists() && !minecraftlibraries.isDirectory()) {
