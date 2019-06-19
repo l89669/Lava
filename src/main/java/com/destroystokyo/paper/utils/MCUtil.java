@@ -213,5 +213,3 @@ public final class MCUtil {
         return getNMSWorld(entity.getWorld());
     }
 }
-
-}
