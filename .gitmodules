@@ -1,4 +1,0 @@
-[submodule "MinecraftForge"]
-	path = MinecraftForge
-	url = https://github.com/MinecraftForge/MinecraftForge.git
-	branch = 1.12.x
