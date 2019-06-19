@@ -1,11 +1,6 @@
 package org.bukkit.inventory;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,7 +10,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 
-import javax.annotation.Nullable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Represents a stack of items
@@ -36,7 +32,6 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @param type item material id
      * @deprecated Magic value
      */
-    @Deprecated
     public ItemStack(final int type) {
         this(type, 1);
     }
@@ -57,7 +52,6 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @param amount stack size
      * @deprecated Magic value
      */
-    @Deprecated
     public ItemStack(final int type, final int amount) {
         this(type, amount, (short) 0);
     }
@@ -80,7 +74,6 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @param damage durability / damage
      * @deprecated Magic value
      */
-    @Deprecated
     public ItemStack(final int type, final int amount, final short damage) {
         this.type = type;
         this.amount = amount;
@@ -105,7 +98,6 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @param data the data value or null
      * @deprecated this method uses an ambiguous data byte object
      */
-    @Deprecated
     public ItemStack(final int type, final int amount, final short damage, final Byte data) {
         this.type = type;
         this.amount = amount;
@@ -123,7 +115,8 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @param data the data value or null
      * @deprecated this method uses an ambiguous data byte object
      */
-    @Deprecated
+
+
     public ItemStack(final Material type, final int amount, final short damage, final Byte data) {
         this(type.getId(), amount, damage, data);
     }
@@ -184,7 +177,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @return Type Id of the items in this stack
      * @deprecated Magic value
      */
-    @Deprecated
+
     public int getTypeId() {
         return type;
     }
@@ -197,7 +190,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @param type New type id to set the items in this stack to
      * @deprecated Magic value
      */
-    @Deprecated
+
     public void setTypeId(int type) {
         this.type = type;
         if (this.meta != null) {
@@ -339,7 +332,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
         if (stack == this) {
             return true;
         }
-        return getTypeId() == stack.getTypeId() && getDurability() == stack.getDurability() && hasItemMeta() == stack.hasItemMeta() && (hasItemMeta() ? Bukkit.getItemFactory().equals(getItemMeta(), stack.getItemMeta()) : true);
+        return getTypeId() == stack.getTypeId() && getDurability() == stack.getDurability() && hasItemMeta() == stack.hasItemMeta() && (!hasItemMeta() || Bukkit.getItemFactory().equals(getItemMeta(), stack.getItemMeta()));
     }
 
     @Override
@@ -381,7 +374,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @return True if this has the given enchantment
      */
     public boolean containsEnchantment(Enchantment ench) {
-        return meta == null ? false : meta.hasEnchant(ench);
+        return meta != null && meta.hasEnchant(ench);
     }
 
     /**
@@ -400,14 +393,14 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * @return Map of enchantments.
      */
     public Map<Enchantment, Integer> getEnchantments() {
-        return meta == null ? ImmutableMap.<Enchantment, Integer>of() : meta.getEnchants();
+        return meta == null ? ImmutableMap.of() : meta.getEnchants();
     }
 
     /**
      * Adds the specified enchantments to this item stack.
      * <p>
      * This method is the same as calling {@link
-     * #addEnchantment(org.bukkit.enchantments.Enchantment, int)} for each
+     * #addEnchantment(Enchantment, int)} for each
      * element of the map.
      *
      * @param enchantments Enchantments to add
@@ -451,7 +444,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
      * Adds the specified enchantments to this item stack in an unsafe manner.
      * <p>
      * This method is the same as calling {@link
-     * #addUnsafeEnchantment(org.bukkit.enchantments.Enchantment, int)} for
+     * #addUnsafeEnchantment(Enchantment, int)} for
      * each element of the map.
      *
      * @param enchantments Enchantments to add
@@ -495,6 +488,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
         return level;
     }
 
+    @Override
     @Utility
     public Map<String, Object> serialize() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
@@ -560,7 +554,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
             }
         }
 
-        return result.ensureServerConversions(); // Paper
+        return result;
     }
 
     /**
@@ -612,166 +606,4 @@ public class ItemStack implements Cloneable, ConfigurationSerializable {
 
         return true;
     }
-
-    // Paper start
-    /**
-     * Minecart updates are converting simple item stacks into more complex NBT oriented Item Stacks.
-     *
-     * Use this method to to ensure any desired data conversions are processed.
-     * The input itemstack will not be the same as the returned itemstack.
-     *
-     * @return A potentially Data Converted ItemStack
-     */
-    public ItemStack ensureServerConversions() {
-        return Bukkit.getServer().getItemFactory().ensureServerConversions(this);
-    }
-
-    /**
-     * Gets the Display name as seen in the Client.
-     * Currently the server only supports the English language. To override this,
-     * You must replace the language file embedded in the server jar.
-     *
-     * @return Display name of Item
-     */
-    public String getI18NDisplayName() {
-        return Bukkit.getServer().getItemFactory().getI18NDisplayName(this);
-    }
-
-    public int getMaxItemUseDuration() {
-        Material material = Material.getMaterial(type);
-        if (material == null || !material.isItem()) {
-            return 0;
-        }
-        // Requires access to NMS
-        return ensureServerConversions().getMaxItemUseDuration();
-    }
-
-    /**
-     * Clones the itemstack and returns it a single quantity.
-     * @return The new itemstack with 1 quantity
-     */
-    public ItemStack asOne() {
-        return asQuantity(1);
-    }
-
-    /**
-     * Clones the itemstack and returns it as the specified quantity
-     * @param qty The quantity of the cloned item
-     * @return The new itemstack with specified quantity
-     */
-    public ItemStack asQuantity(int qty) {
-        ItemStack clone = clone();
-        clone.setAmount(qty);
-        return clone;
-    }
-
-    /**
-     * Adds 1 to this itemstack. Will not go over the items max stack size.
-     * @return The same item (not a clone)
-     */
-    public ItemStack add() {
-        return add(1);
-    }
-
-    /**
-     * Adds quantity to this itemstack. Will not go over the items max stack size.
-     *
-     * @param qty The amount to add
-     * @return The same item (not a clone)
-     */
-    public ItemStack add(int qty) {
-        setAmount(Math.min(getMaxStackSize(), getAmount() + qty));
-        return this;
-    }
-
-    /**
-     * Subtracts 1 to this itemstack.  Going to 0 or less will invalidate the item.
-     * @return The same item (not a clone)
-     */
-    public ItemStack subtract() {
-        return subtract(1);
-    }
-
-    /**
-     * Subtracts quantity to this itemstack. Going to 0 or less will invalidate the item.
-     *
-     * @param qty The amount to add
-     * @return The same item (not a clone)
-     */
-    public ItemStack subtract(int qty) {
-        setAmount(Math.max(0, getAmount() - qty));
-        return this;
-    }
-
-    /**
-     * If the item has lore, returns it, else it will return null
-     * @return The lore, or null
-     */
-    @Nullable
-    public List<String> getLore() {
-        if (!hasItemMeta()) {
-            return null;
-        }
-        ItemMeta itemMeta = getItemMeta();
-        if (!itemMeta.hasLore()) {
-            return null;
-        }
-        return itemMeta.getLore();
-    }
-
-    /**
-     * Sets the lore for this item.
-     * Removes lore when given null.
-     *
-     * @param lore the lore that will be set
-     */
-    public void setLore(List<String> lore) {
-        ItemMeta itemMeta = getItemMeta();
-        itemMeta.setLore(lore);
-        setItemMeta(itemMeta);
-    }
-
-    /**
-     * Set itemflags which should be ignored when rendering a ItemStack in the Client. This Method does silently ignore double set itemFlags.
-     *
-     * @param itemFlags The hideflags which shouldn't be rendered
-     */
-    public void addItemFlags(ItemFlag... itemFlags) {
-        ItemMeta itemMeta = getItemMeta();
-        itemMeta.addItemFlags(itemFlags);
-        setItemMeta(itemMeta);
-    }
-
-    /**
-     * Remove specific set of itemFlags. This tells the Client it should render it again. This Method does silently ignore double removed itemFlags.
-     *
-     * @param itemFlags Hideflags which should be removed
-     */
-    public void removeItemFlags(ItemFlag... itemFlags) {
-        ItemMeta itemMeta = getItemMeta();
-        itemMeta.removeItemFlags(itemFlags);
-        setItemMeta(itemMeta);
-    }
-
-    /**
-     * Get current set itemFlags. The collection returned is unmodifiable.
-     *
-     * @return A set of all itemFlags set
-     */
-    public Set<ItemFlag> getItemFlags() {
-        ItemMeta itemMeta = getItemMeta();
-        return itemMeta.getItemFlags();
-    }
-
-    /**
-     * Check if the specified flag is present on this item.
-     *
-     * @param flag the flag to check
-     * @return if it is present
-     */
-    public boolean hasItemFlag(ItemFlag flag) {
-        ItemMeta itemMeta = getItemMeta();
-        return itemMeta.hasItemFlag(flag);
-    }
-    // Paper end
 }

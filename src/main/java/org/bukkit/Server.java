@@ -354,18 +354,6 @@ public interface Server extends PluginMessageRecipient {
      */
     public Player getPlayer(UUID id);
 
-    // Paper start
-    /**
-     * Gets the unique ID of the player currently known as the specified player name
-     * In Offline Mode, will return an Offline UUID
-     *
-     * @param playerName the player name to look up the unique ID for
-     * @return A UUID, or null if that player name is not registered with Minecraft and the server is in online mode
-     */
-    @Nullable
-    public UUID getPlayerUniqueId(String playerName);
-    // Paper end
-
     /**
      * Gets the plugin manager for interfacing with plugins.
      *
@@ -1044,18 +1032,7 @@ public interface Server extends PluginMessageRecipient {
     Spigot spigot();
     // Spigot end
 
-    void reloadPermissions(); // Paper
-
-    boolean reloadCommandAliases(); // Paper
-
     // Paper start - allow preventing player name suggestions by default
-    /**
-     * Checks if player names should be suggested when a command returns {@code null} as
-     * their tab completion result.
-     *
-     * @return true if player names should be suggested
-     */
-    boolean suggestPlayerNamesWhenNullTabCompletions();
 
     /**
      * Creates a PlayerProfile for the specified uuid, with name as null

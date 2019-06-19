@@ -4,7 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.map.MapView;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Button;
@@ -64,6 +64,8 @@ import com.google.common.collect.Maps;
 
 import org.bukkit.material.Banner;
 import org.bukkit.material.Observer;
+
+import javax.annotation.Nullable;
 
 /**
  * An enum of all material IDs accepted by the official server and client
@@ -540,7 +542,8 @@ public enum Material {
 
     private final int id;
     private final Constructor<? extends MaterialData> ctor;
-    private static Material[] byId = new Material[383];
+    private static Material[] byId = new Material[32676];
+    private static Material[] byBlockId = new Material[32676];
     private final static Map<String, Material> BY_NAME = Maps.newHashMap();
     private final int maxStack;
     private final short durability;
@@ -1451,6 +1454,34 @@ public enum Material {
                 return false;
             default:
                 return true;
+        }
+    }
+
+    @Nullable
+    public static Material addMaterial(Material material) {
+        if (byId[material.id] == null) {
+            byId[material.id] = material;
+            BY_NAME.put(material.name().toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", ""), material);
+            BY_NAME.put("X" + material.id, material);
+            return material;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Material addBlockMaterial(Material Blockmaterial) {
+        if (byBlockId[Blockmaterial.id] == null) {
+            byBlockId[Blockmaterial.id] = Blockmaterial;
+            return Blockmaterial;
+        }
+        return null;
+    }
+
+    public static Material getBlockMaterial(final int id) {
+        if (byBlockId.length > id && id >= 0) {
+            return byBlockId[id];
+        } else {
+            return null;
         }
     }
 }

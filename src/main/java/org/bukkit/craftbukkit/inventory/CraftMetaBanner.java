@@ -2,9 +2,11 @@ package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.bukkit.DyeColor;
@@ -35,7 +37,7 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
 
         CraftMetaBanner banner = (CraftMetaBanner) meta;
         base = banner.base;
-        patterns = new ArrayList<Pattern>(banner.patterns);
+        patterns = new ArrayList<>(banner.patterns);
     }
 
     CraftMetaBanner(NBTTagCompound tag) {
@@ -78,6 +80,7 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
             addPattern((Pattern) obj);
         }
     }
+
     @Override
     void applyToItem(NBTTagCompound tag) {
         super.applyToItem(tag);
@@ -112,12 +115,12 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
 
     @Override
     public List<Pattern> getPatterns() {
-        return new ArrayList<Pattern>(patterns);
+        return new ArrayList<>(patterns);
     }
 
     @Override
     public void setPatterns(List<Pattern> patterns) {
-        this.patterns = new ArrayList<Pattern>(patterns);
+        this.patterns = new ArrayList<>(patterns);
     }
 
     @Override
@@ -149,11 +152,11 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
     ImmutableMap.Builder<String, Object> serialize(ImmutableMap.Builder<String, Object> builder) {
         super.serialize(builder);
 
-        if(base != null){
+        if (base != null) {
             builder.put(BASE.BUKKIT, base.toString());
         }
 
-        if(!patterns.isEmpty()){
+        if (!patterns.isEmpty()) {
             builder.put(PATTERNS.BUKKIT, ImmutableList.copyOf(patterns));
         }
 

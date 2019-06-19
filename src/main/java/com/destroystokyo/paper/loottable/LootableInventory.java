@@ -7,30 +7,24 @@ import java.util.UUID;
 /**
  * Represents an Inventory that contains a Loot Table associated to it that will
  * automatically fill on first open.
- *
+ * <p>
  * A new feature and API is provided to support automatically refreshing the contents
  * of the inventory based on that Loot Table after a configurable amount of time has passed.
- *
+ * <p>
  * The behavior of how the Inventory is filled based on the loot table may vary based
  * on Minecraft versions and the Loot Table feature.
  */
 public interface LootableInventory extends Lootable {
-
-    /**
-     * Server owners have to enable whether or not an object in a world should refill
-     *
-     * @return If the world this inventory is currently in has Replenishable Lootables enabled
-     */
-    boolean isRefillEnabled();
-
     /**
      * Whether or not this object has ever been filled
+     *
      * @return Has ever been filled
      */
     boolean hasBeenFilled();
 
     /**
      * Has this player ever looted this block
+     *
      * @param player The player to check
      * @return Whether or not this player has looted this block
      */
@@ -40,6 +34,7 @@ public interface LootableInventory extends Lootable {
 
     /**
      * Has this player ever looted this block
+     *
      * @param player The player to check
      * @return Whether or not this player has looted this block
      */
@@ -65,6 +60,7 @@ public interface LootableInventory extends Lootable {
 
     /**
      * Change the state of whether or not a player has looted this block
+     *
      * @param player The player to change state for
      * @param looted true to add player to looted list, false to remove
      * @return The previous state of whether the player had looted this or not
@@ -75,6 +71,7 @@ public interface LootableInventory extends Lootable {
 
     /**
      * Change the state of whether or not a player has looted this block
+     *
      * @param player The player to change state for
      * @param looted true to add player to looted list, false to remove
      * @return The previous state of whether the player had looted this or not
@@ -83,6 +80,7 @@ public interface LootableInventory extends Lootable {
 
     /**
      * Returns Whether or not this object has been filled and now has a pending refill
+     *
      * @return Has pending refill
      */
     boolean hasPendingRefill();

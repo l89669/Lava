@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit;
 
 import com.mojang.authlib.GameProfile;
+
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,7 +31,6 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
         this.server = server;
         this.profile = profile;
         this.storage = (SaveHandler) (server.console.worldServerList.get(0).getSaveHandler());
-
     }
 
     public GameProfile getProfile() {

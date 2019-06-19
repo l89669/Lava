@@ -35,7 +35,7 @@ public class CraftPotionBrewer implements PotionBrewer {
 
     @Override
     public Collection<PotionEffect> getEffectsFromDamage(int damage) {
-        return new ArrayList<PotionEffect>();
+        return new ArrayList<>();
     }
 
     @Override

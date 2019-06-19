@@ -21,9 +21,11 @@
  import net.minecraft.stats.StatList;
  import net.minecraft.tileentity.TileEntity;
  import net.minecraft.util.BlockRenderLayer;
-@@ -52,8 +55,7 @@
+@@ -51,9 +54,9 @@
+ import net.minecraft.world.World;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.entity.ExperienceOrb;
  
 -public class Block extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<Block>
 -{
@@ -31,7 +33,7 @@
      private static final ResourceLocation AIR_ID = new ResourceLocation("air");
      public static final RegistryNamespacedDefaultedByKey<ResourceLocation, Block> REGISTRY = net.minecraftforge.registries.GameData.getWrapperDefaulted(Block.class);
      @Deprecated //Modders: DO NOT use this! Use GameRegistry
-@@ -82,149 +84,119 @@
+@@ -82,149 +85,119 @@
      private IBlockState defaultBlockState;
      private String unlocalizedName;
  
@@ -209,7 +211,7 @@
          this.enableStats = true;
          this.blockSoundType = SoundType.STONE;
          this.blockParticleGravity = 1.0F;
-@@ -238,209 +210,174 @@
+@@ -238,209 +211,174 @@
          this.translucent = !blockMaterialIn.blocksLight();
      }
  
@@ -454,7 +456,7 @@
                      return true;
                  }
          }
-@@ -449,25 +386,20 @@
+@@ -449,25 +387,20 @@
      }
  
      @Deprecated
@@ -485,7 +487,7 @@
                  collidingBoxes.add(axisalignedbb);
              }
          }
-@@ -475,261 +407,221 @@
+@@ -475,261 +408,221 @@
  
      @Deprecated
      @Nullable
@@ -664,7 +666,7 @@
                  int i = EntityXPOrb.getXPSplit(amount);
                  amount -= i;
 -                worldIn.spawnEntity(new EntityXPOrb(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, i));
-+                worldIn.spawnEntity(new EntityXPOrb(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, i));
++                worldIn.spawnEntity(new EntityXPOrb(worldIn, (double) pos.getX() + 0.5D, (double) pos.getY() + 0.5D, (double) pos.getZ() + 0.5D, i, ExperienceOrb.SpawnReason.BLOCK_BREAK, null));
              }
          }
      }
@@ -814,7 +816,7 @@
              harvesters.set(player);
              int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
              this.dropBlockAsItem(worldIn, pos, state, i);
-@@ -738,218 +630,175 @@
+@@ -738,218 +631,175 @@
      }
  
      @Deprecated //Forge: State sensitive version
@@ -1075,7 +1077,7 @@
      }
  
      /* ======================================== FORGE START =====================================*/
-@@ -967,14 +816,13 @@
+@@ -967,14 +817,13 @@
       * {@link net.minecraft.entity.item.EntityItem} uses {@code .98}, and
       * {@link net.minecraft.entity.projectile.EntityFishHook} uses {@code .92}.
       *
@@ -1094,7 +1096,7 @@
          return slipperiness;
      }
  
-@@ -989,8 +837,7 @@
+@@ -989,8 +838,7 @@
       * @param slipperiness the base slipperiness of this block
       * @see #getSlipperiness(IBlockState, IBlockAccess, BlockPos, Entity)
       */
@@ -1104,7 +1106,7 @@
          this.slipperiness = slipperiness;
      }
  
-@@ -999,24 +846,25 @@
+@@ -999,24 +847,25 @@
       *
       * @param state Block state
       * @param world The current world
@@ -1137,7 +1139,7 @@
  
      /**
       * Return true if the block is a normal, solid cube.  This
-@@ -1025,28 +873,26 @@
+@@ -1025,28 +874,26 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1172,7 +1174,7 @@
          return state.isOpaqueCube();
      }
  
-@@ -1054,60 +900,45 @@
+@@ -1054,60 +901,45 @@
       * Checks if the block is a solid face on the given side, used by placement logic.
       *
       * @param base_state The base state, getActualState should be called first
@@ -1252,7 +1254,7 @@
              return true;
          }
          return isNormalCube(base_state, world, pos);
-@@ -1118,11 +949,10 @@
+@@ -1118,11 +950,10 @@
       * to entities coming into contact with it.
       *
       * @param world The current world
@@ -1266,7 +1268,7 @@
          return false;
      }
  
-@@ -1134,11 +964,10 @@
+@@ -1134,11 +965,10 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1280,7 +1282,7 @@
          return state.getMaterial() == Material.AIR;
      }
  
-@@ -1146,11 +975,10 @@
+@@ -1146,11 +976,10 @@
       * Determines if the player can harvest this block, obtaining it's drops when the block is destroyed.
       *
       * @param player The player damaging the block
@@ -1294,7 +1296,7 @@
          return net.minecraftforge.common.ForgeHooks.canHarvestBlock(this, player, world, pos);
      }
  
-@@ -1159,22 +987,21 @@
+@@ -1159,22 +988,21 @@
       * actually destroying the block, and the block is intact at time of call.
       * This is called regardless of whether the player can harvest the block or
       * not.
@@ -1325,7 +1327,7 @@
          this.onBlockHarvested(world, pos, state, player);
          return world.setBlockState(pos, net.minecraft.init.Blocks.AIR.getDefaultState(), world.isRemote ? 11 : 3);
      }
-@@ -1184,26 +1011,23 @@
+@@ -1184,26 +1012,23 @@
       * 300 being a 100% chance, 0, being a 0% chance.
       *
       * @param world The current world
@@ -1358,7 +1360,7 @@
          return getFlammability(world, pos, face) > 0;
      }
  
-@@ -1212,12 +1036,11 @@
+@@ -1212,12 +1037,11 @@
       * The higher the number returned, the faster fire will spread around this block.
       *
       * @param world The current world
@@ -1374,7 +1376,7 @@
          return net.minecraft.init.Blocks.FIRE.getEncouragement(this);
      }
  
-@@ -1227,12 +1050,11 @@
+@@ -1227,12 +1051,11 @@
       * Also prevents firing from dying from rain.
       *
       * @param world The current world
@@ -1390,7 +1392,7 @@
          if (side != EnumFacing.UP)
              return false;
          if (this == Blocks.NETHERRACK || this == Blocks.MAGMA)
-@@ -1243,18 +1065,18 @@
+@@ -1243,18 +1066,18 @@
      }
  
      private boolean isTileProvider = this instanceof ITileEntityProvider;
@@ -1412,7 +1414,7 @@
          return isTileProvider;
      }
  
-@@ -1267,11 +1089,9 @@
+@@ -1267,11 +1090,9 @@
       * @return A instance of a class extending TileEntity
       */
      @Nullable
@@ -1427,7 +1429,7 @@
          }
          return null;
      }
-@@ -1280,13 +1100,12 @@
+@@ -1280,13 +1101,12 @@
       * State and fortune sensitive version, this replaces the old (int meta, Random rand)
       * version in 1.1.
       *
@@ -1444,7 +1446,7 @@
          return quantityDroppedWithBonus(fortune, random);
      }
  
-@@ -1294,8 +1113,7 @@
+@@ -1294,8 +1114,7 @@
       * @deprecated use {@link #getDrops(NonNullList, IBlockAccess, BlockPos, IBlockState, int)}
       */
      @Deprecated
@@ -1454,7 +1456,7 @@
          NonNullList<ItemStack> ret = NonNullList.create();
          getDrops(ret, world, pos, state, fortune);
          return ret;
-@@ -1304,22 +1122,19 @@
+@@ -1304,22 +1123,19 @@
      /**
       * This gets a complete list of items dropped from this block.
       *
@@ -1485,7 +1487,7 @@
                  drops.add(new ItemStack(item, 1, this.damageDropped(state)));
              }
          }
-@@ -1328,15 +1143,15 @@
+@@ -1328,15 +1144,15 @@
      /**
       * Return true from this function if the player with silk touch can harvest this block directly, and not it's normal drops.
       *
@@ -1507,7 +1509,7 @@
          boolean ret = this.canSilkHarvest();
          silk_check_state.set(null);
          return ret;
-@@ -1348,12 +1163,11 @@
+@@ -1348,12 +1164,11 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1523,7 +1525,7 @@
          return isSideSolid(state, world, pos, EnumFacing.UP);
      }
  
-@@ -1362,14 +1176,13 @@
+@@ -1362,14 +1177,13 @@
       * players to sleep in it, though the block has to specifically
       * perform the sleeping functionality in it's activated event.
       *
@@ -1542,7 +1544,7 @@
          return this == net.minecraft.init.Blocks.BED;
      }
  
-@@ -1377,36 +1190,33 @@
+@@ -1377,36 +1191,33 @@
       * Returns the position that the player is moved to upon
       * waking up, or respawning at the bed.
       *
@@ -1590,7 +1592,7 @@
          }
      }
  
-@@ -1416,23 +1226,21 @@
+@@ -1416,23 +1227,21 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1619,7 +1621,7 @@
          return getActualState(world.getBlockState(pos), world, pos).getValue(BlockBed.PART) == BlockBed.EnumPartType.FOOT;
      }
  
-@@ -1441,19 +1249,20 @@
+@@ -1441,19 +1250,20 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1645,7 +1647,7 @@
          return false;
      }
  
-@@ -1462,11 +1271,10 @@
+@@ -1462,11 +1272,10 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1659,7 +1661,7 @@
          return state.getMaterial() == Material.LEAVES;
      }
  
-@@ -1475,51 +1283,46 @@
+@@ -1475,51 +1284,46 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1725,7 +1727,7 @@
          return getExplosionResistance(exploder);
      }
  
-@@ -1528,12 +1331,11 @@
+@@ -1528,12 +1332,11 @@
       * Useful for allowing the block to take into account tile entities,
       * state, etc. when exploded, before it is removed.
       *
@@ -1741,7 +1743,7 @@
          world.setBlockToAir(pos);
          onBlockDestroyedByExplosion(world, pos, explosion);
      }
-@@ -1544,12 +1346,11 @@
+@@ -1544,12 +1347,11 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1757,7 +1759,7 @@
          return state.canProvidePower() && side != null;
      }
  
-@@ -1559,21 +1360,15 @@
+@@ -1559,21 +1361,15 @@
       *
       * @param state The current state
       * @param world The current world
@@ -1784,7 +1786,7 @@
              BlockFaceShape shape = state.getBlockFaceShape(world, pos, EnumFacing.UP);
              return (shape == BlockFaceShape.SOLID || shape == BlockFaceShape.CENTER || shape == BlockFaceShape.CENTER_BIG) && !isExceptionBlockForAttaching(this);
          }
-@@ -1585,8 +1380,7 @@
+@@ -1585,8 +1381,7 @@
       * @param target The full target the player is looking at
       * @return A ItemStack to add to the player's inventory, empty itemstack if nothing should be added.
       */
@@ -1794,7 +1796,7 @@
          return getItem(world, pos, state);
      }
  
-@@ -1596,8 +1390,7 @@
+@@ -1596,8 +1391,7 @@
       *
       * @return False to disallow spawning
       */
@@ -1804,7 +1806,7 @@
          return false;
      }
  
-@@ -1606,15 +1399,14 @@
+@@ -1606,15 +1400,14 @@
       * particles, this is a server side method that spawns particles with
       * WorldServer.spawnParticle
       *
@@ -1825,7 +1827,7 @@
          return false;
      }
  
-@@ -1630,8 +1422,7 @@
+@@ -1630,8 +1423,7 @@
       * @param entity The entity running on the block.
       * @return True to prevent vanilla running particles from spawning.
       */
@@ -1835,7 +1837,7 @@
          return false;
      }
  
-@@ -1641,15 +1432,14 @@
+@@ -1641,15 +1433,14 @@
       * control over the particles. Useful when you have entirely different
       * texture sheets for different sides/locations in the world.
       *
@@ -1855,7 +1857,7 @@
          return false;
      }
  
-@@ -1659,69 +1449,69 @@
+@@ -1659,69 +1450,69 @@
       * to host your block. So be sure to do proper sanity checks before assuming
       * that the location is this block.
       *
@@ -1958,7 +1960,7 @@
                  return isBeach && hasWater;
          }
  
-@@ -1734,18 +1524,16 @@
+@@ -1734,18 +1525,16 @@
       * This does not use ForgeDirection, because large/huge trees can be located in non-representable direction,
       * so the source location is specified.
       * Currently this just changes the block to dirt if it was grass.
@@ -1983,7 +1985,7 @@
              world.setBlockState(pos, net.minecraft.init.Blocks.DIRT.getDefaultState(), 2);
          }
      }
-@@ -1756,14 +1544,12 @@
+@@ -1756,14 +1545,12 @@
       * Only vanilla case is tilledField when it is within range of water.
       *
       * @param world The current world
@@ -2002,7 +2004,7 @@
          }
  
          return false;
-@@ -1772,18 +1558,17 @@
+@@ -1772,18 +1559,17 @@
      /**
       * Location aware and overrideable version of the lightOpacity array,
       * return the number to subtract from the light value when it passes through this block.
@@ -2024,7 +2026,7 @@
          return state.getLightOpacity();
      }
  
-@@ -1792,28 +1577,24 @@
+@@ -1792,28 +1578,24 @@
       *
       * @param state The current state
       * @param world The current world
@@ -2068,7 +2070,7 @@
              return net.minecraft.entity.boss.EntityWither.canDestroyBlock(this);
          }
  
-@@ -1823,13 +1604,12 @@
+@@ -1823,13 +1605,12 @@
      /**
       * Determines if this block can be used as the base of a beacon.
       *
@@ -2085,7 +2087,7 @@
          return this == net.minecraft.init.Blocks.EMERALD_BLOCK || this == net.minecraft.init.Blocks.GOLD_BLOCK || this == net.minecraft.init.Blocks.DIAMOND_BLOCK || this == net.minecraft.init.Blocks.IRON_BLOCK;
      }
  
-@@ -1840,20 +1620,16 @@
+@@ -1840,20 +1621,16 @@
       * The method should return true if the rotation was successful though.
       *
       * @param world The world
@@ -2112,7 +2114,7 @@
                      IBlockState newState;
                      //noinspection unchecked
                      IProperty<EnumFacing> facingProperty = (IProperty<EnumFacing>) prop;
-@@ -1861,19 +1637,14 @@
+@@ -1861,19 +1638,14 @@
                      java.util.Collection<EnumFacing> validFacings = facingProperty.getAllowedValues();
  
                      // rotate horizontal facings clockwise
@@ -2136,7 +2138,7 @@
                          {
                              newState = state.cycleProperty(facingProperty);
                          }
-@@ -1890,20 +1661,18 @@
+@@ -1890,20 +1662,18 @@
      /**
       * Get the rotations that can apply to the block at the specified coordinates. Null means no rotations are possible.
       * Note, this is up to the block to decide. It may not be accurate or representative.
@@ -2163,7 +2165,7 @@
                  return values.toArray(new EnumFacing[values.size()]);
              }
          }
-@@ -1912,34 +1681,31 @@
+@@ -1912,34 +1682,31 @@
  
      /**
       * Determines the amount of enchanting power this block can provide to an enchanting table.
@@ -2210,7 +2212,7 @@
                      world.setBlockState(pos, state.withProperty(prop, color));
                      return true;
                  }
-@@ -1951,45 +1717,47 @@
+@@ -1951,45 +1718,47 @@
      /**
       * Gathers how much experience this block drops when broken.
       *
@@ -2275,7 +2277,7 @@
          return state.isNormalCube();
      }
  
-@@ -1999,32 +1767,31 @@
+@@ -1999,32 +1768,31 @@
       * Similar to comparators.
       *
       * @param world The current world
@@ -2321,7 +2323,7 @@
              setHarvestLevel(toolClass, level, itr.next());
          }
      }
-@@ -2033,16 +1800,15 @@
+@@ -2033,16 +1801,15 @@
       * Sets or removes the tool and level required to harvest this block.
       *
       * @param toolClass Class
@@ -2346,7 +2348,7 @@
          int idx = this.getMetaFromState(state);
          this.harvestTool[idx] = toolClass;
          this.harvestLevel[idx] = level;
-@@ -2052,8 +1818,8 @@
+@@ -2052,8 +1819,8 @@
       * Queries the class of tool required to harvest this block, if null is returned
       * we assume that anything can harvest this block.
       */
@@ -2357,7 +2359,7 @@
          return harvestTool[getMetaFromState(state)];
      }
  
-@@ -2063,8 +1829,7 @@
+@@ -2063,8 +1830,7 @@
       *
       * @return Harvest level, or -1 if not the specified tool type.
       */
@@ -2367,7 +2369,7 @@
          return harvestLevel[getMetaFromState(state)];
      }
  
-@@ -2072,8 +1837,7 @@
+@@ -2072,8 +1838,7 @@
       * Checks if the specified tool type is efficient on this block,
       * meaning that it digs at full speed.
       */
@@ -2377,7 +2379,7 @@
          if ("pickaxe".equals(type) && (this == net.minecraft.init.Blocks.REDSTONE_ORE || this == net.minecraft.init.Blocks.LIT_REDSTONE_ORE || this == net.minecraft.init.Blocks.OBSIDIAN))
              return false;
          return type != null && type.equals(getHarvestTool(state));
-@@ -2082,95 +1846,87 @@
+@@ -2082,95 +1847,87 @@
      /**
       * Can return IExtendedBlockState
       */
@@ -2534,7 +2536,7 @@
              captureDrops.set(false);
              return capturedDrops.get();
          }
-@@ -2178,27 +1934,26 @@
+@@ -2178,27 +1935,26 @@
  
      /**
       * Sensitive version of getSoundType
@@ -2571,7 +2573,7 @@
          return null;
      }
  
-@@ -2213,27 +1968,21 @@
+@@ -2213,27 +1969,21 @@
       * @param originalColor The current fog color, You are not expected to use this, Return as the default if applicable.
       * @return The new fog color.
       */
@@ -2607,7 +2609,7 @@
              return new Vec3d(0.6F, 0.1F, 0.0F);
          }
          return originalColor;
-@@ -2250,73 +1999,60 @@
+@@ -2250,73 +2000,60 @@
       * @param viewpoint the viewpoint
       * @return the block state that should be 'seen'
       */
@@ -2701,7 +2703,7 @@
              // maintain the vanilla behavior of https://bugs.mojang.com/browse/MC-378
              return isNormalCube(blockState, world, pos);
          }
-@@ -2327,15 +2063,13 @@
+@@ -2327,15 +2064,13 @@
       * @param state The state
       * @return true if the block is sticky block which used for pull or push adjacent blocks (use by piston)
       */
@@ -2719,7 +2721,7 @@
          registerBlock(0, AIR_ID, (new BlockAir()).setUnlocalizedName("air"));
          registerBlock(1, "stone", (new BlockStone()).setHardness(1.5F).setResistance(10.0F).setSoundType(SoundType.STONE).setUnlocalizedName("stone"));
          registerBlock(2, "grass", (new BlockGrass()).setHardness(0.6F).setSoundType(SoundType.PLANT).setUnlocalizedName("grass"));
-@@ -2607,14 +2341,10 @@
+@@ -2607,14 +2342,10 @@
          registerBlock(255, "structure_block", (new BlockStructure()).setBlockUnbreakable().setResistance(6000000.0F).setUnlocalizedName("structureBlock"));
          REGISTRY.validateKey();
  
@@ -2737,7 +2739,7 @@
                  boolean flag = false;
                  boolean flag1 = block15 instanceof BlockStairs;
                  boolean flag2 = block15 instanceof BlockSlab;
-@@ -2622,8 +2352,7 @@
+@@ -2622,8 +2353,7 @@
                  boolean flag4 = block15.translucent;
                  boolean flag5 = block15.lightOpacity == 0;
  
@@ -2747,7 +2749,7 @@
                      flag = true;
                  }
  
-@@ -2632,18 +2361,15 @@
+@@ -2632,18 +2362,15 @@
          }
      }
  

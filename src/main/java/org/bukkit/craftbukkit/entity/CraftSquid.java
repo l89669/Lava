@@ -5,7 +5,7 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Squid;
 
-public class CraftSquid extends CraftWaterMob implements Squid {
+public class CraftSquid extends CraftWaterMob implements Squid { // Paper
 
     public CraftSquid(CraftServer server, EntitySquid entity) {
         super(server, entity);

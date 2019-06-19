@@ -17,7 +17,7 @@ public class CraftCustomContainer extends CraftBlockState implements InventoryHo
     public CraftCustomContainer(Block block) {
         super(block);
         world = (CraftWorld) block.getWorld();
-        container = (IInventory)world.getTileEntityAt(getX(), getY(), getZ());
+        container = (IInventory) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
     @Override

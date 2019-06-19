@@ -20,6 +20,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 
 import net.minecraft.advancements.Advancement;
@@ -233,12 +235,7 @@ public final class CraftServer implements Server {
         this.console = console;
         this.playerList = (DedicatedPlayerList) playerList;
         this.playerView = Collections
-                .unmodifiableList(Lists.transform(playerList.getPlayers(), new Function<EntityPlayerMP, CraftPlayer>() {
-                    @Override
-                    public CraftPlayer apply(EntityPlayerMP player) {
-                        return player.getBukkitEntity();
-                    }
-                }));
+                .unmodifiableList(Lists.transform(playerList.getPlayers(), EntityPlayerMP::getBukkitEntity));
         this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
         online.value = console.getPropertyManager().getBooleanProperty("online-mode", true);
 
@@ -827,7 +824,7 @@ public final class CraftServer implements Server {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "finally" })
+    @SuppressWarnings({"unchecked", "finally"})
     private void loadCustomPermissions() {
         File file = new File(configuration.getString("settings.permissions-file"));
         FileInputStream stream;
@@ -993,11 +990,11 @@ public final class CraftServer implements Server {
                 getLogger().log(Level.SEVERE, null, ex);
             }
         }
-		MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(handle)); // fire unload event before removing world
+        MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(handle)); // fire unload event before removing world
         worlds.remove(world.getName().toLowerCase(java.util.Locale.ENGLISH));
         DimensionManager.setWorld(handle.provider.getDimension(), null, FMLCommonHandler.instance().getMinecraftServerInstance()); // remove world from DimensionManager
 
-		return true;
+        return true;
     }
 
     public MinecraftServer getServer() {
@@ -1011,10 +1008,11 @@ public final class CraftServer implements Server {
         if (world == null && name.toUpperCase().startsWith("DIM")) {
             int dimension;
             try {
-                dimension = Integer.valueOf(name.substring(3));
+                dimension = Integer.parseInt(name.substring(3));
                 WorldServer worldserver = console.getWorld(dimension);
                 if (worldserver != null) world = worldserver.getWorld();
-            } catch (NumberFormatException e) {}
+            } catch (NumberFormatException e) {
+            }
         }
         return world;
     }
@@ -1043,11 +1041,6 @@ public final class CraftServer implements Server {
         return logger;
     }
 
-    /*
-    public ConsoleReader getReader() {
-        return console.reader;
-    }
-    */
     @Override
     public PluginCommand getPluginCommand(String name) {
         Command command = commandMap.getCommand(name);
@@ -1111,7 +1104,7 @@ public final class CraftServer implements Server {
 
     @Override
     public void clearRecipes() {
-        CraftingManager.REGISTRY = new RegistryNamespaced();
+        CraftingManager.REGISTRY = new RegistryNamespaced<>();
         FurnaceRecipes.instance().smeltingList.clear();
         FurnaceRecipes.instance().customRecipes.clear();
         FurnaceRecipes.instance().customExperience.clear();
@@ -1119,7 +1112,7 @@ public final class CraftServer implements Server {
 
     @Override
     public void resetRecipes() {
-        CraftingManager.REGISTRY = new RegistryNamespaced();
+        CraftingManager.REGISTRY = new RegistryNamespaced<>();
         CraftingManager.init();
         FurnaceRecipes.instance().smeltingList = new FurnaceRecipes().smeltingList;
         FurnaceRecipes.instance().customRecipes.clear();
@@ -1327,9 +1320,8 @@ public final class CraftServer implements Server {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Set<String> getIPBans() {
-        return new HashSet<String>(Arrays.asList(playerList.getBannedIPs().getKeys()));
+        return new HashSet<>(Arrays.asList(playerList.getBannedIPs().getKeys()));
     }
 
     @Override
@@ -1348,7 +1340,7 @@ public final class CraftServer implements Server {
 
     @Override
     public Set<OfflinePlayer> getBannedPlayers() {
-        Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
+        Set<OfflinePlayer> result = new HashSet<>();
 
         for (UserListEntry entry : playerList.getBannedPlayers().getValuesCB()) {
             result.add(getOfflinePlayer((GameProfile) entry.getValue()));
@@ -1362,11 +1354,11 @@ public final class CraftServer implements Server {
         Validate.notNull(type, "Type cannot be null");
 
         switch (type) {
-        case IP:
-            return new CraftIpBanList(playerList.getBannedIPs());
-        case NAME:
-        default:
-            return new CraftProfileBanList(playerList.getBannedPlayers());
+            case IP:
+                return new CraftIpBanList(playerList.getBannedIPs());
+            case NAME:
+            default:
+                return new CraftProfileBanList(playerList.getBannedPlayers());
         }
     }
 
@@ -1378,7 +1370,7 @@ public final class CraftServer implements Server {
 
     @Override
     public Set<OfflinePlayer> getWhitelistedPlayers() {
-        Set<OfflinePlayer> result = new LinkedHashSet<OfflinePlayer>();
+        Set<OfflinePlayer> result = new LinkedHashSet<>();
 
         for (UserListEntry entry : playerList.getWhitelistedPlayers().getValuesCB()) {
             result.add(getOfflinePlayer((GameProfile) entry.getValue()));
@@ -1389,7 +1381,7 @@ public final class CraftServer implements Server {
 
     @Override
     public Set<OfflinePlayer> getOperators() {
-        Set<OfflinePlayer> result = new HashSet<OfflinePlayer>();
+        Set<OfflinePlayer> result = new HashSet<>();
 
         for (UserListEntry entry : playerList.getOppedPlayers().getValuesCB()) {
             result.add(getOfflinePlayer((GameProfile) entry.getValue()));
@@ -1437,7 +1429,7 @@ public final class CraftServer implements Server {
     @Override
     public File getWorldContainer() {
         if (DimensionManager.getWorld(0) != null) {
-            return ((SaveHandler)DimensionManager.getWorld(0).getSaveHandler()).getWorldDirectory();
+            return (DimensionManager.getWorld(0).getSaveHandler()).getWorldDirectory();
         }
         if (this.getServer().anvilFile != null) {
             return this.getServer().anvilFile;
@@ -1485,7 +1477,7 @@ public final class CraftServer implements Server {
 
     @Override
     public Set<String> getListeningPluginChannels() {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
 
         for (Player player : getOnlinePlayers()) {
             result.addAll(player.getListeningPluginChannels());
@@ -1605,11 +1597,11 @@ public final class CraftServer implements Server {
                     "Exception when " + player.getName() + " attempted to tab complete " + message, ex);
         }
 
-        return completions == null ? ImmutableList.<String>of() : completions;
+        return completions == null ? ImmutableList.of() : completions;
     }
 
     public List<String> tabCompleteChat(Player player, String message) {
-        List<String> completions = new ArrayList<String>();
+        List<String> completions = new ArrayList<>();
         PlayerChatTabCompleteEvent event = new PlayerChatTabCompleteEvent(player, message, completions);
         String token = event.getLastToken();
         for (Player p : getOnlinePlayers()) {
@@ -1619,14 +1611,8 @@ public final class CraftServer implements Server {
         }
         pluginManager.callEvent(event);
 
-        Iterator<?> it = completions.iterator();
-        while (it.hasNext()) {
-            Object current = it.next();
-            if (!(current instanceof String)) {
-                // Sanity
-                it.remove();
-            }
-        }
+        // Sanity
+        completions.removeIf(current -> !(current instanceof String));
         Collections.sort(completions, String.CASE_INSENSITIVE_ORDER);
         return completions;
     }
@@ -1723,14 +1709,10 @@ public final class CraftServer implements Server {
 
     @Override
     public Iterator<org.bukkit.advancement.Advancement> advancementIterator() {
+        // PAIL: rename
         return Iterators
                 .unmodifiableIterator(Iterators.transform(console.getAdvancementManager().getAdvancements().iterator(),
-                        new Function<Advancement, org.bukkit.advancement.Advancement>() { // PAIL: rename
-                            @Override
-                            public org.bukkit.advancement.Advancement apply(Advancement advancement) {
-                                return advancement.bukkit;
-                            }
-                        }));
+                        advancement -> advancement.bukkit));
     }
 
     @Deprecated
@@ -1739,13 +1721,56 @@ public final class CraftServer implements Server {
         return CraftMagicNumbers.INSTANCE;
     }
 
-    private final Spigot spigot=new Spigot(){@Override public YamlConfiguration getConfig(){return org.spigotmc.SpigotConfig.config;}
+    // Paper - Add getTPS API - Further improve tick loop
+    @Override
+    public double[] getTPS() {
+        return new double[] {
+                MinecraftServer.getServerInstance().tps1.getAverage(),
+                MinecraftServer.getServerInstance().tps5.getAverage(),
+                MinecraftServer.getServerInstance().tps15.getAverage()
+        };
+    }
+    // Paper end
 
-    @Override public void broadcast(BaseComponent component){for(Player player:getOnlinePlayers()){player.spigot().sendMessage(component);}}
+    private final Spigot spigot = new Spigot() {
+        @Override
+        public YamlConfiguration getConfig() {
+            return org.spigotmc.SpigotConfig.config;
+        }
 
-    @Override public void broadcast(BaseComponent...components){for(Player player:getOnlinePlayers()){player.spigot().sendMessage(components);}}};
+        @Override
+        public void broadcast(BaseComponent component) {
+            for (Player player : getOnlinePlayers()) {
+                player.spigot().sendMessage(component);
+            }
+        }
+
+        @Override
+        public void broadcast(BaseComponent... components) {
+            for (Player player : getOnlinePlayers()) {
+                player.spigot().sendMessage(components);
+            }
+        }
+    };
 
     public Spigot spigot() {
         return spigot;
     }
+
+    public com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid) {
+        return createProfile(uuid, null);
+    }
+
+    public com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name) {
+        return createProfile(null, name);
+    }
+
+    public com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name) {
+        Player player = uuid != null ? Bukkit.getPlayer(uuid) : (name != null ? Bukkit.getPlayerExact(name) : null);
+        if (player != null) {
+            return new com.destroystokyo.paper.profile.CraftPlayerProfile((CraftPlayer)player);
+        }
+        return new com.destroystokyo.paper.profile.CraftPlayerProfile(uuid, name);
+    }
+    // Paper end
 }

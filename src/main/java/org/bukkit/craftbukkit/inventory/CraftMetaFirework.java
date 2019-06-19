@@ -69,7 +69,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
         this.power = that.power;
 
         if (that.hasEffects()) {
-            this.effects = new ArrayList<FireworkEffect>(that.effects);
+            this.effects = new ArrayList<>(that.effects);
         }
     }
 
@@ -89,7 +89,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
         }
 
         NBTTagList fireworkEffects = fireworks.getTagList(EXPLOSIONS.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND);
-        List<FireworkEffect> effects = this.effects = new ArrayList<FireworkEffect>(fireworkEffects.tagCount());
+        List<FireworkEffect> effects = this.effects = new ArrayList<>(fireworkEffects.tagCount());
 
         for (int i = 0; i < fireworkEffects.tagCount(); i++) {
             effects.add(getEffect((NBTTagCompound) fireworkEffects.get(i)));
@@ -197,7 +197,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
 
         List<FireworkEffect> effects = this.effects;
         if (effects == null) {
-            effects = this.effects = new ArrayList<FireworkEffect>();
+            effects = this.effects = new ArrayList<>();
         }
 
         for (Object obj : collection) {
@@ -251,7 +251,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
 
     @Override
     boolean applicableTo(Material type) {
-        switch(type) {
+        switch (type) {
             case FIREWORK:
                 return true;
             default:
@@ -265,7 +265,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
     }
 
     boolean isFireworkEmpty() {
-        return  !(hasEffects() || hasPower());
+        return !(hasEffects() || hasPower());
     }
 
     boolean hasPower() {
@@ -326,7 +326,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
         CraftMetaFirework meta = (CraftMetaFirework) super.clone();
 
         if (this.effects != null) {
-            meta.effects = new ArrayList<FireworkEffect>(this.effects);
+            meta.effects = new ArrayList<>(this.effects);
         }
 
         return meta;
@@ -335,12 +335,12 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
     public void addEffect(FireworkEffect effect) {
         Validate.notNull(effect, "Effect cannot be null");
         if (this.effects == null) {
-            this.effects = new ArrayList<FireworkEffect>();
+            this.effects = new ArrayList<>();
         }
         this.effects.add(effect);
     }
 
-    public void addEffects(FireworkEffect...effects) {
+    public void addEffects(FireworkEffect... effects) {
         Validate.notNull(effects, "Effects cannot be null");
         if (effects.length == 0) {
             return;
@@ -348,7 +348,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
 
         List<FireworkEffect> list = this.effects;
         if (list == null) {
-            list = this.effects = new ArrayList<FireworkEffect>();
+            list = this.effects = new ArrayList<>();
         }
 
         for (FireworkEffect effect : effects) {

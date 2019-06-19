@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,8 +9,8 @@ import java.util.TreeSet;
 
 public class HashTreeSet<V> implements Set<V> {
 
-    private HashSet<V> hash = new HashSet<V>();
-    private TreeSet<V> tree = new TreeSet<V>();
+    private HashSet<V> hash = new HashSet<>();
+    private TreeSet<V> tree = new TreeSet<>();
 
     public HashTreeSet() {
 
@@ -31,6 +32,7 @@ public class HashTreeSet<V> implements Set<V> {
     }
 
     @Override
+    @Nonnull
     public Iterator<V> iterator() {
         return new Iterator<V>() {
 
@@ -60,12 +62,14 @@ public class HashTreeSet<V> implements Set<V> {
     }
 
     @Override
+    @Nonnull
     public Object[] toArray() {
         return hash.toArray();
     }
 
     @Override
-    public Object[] toArray(Object[] a) {
+    @Nonnull
+    public Object[] toArray(@Nonnull Object[] a) {
         return hash.toArray(a);
     }
 
@@ -82,24 +86,24 @@ public class HashTreeSet<V> implements Set<V> {
     }
 
     @Override
-    public boolean containsAll(Collection c) {
+    public boolean containsAll(@Nonnull Collection c) {
         return hash.containsAll(c);
     }
 
     @Override
-    public boolean addAll(Collection c) {
+    public boolean addAll(@Nonnull Collection c) {
         tree.addAll(c);
         return hash.addAll(c);
     }
 
     @Override
-    public boolean retainAll(Collection c) {
+    public boolean retainAll(@Nonnull Collection c) {
         tree.retainAll(c);
         return hash.retainAll(c);
     }
 
     @Override
-    public boolean removeAll(Collection c) {
+    public boolean removeAll(@Nonnull Collection c) {
         tree.removeAll(c);
         return hash.removeAll(c);
     }

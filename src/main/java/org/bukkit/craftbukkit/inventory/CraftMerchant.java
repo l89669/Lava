@@ -1,6 +1,8 @@
 package org.bukkit.craftbukkit.inventory;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -25,12 +27,7 @@ public class CraftMerchant implements Merchant {
 
     @Override
     public List<MerchantRecipe> getRecipes() {
-        return Collections.unmodifiableList(Lists.transform(merchant.getRecipes(null), new com.google.common.base.Function<net.minecraft.village.MerchantRecipe, MerchantRecipe>() {
-            @Override
-            public MerchantRecipe apply(net.minecraft.village.MerchantRecipe recipe) {
-                return recipe.asBukkit();
-            }
-        }));
+        return Collections.unmodifiableList(Lists.transform(merchant.getRecipes(null), (Function<net.minecraft.village.MerchantRecipe, MerchantRecipe>) recipe -> recipe.asBukkit()));
     }
 
     @Override

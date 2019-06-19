@@ -1,10 +1,12 @@
 package org.bukkit.craftbukkit.inventory;
 
 import com.google.common.collect.ImmutableMap.Builder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
@@ -21,7 +23,7 @@ public class CraftMetaKnowledgeBook extends CraftMetaItem implements KnowledgeBo
     static final ItemMetaKey BOOK_RECIPES = new ItemMetaKey("Recipes");
     static final int MAX_RECIPES = Short.MAX_VALUE;
 
-    protected List<NamespacedKey> recipes = new ArrayList<NamespacedKey>();
+    protected List<NamespacedKey> recipes = new ArrayList<>();
 
     CraftMetaKnowledgeBook(CraftMetaItem meta) {
         super(meta);

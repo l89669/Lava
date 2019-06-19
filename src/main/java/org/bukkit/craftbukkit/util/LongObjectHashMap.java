@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -20,12 +21,12 @@ public class LongObjectHashMap<V> implements Cloneable, Serializable {
     static final long serialVersionUID = 2841537710170573815L;
 
     private static final long EMPTY_KEY = Long.MIN_VALUE;
-    private static final int  BUCKET_SIZE = 4096;
+    private static final int BUCKET_SIZE = 4096;
 
     private transient long[][] keys;
-    private transient V[][]    values;
-    private transient int      modCount;
-    private transient int      size;
+    private transient V[][] values;
+    private transient int modCount;
+    private transient int size;
 
     public LongObjectHashMap() {
         initialize();
@@ -192,7 +193,7 @@ public class LongObjectHashMap<V> implements Cloneable, Serializable {
      */
     @Deprecated
     public Set<Map.Entry<Long, V>> entrySet() {
-        HashSet<Map.Entry<Long, V>> set = new HashSet<Map.Entry<Long, V>>();
+        HashSet<Map.Entry<Long, V>> set = new HashSet<>();
         for (long key : keySet()) {
             set.add(new Entry(key, get(key)));
         }
@@ -363,13 +364,13 @@ public class LongObjectHashMap<V> implements Cloneable, Serializable {
 
         public boolean contains(Object key) {
             return key instanceof Long && LongObjectHashMap.this.containsKey((Long) key);
-
         }
 
         public boolean remove(Object key) {
             return LongObjectHashMap.this.remove((Long) key) != null;
         }
 
+        @Nonnull
         public Iterator<Long> iterator() {
             return new KeyIterator();
         }
@@ -389,6 +390,7 @@ public class LongObjectHashMap<V> implements Cloneable, Serializable {
             return LongObjectHashMap.this.containsValue((V) value);
         }
 
+        @Nonnull
         public Iterator<V> iterator() {
             return new ValueIterator();
         }

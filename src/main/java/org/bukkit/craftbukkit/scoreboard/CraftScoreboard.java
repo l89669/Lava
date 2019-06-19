@@ -125,13 +125,7 @@ public final class CraftScoreboard implements org.bukkit.scoreboard.Scoreboard {
     }
 
     public ImmutableSet<Team> getTeams() {
-        return ImmutableSet.copyOf(Iterables.transform((Collection<ScorePlayerTeam>) this.board.getTeams(), new Function<ScorePlayerTeam, Team>() {
-
-            @Override
-            public Team apply(ScorePlayerTeam input) {
-                return new CraftTeam(CraftScoreboard.this, input);
-            }
-        }));
+        return ImmutableSet.copyOf(Iterables.transform(this.board.getTeams(), (Function<ScorePlayerTeam, Team>) input -> new CraftTeam(CraftScoreboard.this, input)));
     }
 
     public Team registerNewTeam(String name) throws IllegalArgumentException {

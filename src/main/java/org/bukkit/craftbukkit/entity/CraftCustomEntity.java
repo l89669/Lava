@@ -19,7 +19,7 @@ public class CraftCustomEntity extends CraftEntity {
 
     @Override
     public Entity getHandle() {
-        return (Entity) entity;
+        return entity;
     }
 
     @Override

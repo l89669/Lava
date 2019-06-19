@@ -63,7 +63,7 @@ public final class CraftItemStack extends ItemStack {
         if (original.isEmpty()) {
             return new ItemStack(Material.AIR);
         }
-        
+
         // Lava start - don't use strict Bukkit stacks as we don't have Bukkit Materials for modded item stacks, create wrapper? (Cauldron)
         return asCraftMirror(copyNMSStack(original, original.getCount()));
         /*

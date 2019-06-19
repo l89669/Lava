@@ -25,8 +25,8 @@ public class SimpleHelpMap implements HelpMap {
 
     @SuppressWarnings("unchecked")
     public SimpleHelpMap(CraftServer server) {
-        this.helpTopics = new TreeMap<String, HelpTopic>(HelpTopicComparator.topicNameComparatorInstance()); // Using a TreeMap for its explicit sorting on key
-        this.topicFactoryMap = new HashMap<Class, HelpTopicFactory<Command>>();
+        this.helpTopics = new TreeMap<>(HelpTopicComparator.topicNameComparatorInstance()); // Using a TreeMap for its explicit sorting on key
+        this.topicFactoryMap = new HashMap<>();
         this.server = server;
         this.yaml = new HelpYamlReader(server);
 
@@ -105,7 +105,8 @@ public class SimpleHelpMap implements HelpMap {
         }
 
         // Initialize help topics from the server's command map
-        outer: for (Command command : server.getCommandMap().getCommands()) {
+        outer:
+        for (Command command : server.getCommandMap().getCommands()) {
             if (commandInIgnoredPlugin(command, ignoredPlugins)) {
                 continue;
             }
@@ -117,7 +118,7 @@ public class SimpleHelpMap implements HelpMap {
                     if (t != null) addTopic(t);
                     continue outer;
                 }
-                if (command instanceof PluginCommand && c.isAssignableFrom(((PluginCommand)command).getExecutor().getClass())) {
+                if (command instanceof PluginCommand && c.isAssignableFrom(((PluginCommand) command).getExecutor().getClass())) {
                     HelpTopic t = topicFactoryMap.get(c).createTopic(command);
                     if (t != null) addTopic(t);
                     continue outer;
@@ -187,7 +188,7 @@ public class SimpleHelpMap implements HelpMap {
             return "Bukkit";
         }
         if (command instanceof PluginIdentifiableCommand) {
-            return ((PluginIdentifiableCommand)command).getPlugin().getName();
+            return ((PluginIdentifiableCommand) command).getPlugin().getName();
         }
         return null;
     }
@@ -196,7 +197,7 @@ public class SimpleHelpMap implements HelpMap {
         if ((command instanceof BukkitCommand) && ignoredPlugins.contains("Bukkit")) {
             return true;
         }
-        if (command instanceof PluginIdentifiableCommand && ignoredPlugins.contains(((PluginIdentifiableCommand)command).getPlugin().getName())) {
+        if (command instanceof PluginIdentifiableCommand && ignoredPlugins.contains(((PluginIdentifiableCommand) command).getPlugin().getName())) {
             return true;
         }
         return false;

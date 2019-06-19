@@ -19,6 +19,11 @@ public class CraftEnderman extends CraftMonster implements Enderman {
         return (blockData == null) ? Material.AIR.getNewData((byte) 0) : CraftMagicNumbers.getMaterial(blockData.getBlock()).getNewData((byte) blockData.getBlock().getMetaFromState(blockData));
     }
 
+    @Override
+    public boolean teleportRandomly() {
+        return getHandle().teleportRandomly();
+    }
+
     public void setCarriedMaterial(MaterialData data) {
         getHandle().setHeldBlockState(CraftMagicNumbers.getBlock(data.getItemTypeId()).getDefaultState());
     }

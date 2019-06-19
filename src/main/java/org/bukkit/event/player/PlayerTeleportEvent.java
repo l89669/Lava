@@ -74,7 +74,12 @@ public class PlayerTeleportEvent extends PlayerMoveEvent {
          * Indicates the teleportation was caused by an event not covered by
          * this enum
          */
-        UNKNOWN;
+        UNKNOWN,
+        /**
+         * Indicates the teleportation was caused by a player entering a
+         * Mod portal
+         */
+        MOD;
     }
 
     @Override

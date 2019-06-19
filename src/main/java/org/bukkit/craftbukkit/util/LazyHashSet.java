@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.util;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,15 +20,18 @@ public abstract class LazyHashSet<E> implements Set<E> {
         return getReference().contains(o);
     }
 
+    @Nonnull
     public Iterator<E> iterator() {
         return getReference().iterator();
     }
 
+    @Nonnull
     public Object[] toArray() {
         return getReference().toArray();
     }
 
-    public <T> T[] toArray(T[] a) {
+    @Nonnull
+    public <T> T[] toArray(@Nonnull T[] a) {
         return getReference().toArray(a);
     }
 
@@ -39,19 +43,19 @@ public abstract class LazyHashSet<E> implements Set<E> {
         return getReference().remove(o);
     }
 
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@Nonnull Collection<?> c) {
         return getReference().containsAll(c);
     }
 
-    public boolean addAll(Collection<? extends E> c) {
+    public boolean addAll(@Nonnull Collection<? extends E> c) {
         return getReference().addAll(c);
     }
 
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@Nonnull Collection<?> c) {
         return getReference().retainAll(c);
     }
 
-    public boolean removeAll(Collection<?> c) {
+    public boolean removeAll(@Nonnull Collection<?> c) {
         return getReference().removeAll(c);
     }
 
@@ -60,7 +64,7 @@ public abstract class LazyHashSet<E> implements Set<E> {
     }
 
     public Set<E> getReference() {
-        Set<E> reference = this.reference ;
+        Set<E> reference = this.reference;
         if (reference != null) {
             return reference;
         }

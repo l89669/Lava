@@ -71,7 +71,7 @@ public class CraftBlockProjectileSource implements BlockProjectileSource {
         IBlockSource isourceblock = new BlockSourceImpl(dispenserBlock.getWorld(), dispenserBlock.getPos());
         // Copied from DispenseBehaviorProjectile
         IPosition iposition = BlockDispenser.getDispensePosition(isourceblock);
-        EnumFacing enumdirection = (EnumFacing) isourceblock.getBlockState().getValue(BlockDispenser.FACING);
+        EnumFacing enumdirection = isourceblock.getBlockState().getValue(BlockDispenser.FACING);
         net.minecraft.world.World world = dispenserBlock.getWorld();
         net.minecraft.entity.Entity launch = null;
 
@@ -148,7 +148,7 @@ public class CraftBlockProjectileSource implements BlockProjectileSource {
                 b *= 1.25F;
             }
             // Copied from DispenseBehaviorProjectile
-            ((IProjectile) launch).shoot((double) enumdirection.getFrontOffsetX(), (double) ((float) enumdirection.getFrontOffsetY() + 0.1F), (double) enumdirection.getFrontOffsetZ(), b, a);
+            ((IProjectile) launch).shoot(enumdirection.getFrontOffsetX(), ((float) enumdirection.getFrontOffsetY() + 0.1F), enumdirection.getFrontOffsetZ(), b, a);
         }
 
         if (velocity != null) {

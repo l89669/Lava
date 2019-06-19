@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/nbt/NBTTagList.java
++++ ../src-work/minecraft/net/minecraft/nbt/NBTTagList.java
+@@ -12,7 +12,7 @@
+ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase>
+ {
+     private static final Logger LOGGER = LogManager.getLogger();
+-    private List<NBTBase> tagList = Lists.<NBTBase>newArrayList();
++    public List<NBTBase> tagList = Lists.<NBTBase>newArrayList();
+     private byte tagType = 0;
+ 
+     void write(DataOutput output) throws IOException
