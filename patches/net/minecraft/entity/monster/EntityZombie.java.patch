@@ -539,7 +539,7 @@
 +                    entitychicken1.onInitialSpawn(difficulty, (IEntityLivingData) null);
                      entitychicken1.setChickenJockey(true);
 -                    this.world.spawnEntity(entitychicken1);
-+                    this.world.spawnEntity(entitychicken1, CreatureSpawnEvent.SpawnReason.MOUNT);
++                    this.world.addEntity(entitychicken1, CreatureSpawnEvent.SpawnReason.MOUNT);
                      this.startRiding(entitychicken1);
                  }
              }

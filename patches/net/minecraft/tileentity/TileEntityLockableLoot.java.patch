@@ -247,7 +247,7 @@
 +
 +    @Override
 +    public LootableInventory getAPILootableInventory() {
-+        return (LootableInventory) getBukkitWorld().getBlockAt(MCUtil.toLocation(world, getPosition())).getState();
++        return (LootableInventory) getBukkitWorld().getBlockAt(MCUtil.toLocation(world, getPos())).getState();
 +    }
 +
 +    @Override

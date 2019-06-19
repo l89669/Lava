@@ -21,10 +21,9 @@
 + */
 +
  package net.minecraftforge.fml.relauncher;
- 
--public enum Side
--{
-+public enum Side {
+
+public enum Side 
+{
 +
 +    /**
 +     * The client side. Specifically, an environment where rendering capability exists.
