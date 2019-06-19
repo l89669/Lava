@@ -156,7 +156,7 @@
 +                                        getMetaFromState(this.getDefaultState().withProperty(AGE, Integer.valueOf(i + 1)))
 +                                )) {
 +                                    worldIn.playEvent(1033, pos, 0);
-+                                    flag2 = true
++                                    flag2 = true;
 +                                }
                                  flag2 = true;
                              }
