@@ -17,7 +17,7 @@ We hope to eliminate all issues with craftbukkit forge servers. In the end, we e
 Advantages over Sponge or other implementations:
 + Lag-lowering optimizations
 + Better world protection (Forge stuff doesn't bypass Bukkit plugins but rather works with it!)
-+ Full use of **all** Spigot plugins and Forge mods
++ Full use of **all** Spigot plugins and Forge mods (*Disclaimer the plugin/mod creator may have to make a version specifically for Lava for it to work*)
 + Hyperthreaded performance
 + Use of Mixin - Unlike other impl.
 
