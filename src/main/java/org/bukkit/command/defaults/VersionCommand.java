@@ -1,19 +1,35 @@
 package org.bukkit.command.defaults;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Charsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import net.minecraftforge.common.ForgeVersion;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+// Lava Start
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+// Lava End
 
 public class VersionCommand extends BukkitCommand {
     public VersionCommand(String name) {
@@ -22,17 +38,16 @@ public class VersionCommand extends BukkitCommand {
         this.description = "Gets the version of this server including any plugins in use";
         this.usageMessage = "/version [plugin name]";
         this.setPermission("bukkit.command.version");
-        this.setAliases(Arrays.asList("ver"));
+        this.setAliases(Arrays.asList("ver", "about"));
     }
 
     @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) {
-            return true;
-        }
+        if (!testPermission(sender)) return true;
 
         if (args.length == 0) {
-            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.class.getPackage().getImplementationVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ", Forge version " + ForgeVersion.getVersion() + ")");
+            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " with Forge version " + ForgeVersion.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion() + ")");
+            sendVersion(sender);
         } else {
             StringBuilder name = new StringBuilder();
 
@@ -129,4 +144,154 @@ public class VersionCommand extends BukkitCommand {
         }
         return ImmutableList.of();
     }
+
+    private final ReentrantLock versionLock = new ReentrantLock();
+    private boolean hasVersion = false;
+    private String versionMessage = null;
+    private final Set<CommandSender> versionWaiters = new HashSet<CommandSender>();
+    private boolean versionTaskStarted = false;
+    private long lastCheck = 0;
+
+    private void sendVersion(CommandSender sender) {
+        if (hasVersion) {
+            if (System.currentTimeMillis() - lastCheck > 21600000) {
+                lastCheck = System.currentTimeMillis();
+                hasVersion = false;
+            } else {
+                sender.sendMessage(versionMessage);
+                return;
+            }
+        }
+        versionLock.lock();
+        try {
+            if (hasVersion) {
+                sender.sendMessage(versionMessage);
+                return;
+            }
+            versionWaiters.add(sender);
+            sender.sendMessage("Checking version, please wait...");
+            if (!versionTaskStarted) {
+                versionTaskStarted = true;
+                new Thread(() -> obtainVersion()).start();
+            }
+        } finally {
+            versionLock.unlock();
+        }
+    }
+
+    private void obtainVersion() {
+        String version = Bukkit.getVersion();
+        if (version == null) version = "Custom";
+        if (version.startsWith("git-Lava-")) {
+            String[] parts = version.substring("git-Lava-".length()).split("[-\\s]");
+            int distance = getDistance(null, parts[0]);
+            switch (distance) {
+                case -1:
+                    setVersionMessage("Error obtaining version information");
+                    break;
+                case 0:
+                    setVersionMessage("You are running the latest version");
+                    break;
+                case -2:
+                    setVersionMessage("Unknown version");
+                    break;
+                default:
+                    setVersionMessage("You are " + distance + " version(s) behind");
+            }
+        } else if (version.startsWith("git-Bukkit-")) {
+            version = version.substring("git-Bukkit-".length());
+            int cbVersions = getDistance("craftbukkit", version.substring(0, version.indexOf(' ')));
+            if (cbVersions == -1) {
+                setVersionMessage("Error obtaining version information");
+            } else {
+                if (cbVersions == 0) {
+                    setVersionMessage("You are running the latest version");
+                } else {
+                    setVersionMessage("You are " + cbVersions + " version(s) behind");
+                }
+            }
+        } else {
+            setVersionMessage("Unknown version, custom build?");
+        }
+    }
+
+    private void setVersionMessage(String msg) {
+        lastCheck = System.currentTimeMillis();
+        versionMessage = msg;
+        versionLock.lock();
+        try {
+            hasVersion = true;
+            versionTaskStarted = false;
+            for (CommandSender sender : versionWaiters) {
+                sender.sendMessage(versionMessage);
+            }
+            versionWaiters.clear();
+        } finally {
+            versionLock.unlock();
+        }
+    }
+
+    // Lava Start - Taken from Paper / Modified by GMatrixGames
+    private static int getDistance(String repo, String verInfo) {
+        try {
+            int currentVer = Integer.decode(verInfo);
+            return getFromJenkins(currentVer);
+        } catch (NumberFormatException ex) {
+            verInfo = verInfo.replace("\"", "");
+            return getFromRepo("LavaPowered/Lava", verInfo);
+        }
+    }
+	
+    private static int getFromJenkins(int currentVer) {
+        try {
+            BufferedReader reader = Resources.asCharSource(
+                    new URL("https://ci.codemc.org/job/LavaPowered/job/Lava/lastSuccessfulBuild/buildNumber"), // Lava - Change URL
+                    Charsets.UTF_8
+            ).openBufferedStream();
+            try {
+                int newVer = Integer.decode(reader.readLine());
+                return newVer - currentVer;
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+                return -2;
+            } finally {
+                reader.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+	
+    // Contributed by Techcable <Techcable@outlook.com> in GH PR #65 of Paper / Modified by GMatrixGames
+    private static final String BRANCH = "master";
+    private static int getFromRepo(String repo, String hash) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + BRANCH + "..." + hash).openConnection();
+            connection.connect();
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
+            try (
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
+            ) {
+                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
+                String status = (String) obj.get("status");
+                switch (status) {
+                    case "identical":
+                        return 0;
+                    case "behind":
+                        return ((Number) obj.get("behind_by")).intValue();
+                    default:
+                        return -1;
+                }
+            } catch (ParseException | NumberFormatException e) {
+                e.printStackTrace();
+                return -1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+	
+    // Lava End
 }

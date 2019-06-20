@@ -22,7 +22,7 @@ apply plugin: 'net.minecraftforge.gradle.launch4j'
 apply plugin: 'net.nemerosa.versioning'
 
 group = 'org.lavapowered.lava'
-version = 'git-' + versioning.info.build
+version = 'git-Lava-' + versioning.info.build
 
 repositories {
     clear()
