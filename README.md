@@ -1,6 +1,6 @@
 # Lava
 <p align="center">
-  <img width="400" height="400" src="https://c-2rtwjumjzx7864x24lfrjujinfx2ehzwx78jhisx2ehtr.g00.gamepedia.com/g00/3_c-2rnsjhwfky.lfrjujinf.htr_/c-2RTWJUMJZX64x24myyux78x3ax2fx2flfrjujinf.hzwx78jhis.htrx2frnsjhwfky_lfrjujinfx2f7x2f72x2fQfaf.uslx3fajwx78ntsx3d822g103gk78fk088gi2101f75fg23j30x26n65h.rfwpx3dnrflj_$/$/$/$/$">
+  <img width="200" height="200" src="https://c-2rtwjumjzx7864x24lfrjujinfx2ehzwx78jhisx2ehtr.g00.gamepedia.com/g00/3_c-2rnsjhwfky.lfrjujinf.htr_/c-2RTWJUMJZX64x24myyux78x3ax2fx2flfrjujinf.hzwx78jhis.htrx2frnsjhwfky_lfrjujinfx2f7x2f72x2fQfaf.uslx3fajwx78ntsx3d822g103gk78fk088gi2101f75fg23j30x26n65h.rfwpx3dnrflj_$/$/$/$/$">
 </p>
 
 ![](https://ci.codemc.org/buildStatus/icon?job=LavaPowered%2FLava&style=flat-square)
