@@ -137,10 +137,7 @@ public class SimpleCommandMap implements CommandMap {
         }
 
         try {
-            try (Timing ignored = target.timings.startTiming()) { // Paper - use try with resources
-                // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
-                target.execute(sender, sentCommandLabel, Arrays.copyOfRange(args, 1, args.length));
-            }
+            target.execute(sender, sentCommandLabel, Arrays.copyOfRange(args, 1, args.length));
         } catch (CommandException ex) {
             server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
             //target.timings.stopTiming(); // Spigot // Paper

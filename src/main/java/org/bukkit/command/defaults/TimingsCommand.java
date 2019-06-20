@@ -46,13 +46,13 @@ public class TimingsCommand extends BukkitCommand {
     public void executeSpigotTimings(CommandSender sender, String[] args) {
         if ( "on".equals( args[0] ) )
         {
-            ( (SimplePluginManager) Bukkit.getPluginManager() ).useTimings( true );
+//            ( (SimplePluginManager) Bukkit.getPluginManager() ).useTimings( true );
             CustomTimingsHandler.reload();
             sender.sendMessage( "Enabled Timings & Reset" );
             return;
         } else if ( "off".equals( args[0] ) )
         {
-            ( (SimplePluginManager) Bukkit.getPluginManager() ).useTimings( false );
+//            ( (SimplePluginManager) Bukkit.getPluginManager() ).useTimings( false );
             sender.sendMessage( "Disabled Timings" );
             return;
         }

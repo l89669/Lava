@@ -748,6 +748,11 @@ public final class SimplePluginManager implements PluginManager {
         return new HashSet<Permission>(permissions.values());
     }
 
+    @Override
+    public boolean useTimings() {
+        return false; //haha no
+    }
+
     // Paper start
     public void clearPermissions() {
         permissions.clear();
