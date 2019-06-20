@@ -231,7 +231,7 @@ public class VersionCommand extends BukkitCommand {
         }
     }
 
-	// Lava Start - Taken from Paper / Modified by GMatrixGames
+    // Lava Start - Taken from Paper / Modified by GMatrixGames
     private static int getDistance(String repo, String verInfo) {
         try {
             int currentVer = Integer.decode(verInfo);
@@ -241,11 +241,11 @@ public class VersionCommand extends BukkitCommand {
             return getFromRepo("LavaPowered/Lava", verInfo);
         } 
 		
-		verInfo = verInfo.replace("\"", "");
+	verInfo = verInfo.replace("\"", "");
         return getFromRepo("LavaPowered/Lava", verInfo);
     }
 	
-	private static int getFromJenkins(int currentVer) {
+    private static int getFromJenkins(int currentVer) {
         try {
             BufferedReader reader = Resources.asCharSource(
                     new URL("https://ci.codemc.org/job/LavaPowered/job/Lava/lastSuccessfulBuild/buildNumber"), // Lava - Change URL
@@ -266,7 +266,7 @@ public class VersionCommand extends BukkitCommand {
         }
     }
 	
-	// Contributed by Techcable <Techcable@outlook.com> in GH PR #65 of Paper / Modified by GMatrixGames
+    // Contributed by Techcable <Techcable@outlook.com> in GH PR #65 of Paper / Modified by GMatrixGames
     private static final String BRANCH = "master";
     private static int getFromRepo(String repo, String hash) {
         try {
@@ -296,5 +296,5 @@ public class VersionCommand extends BukkitCommand {
         }
     }
 	
-	// Lava End
+    // Lava End
 }
