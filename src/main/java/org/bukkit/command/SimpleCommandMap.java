@@ -33,6 +33,7 @@ public class SimpleCommandMap implements CommandMap {
     private void setDefaultCommands() {
         register("bukkit", new VersionCommand("version"));
         register("bukkit", new PluginsCommand("plugins"));
+        register("bukkit", new ModsCommand("mods"));
     }
 
     public void setFallbackCommands() {
