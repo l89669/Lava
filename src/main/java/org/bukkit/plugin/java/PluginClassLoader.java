@@ -27,6 +27,7 @@ import net.md_5.specialsource.provider.ClassLoaderProvider;
 import net.md_5.specialsource.provider.JointProvider;
 import net.md_5.specialsource.repo.RuntimeRepo;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.server.MinecraftServer;
 import org.apache.commons.lang.Validate;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -67,7 +68,7 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
         this.manifest = jar.getManifest();
         this.url = file.toURI().toURL();
 
-        jarMapping = MappingLoader.loadMappings();
+        jarMapping = MappingLoader.loadMapping();
         JointProvider provider = new JointProvider();
         provider.add(new ClassInheritanceProvider());
         provider.add(new ClassLoaderProvider(this));
@@ -107,7 +108,7 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
     Class<?> findClass(String name, boolean checkGlobal) throws ClassNotFoundException {
         if (name.startsWith("net.minecraft.server." + RemapUtils.NMS_VERSION)) {
             String remappedClass = jarMapping.classes.get(name.replaceAll("\\.", "\\/"));
-            Class<?> clazz = ((net.minecraft.launchwrapper.LaunchClassLoader) FMLCommonHandler.instance().getServerInstance().getClass().getClassLoader()).findClass(remappedClass);
+            Class<?> clazz = ((net.minecraft.launchwrapper.LaunchClassLoader) MinecraftServer.getServerInstance().getClass().getClassLoader()).findClass(remappedClass);
             return clazz;
         }
 
