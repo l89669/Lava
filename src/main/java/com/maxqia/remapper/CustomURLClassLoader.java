@@ -1,4 +1,4 @@
-package org.lavapowered.lava.nms;
+package com.maxqia.remapper;
 
 import net.md_5.specialsource.JarMapping;
 import net.md_5.specialsource.JarRemapper;
@@ -6,7 +6,7 @@ import net.md_5.specialsource.provider.ClassLoaderProvider;
 import net.md_5.specialsource.provider.JointProvider;
 import net.md_5.specialsource.repo.RuntimeRepo;
 import net.minecraft.launchwrapper.LaunchClassLoader;
-import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraft.server.MinecraftServer;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
@@ -20,46 +20,57 @@ import java.security.CodeSource;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NMSURLClassLoader extends URLClassLoader {
+public class CustomURLClassLoader extends URLClassLoader {
 
     private JarMapping jarMapping;
     private JarRemapper remapper;
     private final Map<String, Class<?>> classes;
+    public static String url = "com/maxqia/remapper/CustomURLClassLoader";
 
-    {
-        this.jarMapping = MappingLoader.loadMappings();
+    public CustomURLClassLoader(final URL[] urls, final ClassLoader parent) {
+        super(urls, parent);
+        this.classes = new HashMap<>();
+        this.jarMapping = MappingLoader.loadMapping();
         final JointProvider provider = new JointProvider();
         provider.add(new ClassInheritanceProvider());
         provider.add(new ClassLoaderProvider(this));
         this.jarMapping.setFallbackInheritanceProvider(provider);
         this.remapper = new JarRemapper(this.jarMapping);
-        classes = new HashMap<>();
     }
 
-    public NMSURLClassLoader(URL[] urls, ClassLoader parent) {
-        super(urls, parent);
-    }
-
-    public NMSURLClassLoader(URL[] urls) {
+    public CustomURLClassLoader(final URL[] urls) {
         super(urls);
+        this.classes = new HashMap<>();
+        this.jarMapping = MappingLoader.loadMapping();
+        final JointProvider provider = new JointProvider();
+        provider.add(new ClassInheritanceProvider());
+        provider.add(new ClassLoaderProvider(this));
+        this.jarMapping.setFallbackInheritanceProvider(provider);
+        this.remapper = new JarRemapper(this.jarMapping);
     }
 
-    public NMSURLClassLoader(URL[] urls, ClassLoader parent, URLStreamHandlerFactory factory) {
+    public CustomURLClassLoader(final URL[] urls, final ClassLoader parent, final URLStreamHandlerFactory factory) {
         super(urls, parent, factory);
+        this.classes = new HashMap<>();
+        this.jarMapping = MappingLoader.loadMapping();
+        final JointProvider provider = new JointProvider();
+        provider.add(new ClassInheritanceProvider());
+        provider.add(new ClassLoaderProvider(this));
+        this.jarMapping.setFallbackInheritanceProvider(provider);
+        this.remapper = new JarRemapper(this.jarMapping);
     }
 
     @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
         return this.findClass(name, true);
     }
 
     private Class<?> findClass(final String name, final boolean checkGlobal) throws ClassNotFoundException {
         if (name.startsWith("net.minecraft.server." + RemapUtils.NMS_VERSION)) {
             final String remappedClass = this.jarMapping.classes.get(name.replaceAll("\\.", "\\/"));
-            final Class<?> clazz = ((LaunchClassLoader) FMLCommonHandler.instance().getMinecraftServerInstance().getClass().getClassLoader()).findClass(remappedClass);
+            final Class<?> clazz = ((LaunchClassLoader) MinecraftServer.getServerInstance().getClass().getClassLoader()).findClass(remappedClass);
             return clazz;
         }
-
         Class<?> result = this.classes.get(name);
         synchronized (name.intern()) {
             if (result == null) {
@@ -70,8 +81,8 @@ public class NMSURLClassLoader extends URLClassLoader {
                 if (result == null) {
                     try {
                         result = super.findClass(name);
-                    } catch (ClassNotFoundException e) {
-                        result = ((LaunchClassLoader) FMLCommonHandler.instance().getMinecraftServerInstance().getClass().getClassLoader()).findClass(name);
+                    }catch (ClassNotFoundException e) {
+                        result = ((LaunchClassLoader) MinecraftServer.getServerInstance().getClass().getClassLoader()).findClass(name);
                     }
                 }
                 if (result == null) {
@@ -83,39 +94,40 @@ public class NMSURLClassLoader extends URLClassLoader {
         return result;
     }
 
-    private void setClass(String name, Class<?> clazz) {
-        if(!this.classes.containsKey(name)){
-            this.classes.put(name,clazz);
-            if(ConfigurationSerializable.class.isAssignableFrom(clazz)){
-                final Class<? extends ConfigurationSerializable> serializable = clazz.asSubclass(ConfigurationSerializable.class);
-                ConfigurationSerialization.registerClass(serializable);
-            }
-        }
-    }
-
-    private Class<?> remappedFindClass(String name) throws ClassNotFoundException {
+    private Class<?> remappedFindClass(final String name) throws ClassNotFoundException {
         Class<?> result = null;
-        try{
+        try {
             final String path = name.replace('.', '/').concat(".class");
             final URL url = this.findResource(path);
-            if(url != null){
+            if (url != null) {
                 final InputStream stream = url.openStream();
-                if(stream != null){
+                if (stream != null) {
                     byte[] bytecode;
                     bytecode = this.remapper.remapClassFile(stream, RuntimeRepo.getInstance());
                     bytecode = ReflectionTransformer.transform(bytecode);
                     final JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
-                    final URL jarUrl = jarURLConnection.getJarFileURL();
-                    final CodeSource codeSource = new CodeSource(jarUrl, new CodeSigner[0]);
+                    final URL jarURL = jarURLConnection.getJarFileURL();
+                    final CodeSource codeSource = new CodeSource(jarURL, new CodeSigner[0]);
                     result = this.defineClass(name, bytecode, 0, bytecode.length, codeSource);
-                    if(result != null){
+                    if (result != null) {
                         this.resolveClass(result);
                     }
                 }
             }
-        }catch (Throwable t){
-            throw new ClassNotFoundException("Failed to remap class "+ name, t);
+        }
+        catch (Throwable t) {
+            throw new ClassNotFoundException("Failed to remap class " + name, t);
         }
         return result;
+    }
+
+    void setClass(final String name, final Class<?> clazz) {
+        if (!this.classes.containsKey(name)) {
+            this.classes.put(name, clazz);
+            if (ConfigurationSerializable.class.isAssignableFrom(clazz)) {
+                final Class<? extends ConfigurationSerializable> serializable = clazz.asSubclass(ConfigurationSerializable.class);
+                ConfigurationSerialization.registerClass(serializable);
+            }
+        }
     }
 }

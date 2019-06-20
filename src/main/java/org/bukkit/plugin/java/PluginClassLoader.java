@@ -1,6 +1,7 @@
 package org.bukkit.plugin.java;
 
 import com.google.common.io.ByteStreams;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +17,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import com.maxqia.remapper.ClassInheritanceProvider;
+import com.maxqia.remapper.MappingLoader;
+import com.maxqia.remapper.ReflectionTransformer;
+import com.maxqia.remapper.RemapUtils;
 import net.md_5.specialsource.JarMapping;
 import net.md_5.specialsource.JarRemapper;
 import net.md_5.specialsource.provider.ClassLoaderProvider;
@@ -25,16 +30,16 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.lang.Validate;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.lavapowered.lava.nms.ClassInheritanceProvider;
-import org.lavapowered.lava.nms.MappingLoader;
-import org.lavapowered.lava.nms.ReflectionTransformer;
-import org.lavapowered.lava.nms.RemapUtils;
+import org.lavapowered.lava.util.ThermosRemapper;
 
 /**
  * A ClassLoader for plugins, to allow shared classes across multiple plugins
  */
 public final class PluginClassLoader extends URLClassLoader { // Spigot
-    public JavaPlugin getPlugin() { return plugin; } // Spigot
+    public JavaPlugin getPlugin() {
+        return plugin;
+    } // Spigot
+
     private final JavaPluginLoader loader;
     private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<String, Class<?>>(); // Spigot
     private final PluginDescriptionFile description;
@@ -51,7 +56,7 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
     private JarMapping jarMapping;
 
     PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws IOException, InvalidPluginException, MalformedURLException {
-        super(new URL[] {file.toURI().toURL()}, parent);
+        super(new URL[]{file.toURI().toURL()}, parent);
         Validate.notNull(loader, "Loader cannot be null");
 
         this.loader = loader;
@@ -67,7 +72,7 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
         provider.add(new ClassInheritanceProvider());
         provider.add(new ClassLoaderProvider(this));
         jarMapping.setFallbackInheritanceProvider(provider);
-        remapper = new JarRemapper(jarMapping);
+        remapper = new ThermosRemapper(jarMapping);
 
         this.logger = com.destroystokyo.paper.utils.PaperPluginLogger.getLogger(description); // Paper - Register logger early
 
@@ -100,9 +105,9 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
     }
 
     Class<?> findClass(String name, boolean checkGlobal) throws ClassNotFoundException {
-        if (name.startsWith("net.minecraft.server." + RemapUtils.NMS_VERSION)){
-            String remappedClass =jarMapping.classes.get(name.replaceAll("\\.", "\\/"));
-            Class<?> clazz = ((net.minecraft.launchwrapper.LaunchClassLoader) FMLCommonHandler.instance().getMinecraftServerInstance().getClass().getClassLoader()).findClass(remappedClass);
+        if (name.startsWith("net.minecraft.server." + RemapUtils.NMS_VERSION)) {
+            String remappedClass = jarMapping.classes.get(name.replaceAll("\\.", "\\/"));
+            Class<?> clazz = ((net.minecraft.launchwrapper.LaunchClassLoader) FMLCommonHandler.instance().getServerInstance().getClass().getClassLoader()).findClass(remappedClass);
             return clazz;
         }
 
@@ -179,6 +184,11 @@ public final class PluginClassLoader extends URLClassLoader { // Spigot
                     bytecode = remapper.remapClassFile(stream, RuntimeRepo.getInstance());
                     bytecode = ReflectionTransformer.transform(bytecode);
 
+                    // Define (create) the class using the modified byte code
+                    // The top-child class loader is used for this to prevent access violations
+                    // Set the codesource to the jar, not within the jar, for compatibility with
+                    // plugins that do new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
+                    // instead of using getResourceAsStream - see https://github.com/MinecraftPortCentral/Cauldron-Plus/issues/75
                     JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
                     URL jarURL = jarURLConnection.getJarFileURL();
                     CodeSource codeSource = new CodeSource(jarURL, new CodeSigner[0]);
