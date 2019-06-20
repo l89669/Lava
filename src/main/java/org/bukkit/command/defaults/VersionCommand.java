@@ -241,7 +241,7 @@ public class VersionCommand extends BukkitCommand {
             return getFromRepo("LavaPowered/Lava", verInfo);
         } 
 		
-	verInfo = verInfo.replace("\"", "");
+		verInfo = verInfo.replace("\"", "");
         return getFromRepo("LavaPowered/Lava", verInfo);
     }
 	
