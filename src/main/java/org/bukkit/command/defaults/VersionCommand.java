@@ -1,3 +1,5 @@
+package org.bukkit.command.defaults;
+
 import com.google.common.base.Charsets;
 import java.util.ArrayList;
 import java.util.Arrays;
