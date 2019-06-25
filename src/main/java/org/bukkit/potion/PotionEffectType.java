@@ -279,7 +279,7 @@ public abstract class PotionEffectType {
         }
         */
 
-        byId[type.id] = type;
+        byId.put(type.id, type);
         byName.put(type.getName().toLowerCase(java.util.Locale.ENGLISH), type);
     }
 
