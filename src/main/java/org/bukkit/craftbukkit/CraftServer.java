@@ -276,7 +276,7 @@ public final class CraftServer implements Server {
     }
 
     public void loadPlugins() {
-        ReflectionTransformer.init();
+        // ReflectionTransformer.init();
         pluginManager.registerInterface(JavaPluginLoader.class);
 
         File pluginFolder = (File) console.options.valueOf("plugins");
