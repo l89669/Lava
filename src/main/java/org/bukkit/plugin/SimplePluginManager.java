@@ -1,7 +1,7 @@
 package org.bukkit.plugin;
 
 import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.PluginCommandYamlParser;
@@ -282,6 +282,7 @@ public final class SimplePluginManager implements PluginManager {
             }
         }
 
+        org.bukkit.command.defaults.TimingsCommand.timingStart = System.nanoTime(); // Spigot
         return result.toArray(new Plugin[result.size()]);
     }
 

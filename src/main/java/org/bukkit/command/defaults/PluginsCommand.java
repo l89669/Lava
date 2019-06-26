@@ -22,7 +22,7 @@ public class PluginsCommand extends BukkitCommand {
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
         if (!testPermission(sender)) return true;
 
-        sender.sendMessage("Plugins " + getPluginList());
+        sender.sendMessage(ChatColor.RED + "Plugins " + getPluginList());
         return true;
     }
 

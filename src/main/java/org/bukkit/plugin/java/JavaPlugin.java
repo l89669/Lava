@@ -1,7 +1,7 @@
 package org.bukkit.plugin.java;
 
 import com.google.common.base.Charsets;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

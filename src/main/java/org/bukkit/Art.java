@@ -1,7 +1,7 @@
 package org.bukkit;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 import java.util.HashMap;
 
@@ -97,7 +97,6 @@ public enum Art {
      */
     public static Art getByName(String name) {
         Validate.notNull(name, "Name cannot be null");
-
         return BY_NAME.get(name.toLowerCase(java.util.Locale.ENGLISH).replaceAll("_", ""));
     }
 

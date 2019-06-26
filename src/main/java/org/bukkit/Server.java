@@ -290,10 +290,7 @@ public interface Server extends PluginMessageRecipient {
      *
      * @param name the name to look up
      * @return a player if one was found, null otherwise
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     * guaranteed to be unique
      */
-    @Deprecated
     public Player getPlayer(String name);
 
     /**
@@ -301,10 +298,7 @@ public interface Server extends PluginMessageRecipient {
      *
      * @param name Exact name of the player to retrieve
      * @return a player object if one was found, null otherwise
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     * guaranteed to be unique
      */
-    @Deprecated
     public Player getPlayerExact(String name);
 
     /**
@@ -316,10 +310,7 @@ public interface Server extends PluginMessageRecipient {
      *
      * @param name the (partial) name to match
      * @return list of all possible players
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     * guaranteed to be unique
      */
-    @Deprecated
     public List<Player> matchPlayer(String name);
 
     /**
@@ -936,4 +927,40 @@ public interface Server extends PluginMessageRecipient {
      */
     @Deprecated
     UnsafeValues getUnsafe();
+
+    // Spigot start
+    public class Spigot {
+
+        public org.bukkit.configuration.file.YamlConfiguration getConfig() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        /**
+         * Sends the component to the player
+         *
+         * @param component the components to send
+         */
+        public void broadcast(net.md_5.bungee.api.chat.BaseComponent component) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        /**
+         * Sends an array of components as a single message to the player
+         *
+         * @param components the components to send
+         */
+        public void broadcast(net.md_5.bungee.api.chat.BaseComponent... components) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        /**
+         * Restart the server. If the server administrator has not configured restarting, the server will stop.
+         */
+        public void restart() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    Spigot spigot();
+    // Spigot end
 }

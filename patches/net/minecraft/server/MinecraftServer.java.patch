@@ -8,10 +8,20 @@
  import com.google.common.util.concurrent.Futures;
  import com.google.common.util.concurrent.ListenableFuture;
  import com.google.common.util.concurrent.ListenableFutureTask;
-@@ -23,85 +24,86 @@
- import java.nio.charset.StandardCharsets;
- import java.security.KeyPair;
- import java.text.SimpleDateFormat;
+@@ -13,95 +14,99 @@
+ import io.netty.buffer.ByteBufOutputStream;
+ import io.netty.buffer.Unpooled;
+ import io.netty.handler.codec.base64.Base64;
+-import java.awt.GraphicsEnvironment;
+-import java.awt.image.BufferedImage;
+-import java.io.File;
+-import java.io.IOException;
+-import java.io.UnsupportedEncodingException;
+-import java.net.Proxy;
+-import java.net.URLEncoder;
+-import java.nio.charset.StandardCharsets;
+-import java.security.KeyPair;
+-import java.text.SimpleDateFormat;
 -import java.util.Arrays;
 -import java.util.Collections;
 -import java.util.Date;
@@ -19,13 +29,12 @@
 -import java.util.Queue;
 -import java.util.Random;
 -import java.util.UUID;
-+import java.util.*;
- import java.util.concurrent.Callable;
- import java.util.concurrent.Executors;
- import java.util.concurrent.FutureTask;
+-import java.util.concurrent.Callable;
+-import java.util.concurrent.Executors;
+-import java.util.concurrent.FutureTask;
 -import java.util.function.Supplier;
- import javax.annotation.Nullable;
- import javax.imageio.ImageIO;
+-import javax.annotation.Nullable;
+-import javax.imageio.ImageIO;
 +import joptsimple.OptionSet;
  import net.minecraft.advancements.AdvancementManager;
  import net.minecraft.advancements.FunctionManager;
@@ -104,6 +113,25 @@
 -public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo
 -{
 -    private static final Logger LOGGER = LogManager.getLogger();
++import javax.annotation.Nullable;
++import javax.imageio.ImageIO;
++import java.awt.*;
++import java.awt.image.BufferedImage;
++import java.io.File;
++import java.io.IOException;
++import java.io.UnsupportedEncodingException;
++import java.net.Proxy;
++import java.net.URLEncoder;
++import java.nio.charset.StandardCharsets;
++import java.security.KeyPair;
++import java.text.SimpleDateFormat;
++import java.util.List;
++import java.util.Queue;
++import java.util.*;
++import java.util.concurrent.Callable;
++import java.util.concurrent.Executors;
++import java.util.concurrent.FutureTask;
++
 +//import jline.console.ConsoleReader;
 +
 +public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo {
@@ -125,7 +153,7 @@
      @SideOnly(Side.SERVER)
      private String hostname;
      private int serverPort = -1;
-@@ -128,7 +130,6 @@
+@@ -128,7 +133,6 @@
      private KeyPair serverKeyPair;
      private String serverOwner;
      private String folderName;
@@ -133,7 +161,7 @@
      private String worldName;
      private boolean isDemo;
      private boolean enableBonusChest;
-@@ -144,178 +145,265 @@
+@@ -144,178 +148,263 @@
      private final GameProfileRepository profileRepo;
      private final PlayerProfileCache profileCache;
      private long nanoTimeSinceStatusRefresh;
@@ -161,8 +189,8 @@
 +    private static MinecraftServer instance;
 +
 +    public MinecraftServer(OptionSet options, Proxy proxyIn, DataFixer dataFixerIn,
-+            YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn,
-+            GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
++                           YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn,
++                           GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn) {
 +        instance = this;
          this.serverProxy = proxyIn;
          this.authService = authServiceIn;
@@ -326,9 +354,7 @@
 -            worldinfo = new WorldInfo(worldsettings, worldNameIn);
 -        }
 -        else
-+        });
-+        for (int dim : dimIds)
-         {
+-        {
 -            worldinfo.setWorldName(worldNameIn);
 -            worldsettings = new WorldSettings(worldinfo);
 -        }
@@ -341,6 +367,8 @@
 -            if (i == 1)
 -            {
 -                j = -1;
++        });
++        for (int dim : dimIds) {
 +            // World validation
 +            if (dim != 0) {
 +                if ((dim == -1 && !this.getAllowNether()) || (dim == 1 && !server.getAllowEnd())) {
@@ -377,7 +405,7 @@
 +                for (Map.Entry<ResourceLocation, Item> entry : ForgeRegistries.ITEMS.getEntries()) {
 +                    ResourceLocation key = entry.getKey();
 +                    Item item = entry.getValue();
-+                    if(!key.getResourceDomain().equals("minecraft")) {
++                    if (!key.getResourceDomain().equals("minecraft")) {
 +                        String materialName = key.toString().toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", "");
 +                        Material material = Material.addMaterial(EnumHelper.addEnum(Material.class, materialName, new Class[]{Integer.TYPE, Integer.TYPE}, new Object[]{Item.getIdFromItem(item), item.getItemStackLimit()}));
 +                        if (material != null) {
@@ -397,7 +425,7 @@
 +                for (Map.Entry<ResourceLocation, Block> entry : ForgeRegistries.BLOCKS.getEntries()) {
 +                    ResourceLocation key = entry.getKey();
 +                    Block block = entry.getValue();
-+                    if(!key.getResourceDomain().equals("minecraft")) {
++                    if (!key.getResourceDomain().equals("minecraft")) {
 +                        String materialName = key.toString().toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", "");
 +                        Material material = Material.addBlockMaterial(EnumHelper.addEnum(Material.class, materialName, new Class[]{Integer.TYPE}, new Object[]{Block.getIdFromBlock(block)}));
 +                        if (material != null) {
@@ -422,7 +450,7 @@
  
 -            this.worlds[i].addEventListener(new ServerWorldEventHandler(this, this.worlds[i]));
 +                    int typeId = GameData.getEntityRegistry().getID(EntityRegistry.getEntry(entity.getValue()));
-+                    EntityType bukkitType = EnumHelper.addEnum(EntityType.class, entityType, new Class[] { String.class, Class.class, Integer.TYPE, Boolean.TYPE }, new Object[] { entityname, CraftCustomEntity.class, typeId, false });
++                    EntityType bukkitType = EnumHelper.addEnum(EntityType.class, entityType, new Class[]{String.class, Class.class, Integer.TYPE, Boolean.TYPE}, new Object[]{entityname, CraftCustomEntity.class, typeId, false});
  
 -            if (!this.isSinglePlayer())
 -            {
@@ -431,7 +459,7 @@
 -        }
 -        } //Forge: End dead code
 +                    NAME_MAP.put(entityname.toLowerCase(), bukkitType);
-+                    ID_MAP.put((short)typeId, bukkitType);
++                    ID_MAP.put((short) typeId, bukkitType);
 +                }
 +                for (Object enchantment : Enchantment.REGISTRY) {
 +                    org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.enchantments.CraftEnchantment((Enchantment) enchantment));
@@ -476,8 +504,9 @@
 +            this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldInitEvent(world.getWorld()));
              world.addEventListener(new ServerWorldEventHandler(this, world));
  
-             if (!this.isSinglePlayer())
-             {
+-            if (!this.isSinglePlayer())
+-            {
++            if (!this.isSinglePlayer()) {
                  world.getWorldInfo().setGameType(this.getGameType());
              }
 +            getPlayerList().setPlayerManager(worldServerList.toArray(new WorldServer[worldServerList.size()]));
@@ -496,7 +525,7 @@
          int i = 16;
          int j = 4;
          int k = 192;
-@@ -323,45 +411,52 @@
+@@ -323,45 +412,52 @@
          int i1 = 0;
          this.setUserMessage("menu.generatingTerrain");
          int j1 = 0;
@@ -576,7 +605,7 @@
          }
      }
  
-@@ -379,73 +474,77 @@
+@@ -379,112 +475,108 @@
  
      public abstract boolean shouldBroadcastConsoleToOps();
  
@@ -682,12 +711,13 @@
              this.saveAllWorlds(false);
  
 -            for (WorldServer worldserver1 : this.worlds)
+-            {
+-                if (worldserver1 != null)
+-                {
 +            // CraftBukkit start - Handled in saveChunks
-+            for (WorldServer worldserver1 : this.worldServerList)
-             {
-                 if (worldserver1 != null)
-                 {
-@@ -453,38 +552,32 @@
++            for (WorldServer worldserver1 : this.worldServerList) {
++                if (worldserver1 != null) {
+                     net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.WorldEvent.Unload(worldserver1));
                      worldserver1.flush();
                  }
              }
@@ -734,7 +764,7 @@
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
                  this.currentTime = getCurrentTimeMillis();
                  long i = 0L;
-@@ -492,20 +585,20 @@
+@@ -492,20 +584,20 @@
                  this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                  this.applyServerIconToResponse(this.statusResponse);
  
@@ -762,7 +792,7 @@
                          LOGGER.warn("Time ran backwards! Did the system time change?");
                          j = 0L;
                      }
-@@ -513,15 +606,12 @@
+@@ -513,15 +605,12 @@
                      i += j;
                      this.currentTime = k;
  
@@ -782,7 +812,7 @@
                              i -= 50L;
                              this.tick();
                          }
-@@ -532,80 +622,67 @@
+@@ -532,80 +621,67 @@
                  }
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopping();
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
@@ -893,7 +923,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +690,41 @@
+@@ -613,52 +689,41 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -956,7 +986,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +733,15 @@
+@@ -667,16 +732,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -978,7 +1008,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,7 +749,7 @@
+@@ -684,7 +748,7 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -987,7 +1017,7 @@
          {
              this.profiler.startSection("save");
              this.playerList.saveAllPlayerData();
-@@ -697,13 +762,11 @@
+@@ -697,13 +761,11 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1003,7 +1033,7 @@
              this.usageSnooper.addMemoryStatsToSnooper();
          }
  
-@@ -712,76 +775,83 @@
+@@ -712,76 +774,82 @@
          net.minecraftforge.fml.common.FMLCommonHandler.instance().onPostServerTick();
      }
  
@@ -1044,9 +1074,9 @@
  
 -        Integer[] ids = net.minecraftforge.common.DimensionManager.getIDs(this.tickCounter % 200 == 0);
 -        for (int x = 0; x < ids.length; x++)
-+        for (int x = 0; x < worldServerList.size(); x++)
-         {
+-        {
 -            int id = ids[x];
++        for (int x = 0; x < worldServerList.size(); x++) {
              long i = System.nanoTime();
  
 -            if (id == 0 || this.getAllowNether())
@@ -1139,7 +1169,7 @@
          }
  
          this.profiler.endStartSection("dim_unloading");
-@@ -794,33 +864,30 @@
+@@ -794,94 +862,87 @@
          this.getFunctionManager().update();
          this.profiler.endStartSection("tickables");
  
@@ -1181,7 +1211,16 @@
          LOGGER.warn(msg);
      }
  
-@@ -835,53 +902,51 @@
+-    public WorldServer getWorld(int dimension)
+-    {
++    public WorldServer getWorld(int dimension) {
+         WorldServer ret = net.minecraftforge.common.DimensionManager.getWorld(dimension, true);
+-        if (ret == null)
+-        {
++        if (ret == null) {
+             net.minecraftforge.common.DimensionManager.initDimension(dimension);
+             ret = net.minecraftforge.common.DimensionManager.getWorld(dimension);
+         }
          return ret;
      }
  
@@ -1259,7 +1298,7 @@
                  }
              });
          }
-@@ -889,145 +954,110 @@
+@@ -889,145 +950,110 @@
          return report;
      }
  
@@ -1267,7 +1306,7 @@
 -    {
 -        List<String> list = Lists.<String>newArrayList();
 +    public List<String> getTabCompletions(ICommandSender sender, String input, @Nullable BlockPos pos,
-+            boolean hasTargetBlock) {
++                                          boolean hasTargetBlock) {
 +        Set<String> completionsSet = Sets.newHashSet(server.tabComplete(sender, input, pos, hasTargetBlock));
          boolean flag = input.startsWith("/");
  
@@ -1445,7 +1484,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1065,75 @@
+@@ -1035,80 +1061,75 @@
          }
      }
  
@@ -1555,7 +1594,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1142,186 @@
+@@ -1117,228 +1138,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1832,7 +1871,7 @@
                      return entity;
                  }
              }
-@@ -1347,130 +1330,120 @@
+@@ -1347,130 +1326,120 @@
          return null;
      }
  
@@ -1853,7 +1892,7 @@
 -    public int getMaxWorldSize()
 -    {
 +    public static MinecraftServer getServerInstance() {
-+         return instance;
++        return instance;
 +    }
 +
 +    @Nullable
@@ -2006,7 +2045,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1534,13 +1507,19 @@
+@@ -1534,13 +1503,19 @@
                      ++i1;
                  }
              }
@@ -2031,7 +2070,7 @@
              if (s != null)
              {
                  dedicatedserver.setServerOwner(s);
-@@ -1579,84 +1558,87 @@
+@@ -1579,84 +1554,87 @@
                      dedicatedserver.stopServer();
                  }
              });

@@ -243,7 +243,6 @@ public final class PluginDescriptionFile {
      */
     public PluginDescriptionFile(final String pluginName, final String pluginVersion, final String mainClass) {
         name = rawName = pluginName;
-
         if (!VALID_NAME.matcher(name).matches()) {
             throw new IllegalArgumentException("name '" + name + "' contains invalid characters.");
         }

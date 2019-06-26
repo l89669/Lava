@@ -1,7 +1,7 @@
 package org.bukkit;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Map;
 

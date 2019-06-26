@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 /**
  * Represents a String based key which consists of two components - a namespace
  * and a key.
- * <p>
  * Namespaces may only contain lowercase alphanumeric characters, periods,
  * underscores, and hyphens.
  * <p>
