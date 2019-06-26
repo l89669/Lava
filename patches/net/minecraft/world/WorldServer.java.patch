@@ -1,22 +1,22 @@
 --- ../src-base/minecraft/net/minecraft/world/WorldServer.java
 +++ ../src-work/minecraft/net/minecraft/world/WorldServer.java
-@@ -4,62 +4,35 @@
+@@ -4,6 +4,7 @@
  import com.google.common.collect.Maps;
  import com.google.common.collect.Sets;
  import com.google.common.util.concurrent.ListenableFuture;
--import java.io.File;
--import java.util.ArrayList;
--import java.util.Collection;
--import java.util.Iterator;
--import java.util.List;
--import java.util.Map;
--import java.util.Random;
--import java.util.Set;
--import java.util.TreeSet;
--import java.util.UUID;
++
+ import java.io.File;
+ import java.util.ArrayList;
+ import java.util.Collection;
+@@ -14,27 +15,26 @@
+ import java.util.Set;
+ import java.util.TreeSet;
+ import java.util.UUID;
 -import java.util.function.Predicate;
--import java.util.stream.Collectors;
--import javax.annotation.Nullable;
++import java.util.logging.Level;
+ import java.util.stream.Collectors;
+ import javax.annotation.Nullable;
++
  import net.minecraft.advancements.AdvancementManager;
  import net.minecraft.advancements.FunctionManager;
  import net.minecraft.block.Block;
@@ -40,66 +40,54 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.init.Blocks;
- import net.minecraft.network.Packet;
--import net.minecraft.network.play.server.SPacketBlockAction;
--import net.minecraft.network.play.server.SPacketChangeGameState;
--import net.minecraft.network.play.server.SPacketEntityStatus;
--import net.minecraft.network.play.server.SPacketExplosion;
--import net.minecraft.network.play.server.SPacketParticles;
--import net.minecraft.network.play.server.SPacketSpawnGlobalEntity;
-+import net.minecraft.network.play.server.*;
- import net.minecraft.profiler.Profiler;
- import net.minecraft.scoreboard.ScoreboardSaveData;
+@@ -50,6 +50,29 @@
  import net.minecraft.scoreboard.ServerScoreboard;
  import net.minecraft.server.MinecraftServer;
  import net.minecraft.server.management.PlayerChunkMap;
--import net.minecraft.util.EnumParticleTypes;
--import net.minecraft.util.IProgressUpdate;
--import net.minecraft.util.IThreadListener;
--import net.minecraft.util.ReportedException;
--import net.minecraft.util.WeightedRandom;
--import net.minecraft.util.math.AxisAlignedBB;
--import net.minecraft.util.math.BlockPos;
--import net.minecraft.util.math.ChunkPos;
--import net.minecraft.util.math.MathHelper;
--import net.minecraft.util.math.Vec3d;
-+import net.minecraft.tileentity.*;
-+import net.minecraft.util.*;
-+import net.minecraft.util.math.*;
- import net.minecraft.village.VillageCollection;
- import net.minecraft.village.VillageSiege;
- import net.minecraft.world.biome.Biome;
-@@ -77,16 +50,26 @@
- import net.minecraft.world.storage.WorldInfo;
- import net.minecraft.world.storage.WorldSavedDataCallableSave;
- import net.minecraft.world.storage.loot.LootTableManager;
-+import net.minecraftforge.common.DimensionManager;
-+import net.minecraftforge.common.WorldSpecificSaveHandler;
- import net.minecraftforge.fml.relauncher.Side;
++import net.minecraft.tileentity.TileEntity;
++import net.minecraft.tileentity.TileEntityBanner;
++import net.minecraft.tileentity.TileEntityBeacon;
++import net.minecraft.tileentity.TileEntityBed;
++import net.minecraft.tileentity.TileEntityBrewingStand;
++import net.minecraft.tileentity.TileEntityChest;
++import net.minecraft.tileentity.TileEntityCommandBlock;
++import net.minecraft.tileentity.TileEntityComparator;
++import net.minecraft.tileentity.TileEntityDaylightDetector;
++import net.minecraft.tileentity.TileEntityDispenser;
++import net.minecraft.tileentity.TileEntityDropper;
++import net.minecraft.tileentity.TileEntityEnchantmentTable;
++import net.minecraft.tileentity.TileEntityEndGateway;
++import net.minecraft.tileentity.TileEntityEndPortal;
++import net.minecraft.tileentity.TileEntityEnderChest;
++import net.minecraft.tileentity.TileEntityFlowerPot;
++import net.minecraft.tileentity.TileEntityFurnace;
++import net.minecraft.tileentity.TileEntityHopper;
++import net.minecraft.tileentity.TileEntityMobSpawner;
++import net.minecraft.tileentity.TileEntityNote;
++import net.minecraft.tileentity.TileEntitySign;
++import net.minecraft.tileentity.TileEntitySkull;
++import net.minecraft.tileentity.TileEntityStructure;
+ import net.minecraft.util.EnumParticleTypes;
+ import net.minecraft.util.IProgressUpdate;
+ import net.minecraft.util.IThreadListener;
+@@ -81,12 +104,13 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
-+import org.bukkit.craftbukkit.CraftTravelAgent;
 +import org.bukkit.event.entity.CreatureSpawnEvent;
 +import org.bukkit.event.weather.LightningStrikeEvent;
  
 -public class WorldServer extends World implements IThreadListener
 -{
-+import javax.annotation.Nullable;
-+import java.io.File;
-+import java.util.*;
-+import java.util.logging.Level;
-+import java.util.stream.Collectors;
-+
 +public class WorldServer extends World implements IThreadListener {
      private static final Logger LOGGER = LogManager.getLogger();
      private final MinecraftServer mcServer;
 -    private final EntityTracker entityTracker;
-+    public final EntityTracker entityTracker;
++    public EntityTracker entityTracker;
      private final PlayerChunkMap playerChunkMap;
      private final Set<NextTickListEntry> pendingTickListEntriesHashSet = Sets.<NextTickListEntry>newHashSet();
      private final TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet = new TreeSet<NextTickListEntry>();
-@@ -97,26 +80,51 @@
+@@ -97,26 +121,51 @@
      private final Teleporter worldTeleporter;
      private final WorldEntitySpawner entitySpawner = new WorldEntitySpawner();
      protected final VillageSiege villageSiege = new VillageSiege(this);
@@ -120,7 +108,7 @@
 +    public final int dimension;
 +
 +    public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler methodprofiler, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen) {
-+        super(saveHandlerIn, info, DimensionManager.createProviderFor(dimensionId), methodprofiler, false, gen, env);
++        super(saveHandlerIn, info, net.minecraftforge.common.DimensionManager.createProviderFor(dimensionId), methodprofiler, false, gen, env);
 +        this.pvpMode = server.isPVPEnabled();
 +        info.world = this;
 +        this.dimension = dimensionId;
@@ -132,12 +120,12 @@
 +        this.provider.setWorld(this);
 +        this.provider.setDimension(providerDim);
 +        this.chunkProvider = this.createChunkProvider();
-+        perWorldStorage = new MapStorage(new WorldSpecificSaveHandler(this, saveHandlerIn));
-+        this.worldTeleporter = new CraftTravelAgent(this);
++        perWorldStorage = new MapStorage(new net.minecraftforge.common.WorldSpecificSaveHandler((WorldServer) this, saveHandlerIn));
++        this.worldTeleporter = new org.bukkit.craftbukkit.CraftTravelAgent(this);
 +        this.calculateInitialSkylight();
 +        this.calculateInitialWeather();
 +        this.getWorldBorder().setSize(server.getMaxWorldSize());
-+        DimensionManager.setWorld(dimensionId, this, mcServer);
++        net.minecraftforge.common.DimensionManager.setWorld(dimensionId, this, mcServer);
 +    }
 +
 +    public WorldServer(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn) {
@@ -152,11 +140,11 @@
          this.provider.setDimension(providerDim);
          this.chunkProvider = this.createChunkProvider();
 -        perWorldStorage = new MapStorage(new net.minecraftforge.common.WorldSpecificSaveHandler((WorldServer)this, saveHandlerIn));
-+        perWorldStorage = new MapStorage(new net.minecraftforge.common.WorldSpecificSaveHandler((WorldServer) this, saveHandlerIn));
++        perWorldStorage = new MapStorage(new net.minecraftforge.common.WorldSpecificSaveHandler(this, saveHandlerIn));
          this.worldTeleporter = new Teleporter(this);
          this.calculateInitialSkylight();
          this.calculateInitialWeather();
-@@ -124,71 +132,202 @@
+@@ -124,36 +173,43 @@
          net.minecraftforge.common.DimensionManager.setWorld(dimensionId, this, mcServer);
      }
  
@@ -206,7 +194,6 @@
 +        }
          this.lootTable = new LootTableManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "loot_tables"));
 -        this.advancementManager = new AdvancementManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "advancements"));
--        this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
 +        // this.advancementManager = new AdvancementManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "advancements"));
 +        // this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
 +        if (this.dimension != 0) { // SPIGOT-3899 multiple worlds of advancements not supported
@@ -216,9 +203,10 @@
 +            this.advancementManager = new AdvancementManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "advancements"));
 +        }
 +        // CraftBukkit end
+         this.functionManager = new FunctionManager(new File(new File(this.saveHandler.getWorldDirectory(), "data"), "functions"), this.mcServer);
          this.getWorldBorder().setCenter(this.worldInfo.getBorderCenterX(), this.worldInfo.getBorderCenterZ());
          this.getWorldBorder().setDamageAmount(this.worldInfo.getBorderDamagePerBlock());
-         this.getWorldBorder().setDamageBuffer(this.worldInfo.getBorderSafeZone());
+@@ -161,34 +217,159 @@
          this.getWorldBorder().setWarningDistance(this.worldInfo.getBorderWarningDistance());
          this.getWorldBorder().setWarningTime(this.worldInfo.getBorderWarningTime());
  
@@ -391,7 +379,7 @@
                  long i = this.getWorldTime() + 24000L;
                  this.setWorldTime(i - i % 24000L);
              }
-@@ -198,24 +337,23 @@
+@@ -198,78 +379,88 @@
  
          this.profiler.startSection("mobSpawner");
  
@@ -401,6 +389,7 @@
 +        // CraftBukkit start - Only call spawner if we have players online and the world allows for mobs or animals
 +        long time = this.worldInfo.getWorldTotalTime();
 +        if (this.getGameRules().getBoolean("doMobSpawning") && this.worldInfo.getTerrainType() != WorldType.DEBUG_ALL_BLOCK_STATES && (this.spawnHostileMobs || this.spawnPeacefulMobs) && this.playerEntities.size() > 0) {
++            // this.entitySpawner.findChunksForSpawning(this, this.spawnHostileMobs, this.spawnPeacefulMobs, this.worldInfo.getWorldTotalTime() % 400L == 0L);
 +            this.entitySpawner.findChunksForSpawning(this, this.spawnHostileMobs && (this.ticksPerMonsterSpawns != 0 && time % this.ticksPerMonsterSpawns == 0L), this.spawnPeacefulMobs && (this.ticksPerAnimalSpawns != 0 && time % this.ticksPerAnimalSpawns == 0L), this.worldInfo.getWorldTotalTime() % 400L == 0L);
          }
  
@@ -422,7 +411,14 @@
              this.setWorldTime(this.getWorldTime() + 1L);
          }
  
-@@ -230,46 +368,38 @@
+         this.profiler.endStartSection("tickPending");
+         this.tickUpdates(false);
+         this.profiler.endStartSection("tickBlocks");
+         this.updateBlocks();
+         this.profiler.endStartSection("chunkMap");
+         this.playerChunkMap.tick();
+         this.profiler.endStartSection("village");
+         this.villageCollection.tick();
          this.villageSiege.tick();
          this.profiler.endStartSection("portalForcer");
          this.worldTeleporter.removeStalePortalLocations(this.getTotalWorldTime());
@@ -433,6 +429,7 @@
          }
          this.profiler.endSection();
          this.sendQueuedBlockEvents();
++
 +        this.getWorld().processChunkGC();
      }
  
@@ -479,7 +476,7 @@
                      ++j;
                  }
              }
-@@ -278,51 +408,45 @@
+@@ -278,51 +469,46 @@
          }
      }
  
@@ -520,6 +517,7 @@
 +        if (this.allPlayersSleeping && !this.isRemote) {
 +            // CraftBukkit - This allows us to assume that some people are in bed but not really, allowing time to pass in spite of AFKers
 +            boolean foundActualSleepers = false;
++
 +            for (EntityPlayer entityplayer : this.playerEntities) {
 +                if (entityplayer.isPlayerFullyAsleep()) {
 +                    foundActualSleepers = true;
@@ -549,7 +547,7 @@
              this.worldInfo.setSpawnY(this.getSeaLevel() + 1);
          }
  
-@@ -330,14 +454,12 @@
+@@ -330,14 +516,12 @@
          int j = this.worldInfo.getSpawnZ();
          int k = 0;
  
@@ -566,7 +564,7 @@
                  break;
              }
          }
-@@ -346,17 +468,14 @@
+@@ -346,17 +530,14 @@
          this.worldInfo.setSpawnZ(j);
      }
  
@@ -587,7 +585,7 @@
              int i = this.rand.nextInt(this.playerEntities.size());
              EntityPlayer entityplayer = this.playerEntities.get(i);
              int j = MathHelper.floor(entityplayer.posX) + this.rand.nextInt(11) - 5;
-@@ -368,28 +487,22 @@
+@@ -368,28 +549,22 @@
          this.profiler.endSection();
      }
  
@@ -622,7 +620,7 @@
                  this.profiler.startSection("getChunk");
                  Chunk chunk = iterator.next();
                  int j = chunk.x * 16;
-@@ -398,70 +511,60 @@
+@@ -398,70 +573,60 @@
                  chunk.enqueueRelightChecks();
                  this.profiler.endStartSection("tickChunk");
                  chunk.onTick(false);
@@ -715,7 +713,7 @@
                                  this.updateLCG = this.updateLCG * 3 + 1013904223;
                                  int j1 = this.updateLCG >> 2;
                                  int k1 = j1 & 15;
-@@ -471,8 +574,7 @@
+@@ -471,8 +636,7 @@
                                  Block block = iblockstate.getBlock();
                                  this.profiler.startSection("randomTick");
  
@@ -725,7 +723,7 @@
                                      block.randomTick(this, new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k), iblockstate, this.rand);
                                  }
  
-@@ -487,26 +589,19 @@
+@@ -487,26 +651,19 @@
          }
      }
  
@@ -759,7 +757,7 @@
                  blockpos = blockpos.up(2);
              }
  
-@@ -514,40 +609,32 @@
+@@ -514,40 +671,32 @@
          }
      }
  
@@ -808,7 +806,7 @@
                          iblockstate.getBlock().updateTick(this, pos, iblockstate, this.rand);
                      }
                  }
-@@ -560,52 +647,42 @@
+@@ -560,52 +709,42 @@
  
          NextTickListEntry nextticklistentry = new NextTickListEntry(pos, blockIn);
  
@@ -875,7 +873,7 @@
              this.resetUpdateEntityTick();
          }
  
-@@ -613,20 +690,16 @@
+@@ -613,20 +752,16 @@
          super.updateEntities();
      }
  
@@ -900,7 +898,7 @@
                      continue;
                  }
  
-@@ -635,14 +708,10 @@
+@@ -635,14 +770,10 @@
  
              this.profiler.startSection("tick");
  
@@ -918,7 +916,7 @@
                      CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Ticking player");
                      CrashReportCategory crashreportcategory = crashreport.makeCategory("Player being ticked");
                      entity.addEntityCrashInfo(crashreportcategory);
-@@ -653,13 +722,11 @@
+@@ -653,13 +784,11 @@
              this.profiler.endSection();
              this.profiler.startSection("remove");
  
@@ -934,7 +932,7 @@
                      this.getChunkFromChunkCoords(j, k).removeEntity(entity);
                  }
  
-@@ -671,40 +738,36 @@
+@@ -671,40 +800,36 @@
          }
      }
  
@@ -992,7 +990,7 @@
                          break;
                      }
  
-@@ -717,8 +780,7 @@
+@@ -717,8 +842,7 @@
                  this.profiler.startSection("ticking");
                  Iterator<NextTickListEntry> iterator = this.pendingTickListEntriesThisTick.iterator();
  
@@ -1002,7 +1000,7 @@
                      NextTickListEntry nextticklistentry1 = iterator.next();
                      iterator.remove();
                      //Keeping here as a note for future when it may be restored.
-@@ -726,27 +788,20 @@
+@@ -726,27 +850,20 @@
                      //byte b0 = isForced ? 0 : 8;
                      int k = 0;
  
@@ -1035,7 +1033,7 @@
                          this.scheduleUpdate(nextticklistentry1.position, nextticklistentry1.getBlock(), 0);
                      }
                  }
-@@ -759,8 +814,7 @@
+@@ -759,8 +876,7 @@
      }
  
      @Nullable
@@ -1045,7 +1043,7 @@
          ChunkPos chunkpos = chunkIn.getPos();
          int i = (chunkpos.x << 4) - 2;
          int j = i + 16 + 2;
-@@ -770,42 +824,32 @@
+@@ -770,42 +886,32 @@
      }
  
      @Nullable
@@ -1097,25 +1095,15 @@
                          list = Lists.<NextTickListEntry>newArrayList();
                      }
  
-@@ -817,71 +861,110 @@
+@@ -817,6 +923,7 @@
          return list;
      }
  
--    public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate)
--    {
--        if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob))
--        {
 +    /* CraftBukkit start - We prevent spawning in general, so this butchering is not needed
-+    public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate) {
-+        if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob)) {
-             entityIn.setDead();
-         }
- 
--        if (!this.canSpawnNPCs() && entityIn instanceof INpc)
--        {
-+        if (!this.canSpawnNPCs() && entityIn instanceof INpc) {
-             entityIn.setDead();
-         }
+     public void updateEntityWithOptionalForce(Entity entityIn, boolean forceUpdate)
+     {
+         if (!this.canSpawnAnimals() && (entityIn instanceof EntityAnimal || entityIn instanceof EntityWaterMob))
+@@ -831,57 +938,98 @@
  
          super.updateEntityWithOptionalForce(entityIn, forceUpdate);
      }
@@ -1187,7 +1175,7 @@
 +            BlockPosition blockposition = tileentity.getPosition();
 +
 +            if (blockposition.getX() >= i && blockposition.getY() >= j && blockposition.getZ() >= k && blockposition.getX() < l && blockposition.getY() < i1 && blockposition.getZ() < j1) {
-+               arraylist.add(tileentity);
++                arraylist.add(tileentity);
 +            }
 +        }
 +        */
@@ -1241,7 +1229,7 @@
                      ;
                  }
  
-@@ -892,8 +975,7 @@
+@@ -892,8 +1040,7 @@
          }
      }
  
@@ -1251,7 +1239,7 @@
          this.worldInfo.setMapFeaturesEnabled(false);
          this.worldInfo.setAllowCommands(true);
          this.worldInfo.setRaining(false);
-@@ -907,18 +989,12 @@
+@@ -907,18 +1054,12 @@
          this.getGameRules().setOrCreateGameRule("doDaylightCycle", "false");
      }
  
@@ -1274,7 +1262,7 @@
              if (net.minecraftforge.event.ForgeEventFactory.onCreateWorldSpawn(this, settings)) return;
              this.findingSpawnPoint = true;
              BiomeProvider biomeprovider = this.provider.getBiomeProvider();
-@@ -929,26 +1005,38 @@
+@@ -929,26 +1070,39 @@
              int j = this.provider.getAverageGroundLevel();
              int k = 8;
  
@@ -1310,8 +1298,8 @@
              int l = 0;
  
 -            while (!this.provider.canCoordinateBeSpawn(i, k))
--            {
-+            while (!this.canSpawn(i, k)) { // CraftBukkit - use our own canSpawn
++            while (!this.canSpawn(i, k)) // CraftBukkit - use our own canSpawn
+             {
                  i += random.nextInt(64) - random.nextInt(64);
                  k += random.nextInt(64) - random.nextInt(64);
                  ++l;
@@ -1322,7 +1310,7 @@
                      break;
                  }
              }
-@@ -956,89 +1044,80 @@
+@@ -956,89 +1110,80 @@
              this.worldInfo.setSpawn(new BlockPos(i, j, k));
              this.findingSpawnPoint = false;
  
@@ -1436,14 +1424,17 @@
          this.worldInfo.setBorderSize(this.getWorldBorder().getDiameter());
          this.worldInfo.getBorderCenterX(this.getWorldBorder().getCenterX());
          this.worldInfo.getBorderCenterZ(this.getWorldBorder().getCenterZ());
-@@ -1053,51 +1132,44 @@
+@@ -1053,51 +1198,40 @@
          this.perWorldStorage.saveAllData();
      }
  
 -    public boolean spawnEntity(Entity entityIn)
 -    {
-+    public boolean spawnEntity(Entity entityIn) {
-         return this.canAddEntity(entityIn) ? super.spawnEntity(entityIn) : false;
+-        return this.canAddEntity(entityIn) ? super.spawnEntity(entityIn) : false;
++    public boolean spawnEntity(Entity entityIn, CreatureSpawnEvent.SpawnReason spawnReason) {
++        // World.spawnEntity(Entity) will call this, and we still want to perform
++        // existing entity checking when it's called with a SpawnReason
++        return this.canAddEntity(entityIn) ? super.spawnEntity(entityIn, spawnReason) : false;
      }
  
 -    public void loadEntities(Collection<Entity> entityCollection)
@@ -1452,12 +1443,6 @@
 -        {
 -            if (this.canAddEntity(entity) && !net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entity, this)))
 -            {
-+    public boolean spawnEntity(Entity entityIn, CreatureSpawnEvent.SpawnReason spawnReason) {
-+        // World.spawnEntity(Entity) will call this, and we still want to perform
-+        // existing entity checking when it's called with a SpawnReason
-+        return this.canAddEntity(entityIn) ? super.spawnEntity(entityIn, spawnReason) : false;
-+    }
-+
 +    public void loadEntities(Collection<Entity> entityCollection) {
 +        for (Entity entity : Lists.newArrayList(entityCollection)) {
 +            if (this.canAddEntity(entity) && !net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entity, this))) {
@@ -1474,7 +1459,7 @@
 -            LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityList.getKey(entityIn));
 +    private boolean canAddEntity(Entity entityIn) {
 +        if (entityIn.isDead) {
-+            // LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object) EntityList.getKey(entityIn));
++            // LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityList.getKey(entityIn));
              return false;
 -        }
 -        else
@@ -1504,11 +1489,11 @@
                      }
  
 -                    LOGGER.warn("Force-added player with duplicate UUID {}", (Object)uuid.toString());
-+                    LOGGER.warn("Force-added player with duplicate UUID {}", uuid.toString());
++                    LOGGER.warn("Force-added player with duplicate UUID {}", (Object) uuid.toString());
                  }
  
                  this.removeEntityDangerously(entity);
-@@ -1107,92 +1179,85 @@
+@@ -1107,92 +1241,86 @@
          }
      }
  
@@ -1566,7 +1551,7 @@
 -        else
 -        {
 +        if (super.addWeatherEffect(entityIn)) {
-+            this.mcServer.getPlayerList().sendToAllNearExcept(null, entityIn.posX, entityIn.posY, entityIn.posZ, 512.0D, dimension, new SPacketSpawnGlobalEntity(entityIn)); // CraftBukkit - Use dimension
++            this.mcServer.getPlayerList().sendToAllNearExcept((EntityPlayer) null, entityIn.posX, entityIn.posY, entityIn.posZ, 512.0D, dimension, new SPacketSpawnGlobalEntity(entityIn)); // CraftBukkit - Use dimension
 +            return true;
 +        } else {
              return false;
@@ -1591,6 +1576,7 @@
 -        Explosion explosion = new Explosion(this, entityIn, x, y, z, strength, isFlaming, isSmoking);
 +    public Explosion newExplosion(@Nullable Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking) {
 +        Explosion explosion = super.newExplosion(entityIn, x, y, z, strength, isFlaming, isSmoking);
++
 +        if (explosion.wasCanceled) {
 +            return explosion;
 +        }
@@ -1636,7 +1622,7 @@
                  return;
              }
          }
-@@ -1200,18 +1265,15 @@
+@@ -1200,18 +1328,15 @@
          this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
      }
  
@@ -1657,11 +1643,11 @@
 +            for (BlockEventData blockeventdata : this.blockEventQueue[i]) {
 +                if (this.fireBlockEvent(blockeventdata)) {
 +                    // CraftBukkit - this.provider.dimension -> this.dimension
-+                    this.mcServer.getPlayerList().sendToAllNearExcept(null, blockeventdata.getPosition().getX(), blockeventdata.getPosition().getY(), blockeventdata.getPosition().getZ(), 64.0D, dimension, new SPacketBlockAction(blockeventdata.getPosition(), blockeventdata.getBlock(), blockeventdata.getEventID(), blockeventdata.getEventParameter()));
++                    this.mcServer.getPlayerList().sendToAllNearExcept((EntityPlayer) null, (double) blockeventdata.getPosition().getX(), (double) blockeventdata.getPosition().getY(), (double) blockeventdata.getPosition().getZ(), 64.0D, dimension, new SPacketBlockAction(blockeventdata.getPosition(), blockeventdata.getBlock(), blockeventdata.getEventID(), blockeventdata.getEventParameter()));
                  }
              }
  
-@@ -1219,29 +1281,24 @@
+@@ -1219,29 +1344,24 @@
          }
      }
  
@@ -1696,7 +1682,7 @@
              this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(new SPacketChangeGameState(8, this.thunderingStrength), this.provider.getDimension());
          }
  
-@@ -1249,14 +1306,10 @@
+@@ -1249,14 +1369,10 @@
           * rather than to all players on the server. This is what causes the client-side rain, as the
           * client believes that it has started raining locally, rather than in another dimension.
           */
@@ -1714,7 +1700,7 @@
                  this.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(new SPacketChangeGameState(1, 0.0F), this.provider.getDimension());
              }
  
-@@ -1266,105 +1319,87 @@
+@@ -1266,105 +1382,92 @@
      }
  
      @Nullable
@@ -1750,21 +1736,25 @@
  
 -    public void spawnParticle(EnumParticleTypes particleType, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments)
 -    {
--        this.spawnParticle(particleType, false, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, particleArguments);
-+    public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments) {
-+        // CraftBukkit - visibility api support
-+        this.sendParticles(null, particleType, false, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, particleArguments);
++    public void spawnParticle(EnumParticleTypes particleType, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments) {
+         this.spawnParticle(particleType, false, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, particleArguments);
      }
  
 -    public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments)
 -    {
 -        SPacketParticles spacketparticles = new SPacketParticles(particleType, longDistance, (float)xCoord, (float)yCoord, (float)zCoord, (float)xOffset, (float)yOffset, (float)zOffset, (float)particleSpeed, numberOfParticles, particleArguments);
-+    public void sendParticles(@Nullable EntityPlayerMP sender, EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments) {
-+        SPacketParticles spacketparticles = new SPacketParticles(particleType, longDistance, (float) xCoord, (float) yCoord, (float) zCoord, (float) xOffset, (float) yOffset, (float) zOffset, (float) particleSpeed, numberOfParticles, particleArguments);
++    public void spawnParticle(EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments) {
++        // CraftBukkit - visibility api support
++        sendParticles(null, particleType, longDistance, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, particleArguments);
++    }
  
 -        for (int i = 0; i < this.playerEntities.size(); ++i)
 -        {
 -            EntityPlayerMP entityplayermp = (EntityPlayerMP)this.playerEntities.get(i);
++    public void sendParticles(@Nullable EntityPlayerMP sender, EnumParticleTypes particleType, boolean longDistance, double xCoord, double yCoord, double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... particleArguments) {
++        // CraftBukkit end
++        SPacketParticles spacketparticles = new SPacketParticles(particleType, longDistance, (float) xCoord, (float) yCoord, (float) zCoord, (float) xOffset, (float) yOffset, (float) zOffset, (float) particleSpeed, numberOfParticles, particleArguments);
++
 +        for (int i = 0; i < this.playerEntities.size(); ++i) {
 +            EntityPlayerMP entityplayermp = (EntityPlayerMP) this.playerEntities.get(i);
 +            if (sender != null && !entityplayermp.getBukkitEntity().canSee(sender.getBukkitEntity())) continue;
