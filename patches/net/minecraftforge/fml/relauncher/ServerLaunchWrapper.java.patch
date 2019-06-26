@@ -4,7 +4,7 @@
  
  package net.minecraftforge.fml.relauncher;
  
-+import org.org.lavapowered.util.AutoLibraryDownloader;
++import org.lavapowered.lava.util.AutoLibraryDownloader;
 +
  import java.lang.reflect.Method;
  

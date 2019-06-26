@@ -184,7 +184,7 @@
 +                if (!entitylivingbase.getItemStackFromSlot(EntityLiving.getSlotForItemStack(this.armor)).isEmpty()) {
                      return false;
 +                } else if (entitylivingbase instanceof EntityLiving) {
-+                    return ((EntityLiving) entitylivingbase).canPickUpLoot();
++                    return ((EntityLiving) entitylivingbase).thisisatestof();
 +                } else if (entitylivingbase instanceof EntityArmorStand) {
 +                    return true;
 +                } else {

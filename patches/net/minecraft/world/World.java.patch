@@ -203,14 +203,14 @@
 +        }
 +
 +        if (this.worldInfo != null) { // Use saved dimension from level.dat. Fixes issues with Multiverse
-+            if (this.worldInfo.getDimension() != null) {
++            if (this.worldInfo.getDimension() != 0) {
 +                this.provider.setDimension(this.worldInfo.getDimension());
 +            } else {
 +                this.worldInfo.setDimension(this.provider.getDimension());
 +            }
 +        }
 +
-+        if (this.worldInfo.getdimension() == 0) {
++        if (this.worldInfo.getDimension() == 0) {
 +            generator = this.getServer().getGenerator(this.worldInfo.getWorldName());
 +            getWorld().generator = generator;
 +        }
