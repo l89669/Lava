@@ -5,7 +5,7 @@
              if (!Strings.isNullOrEmpty(serverDescription))
              {
 -                moddedClientAllowed = !serverDescription.endsWith(":NOFML§r");
-+                moddedClientAllowed = !serverDescription.endsWith(":NOFML");
++                moddedClientAllowed = !serverDescription.endsWith(":NOFML�r");
              }
              serverDataTag.put(data, new ExtendedServerListData("VANILLA", false, ImmutableMap.of(), !moddedClientAllowed));
          }
@@ -14,7 +14,7 @@
      public String fixDescription(String description)
      {
 -        return description.endsWith(":NOFML§r") ? description.substring(0, description.length() - 8)+"§r" : description;
-+        return description.endsWith(":NOFML") ? description.substring(0, description.length() - 8) : description;
++        return description.endsWith(":NOFML�r") ? description.substring(0, description.length() - 8)+"�r" : description;
      }
  
      public void connectToServerAtStartup(String host, int port)

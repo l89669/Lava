@@ -5,7 +5,7 @@
              if (time < 1000)
              {
 -                return "µs";
-+                return "us";
++                return "�s";
              }
              else
              {
