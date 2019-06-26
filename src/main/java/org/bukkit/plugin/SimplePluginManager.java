@@ -1,7 +1,24 @@
 package org.bukkit.plugin;
 
-import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang3.Validate;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang.Validate;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.PluginCommandYamlParser;
@@ -15,13 +32,7 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.util.FileUtil;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Handles all plugin management from the Server
@@ -52,7 +63,7 @@ public final class SimplePluginManager implements PluginManager {
      *
      * @param loader Class name of the PluginLoader to register
      * @throws IllegalArgumentException Thrown when the given Class is not a
-     *                                  valid PluginLoader
+     *     valid PluginLoader
      */
     public void registerInterface(Class<? extends PluginLoader> loader) throws IllegalArgumentException {
         PluginLoader instance;
@@ -136,11 +147,11 @@ public final class SimplePluginManager implements PluginManager {
             File replacedFile = plugins.put(description.getName(), file);
             if (replacedFile != null) {
                 server.getLogger().severe(String.format(
-                        "Ambiguous plugin name `%s' for files `%s' and `%s' in `%s'",
-                        description.getName(),
-                        file.getPath(),
-                        replacedFile.getPath(),
-                        directory.getPath()
+                    "Ambiguous plugin name `%s' for files `%s' and `%s' in `%s'",
+                    description.getName(),
+                    file.getPath(),
+                    replacedFile.getPath(),
+                    directory.getPath()
                 ));
             }
 
@@ -192,7 +203,7 @@ public final class SimplePluginManager implements PluginManager {
                         if (loadedPlugins.contains(dependency)) {
                             dependencyIterator.remove();
 
-                            // We have a dependency not found
+                        // We have a dependency not found
                         } else if (!plugins.containsKey(dependency)) {
                             missingDependency = false;
                             pluginIterator.remove();
@@ -200,9 +211,9 @@ public final class SimplePluginManager implements PluginManager {
                             dependencies.remove(plugin);
 
                             server.getLogger().log(
-                                    Level.SEVERE,
-                                    "Could not load '" + entry.getValue().getPath() + "' in folder '" + directory.getPath() + "'",
-                                    new UnknownDependencyException(dependency));
+                                Level.SEVERE,
+                                "Could not load '" + entry.getValue().getPath() + "' in folder '" + directory.getPath() + "'",
+                                new UnknownDependencyException(dependency));
                             break;
                         }
                     }
@@ -292,10 +303,10 @@ public final class SimplePluginManager implements PluginManager {
      *
      * @param file File containing the plugin to load
      * @return The Plugin loaded, or null if it was invalid
-     * @throws InvalidPluginException     Thrown when the specified file is not a
-     *                                    valid plugin
+     * @throws InvalidPluginException Thrown when the specified file is not a
+     *     valid plugin
      * @throws UnknownDependencyException If a required dependency could not
-     *                                    be found
+     *     be found
      */
     public synchronized Plugin loadPlugin(File file) throws InvalidPluginException, UnknownDependencyException {
         Validate.notNull(file, "File cannot be null");
@@ -497,7 +508,7 @@ public final class SimplePluginManager implements PluginManager {
                             plugin.getDescription().getAuthors(),
                             plugin.getDescription().getFullName(),
                             ex.getMessage()
-                    ));
+                            ));
                 }
             } catch (Throwable ex) {
                 server.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getPlugin().getDescription().getFullName(), ex);
@@ -524,13 +535,13 @@ public final class SimplePluginManager implements PluginManager {
      * Registers the given event to the specified listener using a directly
      * passed EventExecutor
      *
-     * @param event           Event class to register
-     * @param listener        PlayerListener to register
-     * @param priority        Priority of this event
-     * @param executor        EventExecutor to register
-     * @param plugin          Plugin to register
+     * @param event Event class to register
+     * @param listener PlayerListener to register
+     * @param priority Priority of this event
+     * @param executor EventExecutor to register
+     * @param plugin Plugin to register
      * @param ignoreCancelled Do not call executor if event was already
-     *                        cancelled
+     *     cancelled
      */
     public void registerEvent(Class<? extends Event> event, Listener listener, EventPriority priority, EventExecutor executor, Plugin plugin, boolean ignoreCancelled) {
         Validate.notNull(listener, "Listener cannot be null");
@@ -718,15 +729,6 @@ public final class SimplePluginManager implements PluginManager {
     }
 
     public boolean useTimings() {
-        return useTimings;
-    }
-
-    /**
-     * Sets whether or not per event timing code should be used
-     *
-     * @param use True if per event timing code should be used
-     */
-    public void useTimings(boolean use) {
-        useTimings = use;
+        return false;
     }
 }
