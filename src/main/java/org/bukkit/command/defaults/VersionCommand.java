@@ -231,10 +231,7 @@ public class VersionCommand extends BukkitCommand {
         } catch (NumberFormatException ex) {
             verInfo = verInfo.replace("\"", "");
             return getFromRepo("LavaPowered/Lava", verInfo);
-        } 
-
-        verInfo = verInfo.replace("\"", "");
-        return getFromRepo("LavaPowered/Lava", verInfo);
+        }
     }
 
     private static int getFromJenkins(int currentVer) {
