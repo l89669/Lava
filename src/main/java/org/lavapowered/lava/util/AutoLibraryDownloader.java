@@ -1,4 +1,4 @@
-package org.org.lavapowered.util;
+package org.lavapowered.lava.util;
 
 import java.io.*;
 import java.net.URL;

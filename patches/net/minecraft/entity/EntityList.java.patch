@@ -105,7 +105,7 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
-+import org.org.lavapowered.util.LavaRegistryNamespaced;
++import org.lavapowered.lava.util.LavaRegistryNamespaced;
  
 -public class EntityList
 -{

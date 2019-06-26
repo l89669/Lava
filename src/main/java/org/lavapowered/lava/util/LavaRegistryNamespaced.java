@@ -1,4 +1,4 @@
-package org.org.lavapowered.util;
+package org.lavapowered.lava.util;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.IObjectIntIterable;
