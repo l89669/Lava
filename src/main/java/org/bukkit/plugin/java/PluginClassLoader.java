@@ -1,18 +1,20 @@
 package org.bukkit.plugin.java;
 
-import kettlefoundation.kettle.nms.ClassInheritanceProvider;
-import kettlefoundation.kettle.nms.MappingLoader;
-import kettlefoundation.kettle.nms.reflections.ReflectionTransformer;
-import kettlefoundation.kettle.nms.utils.RemapUtils;
+import com.maxqia.remapper.ClassInheritanceProvider;
+import com.maxqia.remapper.MappingLoader;
+import com.maxqia.remapper.ReflectionTransformer;
+import com.maxqia.remapper.RemapUtils;
 import net.md_5.specialsource.JarMapping;
 import net.md_5.specialsource.JarRemapper;
 import net.md_5.specialsource.provider.ClassLoaderProvider;
 import net.md_5.specialsource.provider.JointProvider;
 import net.md_5.specialsource.repo.RuntimeRepo;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
+import thermos.ThermosRemapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSigner;
 import java.security.CodeSource;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +37,7 @@ import java.util.jar.Manifest;
  */
 final class PluginClassLoader extends URLClassLoader {
     private final JavaPluginLoader loader;
-    private final Map<String, Class<?>> classes = new ConcurrentHashMap<>(); // Spigot
+    private final Map<String, Class<?>> classes = new HashMap<>();
     private final PluginDescriptionFile description;
     private final File dataFolder;
     private final File file;
@@ -48,8 +51,8 @@ final class PluginClassLoader extends URLClassLoader {
     private JarRemapper remapper;
     private JarMapping jarMapping;
 
-    PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws IOException, InvalidPluginException, MalformedURLException {
-        super(new URL[]{file.toURI().toURL()}, parent);
+    PluginClassLoader(final JavaPluginLoader loader, final ClassLoader parent, final PluginDescriptionFile description, final File dataFolder, final File file) throws IOException, InvalidPluginException {
+        super(new URL[] {file.toURI().toURL()}, parent);
         Validate.notNull(loader, "Loader cannot be null");
 
         this.loader = loader;
@@ -60,12 +63,12 @@ final class PluginClassLoader extends URLClassLoader {
         this.manifest = jar.getManifest();
         this.url = file.toURI().toURL();
 
-        jarMapping = MappingLoader.loadMappings();
+        jarMapping = MappingLoader.loadMapping();
         JointProvider provider = new JointProvider();
         provider.add(new ClassInheritanceProvider());
         provider.add(new ClassLoaderProvider(this));
-        jarMapping.setFallbackInheritanceProvider(provider);
-        remapper = new JarRemapper(jarMapping);
+        this.jarMapping.setFallbackInheritanceProvider(provider);
+        remapper = new ThermosRemapper(jarMapping);
 
         try {
             Class<?> jarClass;
@@ -98,7 +101,7 @@ final class PluginClassLoader extends URLClassLoader {
     Class<?> findClass(String name, boolean checkGlobal) throws ClassNotFoundException {
         if (name.startsWith("net.minecraft.server." + RemapUtils.NMS_VERSION)) {
             String remappedClass = jarMapping.classes.get(name.replaceAll("\\.", "\\/"));
-            Class<?> clazz = ((net.minecraft.launchwrapper.LaunchClassLoader) FMLCommonHandler.instance().getMinecraftServerInstance().getClass().getClassLoader()).findClass(remappedClass);
+            Class<?> clazz = ((net.minecraft.launchwrapper.LaunchClassLoader) MinecraftServer.getServerInstance().getClass().getClassLoader()).findClass(remappedClass);
             return clazz;
         }
 
@@ -107,7 +110,6 @@ final class PluginClassLoader extends URLClassLoader {
         }
 
         Class<?> result = classes.get(name);
-
         synchronized (name.intern()) {
             if (result == null) {
                 if (checkGlobal) {
@@ -162,6 +164,7 @@ final class PluginClassLoader extends URLClassLoader {
         Class<?> result = null;
 
         try {
+            // Load the resource to the name
             String path = name.replace('.', '/').concat(".class");
             URL url = this.findResource(path);
             if (url != null) {
@@ -169,21 +172,28 @@ final class PluginClassLoader extends URLClassLoader {
                 if (stream != null) {
                     byte[] bytecode = null;
 
+                    // Remap the classes
                     bytecode = remapper.remapClassFile(stream, RuntimeRepo.getInstance());
                     bytecode = ReflectionTransformer.transform(bytecode);
 
-                    JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
+                    // Define (create) the class using the modified byte code
+                    // The top-child class loader is used for this to prevent access violations
+                    // Set the codesource to the jar, not within the jar, for compatibility with
+                    // plugins that do new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))
+                    // instead of using getResourceAsStream - see https://github.com/MinecraftPortCentral/Cauldron-Plus/issues/75
+                    JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection(); // parses only
                     URL jarURL = jarURLConnection.getJarFileURL();
                     CodeSource codeSource = new CodeSource(jarURL, new CodeSigner[0]);
 
                     result = this.defineClass(name, bytecode, 0, bytecode.length, codeSource);
                     if (result != null) {
+                        // Resolve it - sets the class loader of the class
                         this.resolveClass(result);
                     }
                 }
             }
         } catch (Throwable t) {
-            throw new ClassNotFoundException("Failed to remap class " + name, t);
+            throw new ClassNotFoundException("Failed to remap class "+name, t);
         }
 
         return result;
@@ -191,8 +201,9 @@ final class PluginClassLoader extends URLClassLoader {
 
     @Override
     protected Package getPackage(String name) {
-        if (name.equals("org.bukkit.craftbukkit"))
+        if (name == "org.bukkit.craftbukkit") {
             name = "org.bukkit.craftbukkit." + RemapUtils.NMS_VERSION;
+        }
         return super.getPackage(name);
     }
 }
