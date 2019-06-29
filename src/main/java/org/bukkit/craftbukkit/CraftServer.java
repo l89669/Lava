@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
-import com.maxqia.remapper.ReflectionTransformer;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
@@ -275,7 +274,6 @@ public final class CraftServer implements Server {
     }
 
     public void loadPlugins() {
-        // ReflectionTransformer.init();
         pluginManager.registerInterface(JavaPluginLoader.class);
 
         File pluginFolder = (File) console.options.valueOf("plugins");

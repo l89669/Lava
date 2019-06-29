@@ -8,19 +8,19 @@ import java.util.HashSet;
 public class ClassInheritanceProvider implements InheritanceProvider {
     @Override
     public Collection<String> getParents(String className) {
-        className = ReflectionTransformer.remapper.map(className);
+        className = Transformer.remapper.map(className);
 
         try {
-            Collection<String> parents = new HashSet<String>();
+            Collection<String> parents = new HashSet<>();
             Class<?> reference = Class.forName(className.replace('/', '.').replace('$', '.'), false, this.getClass().getClassLoader());
             Class<?> extend = reference.getSuperclass();
             if (extend != null) {
-                parents.add(RemapUtils.reverseMap(extend));
+                parents.add(Utils.reverseMap(extend));
             }
 
             for (Class<?> inter : reference.getInterfaces()) {
                 if (inter != null) {
-                    parents.add(RemapUtils.reverseMap(inter));
+                    parents.add(Utils.reverseMap(inter));
                 }
             }
 
@@ -30,5 +30,4 @@ public class ClassInheritanceProvider implements InheritanceProvider {
         }
         return null;
     }
-
 }
