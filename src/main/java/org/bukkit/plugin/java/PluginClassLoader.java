@@ -111,7 +111,7 @@ final class PluginClassLoader extends URLClassLoader {
     Class<?> findClass(String name, boolean checkGlobal) throws ClassNotFoundException {
         if (name.startsWith("net.minecraft.server.v1_12_R1")) {
             String remappedClass = jarMapping.classes.get(name.replaceAll("\\.", "\\/"));
-            return ((net.minecraft.launchwrapper.LaunchClassLoader) MinecraftServer.getServerInst().getClass().getClassLoader()).findClass(remappedClass);
+            return ((net.minecraft.launchwrapper.LaunchClassLoader) MinecraftServer.getServerInstance().getClass().getClassLoader()).findClass(remappedClass);
         }
 
         if (name.startsWith("org.bukkit.")) {
