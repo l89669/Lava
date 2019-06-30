@@ -370,6 +370,11 @@ public final class CraftServer implements Server {
     }
 
     @Override
+    public Player[] _INVALID_getOnlinePlayers() {
+        return getOnlinePlayers().toArray(new Player[0]);
+    }
+
+    @Override
     public List<CraftPlayer> getOnlinePlayers() {
         return this.playerView;
     }

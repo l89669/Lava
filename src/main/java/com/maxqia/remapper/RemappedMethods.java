@@ -48,9 +48,8 @@ public class RemappedMethods {
 
         for (Map.Entry<String, String> entry : Transformer.jarMapping.fields.entrySet()) {
             if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
-                String[] matched = entry.getKey().split("/");
-                String rtr =  matched[matched.length-1];
-                return rtr;
+                String[] matched = entry.getKey().split("\\/");
+                return matched[matched.length - 1];
             }
         }
 
@@ -64,8 +63,7 @@ public class RemappedMethods {
         for (Map.Entry<String, String> entry : Transformer.jarMapping.methods.entrySet()) {
             if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
                 String[] matched = entry.getKey().split("\\s+")[0].split("/");
-                String rtr =  matched[matched.length-1];
-                return rtr;
+                return matched[matched.length - 1];
             }
         }
 
@@ -74,8 +72,7 @@ public class RemappedMethods {
 
     // Package names
     public static String getName(Package inst) {
-        if (inst == null)
-        {
+        if (inst == null) {
             return null;
         }
         String name = inst.getName();
@@ -83,7 +80,7 @@ public class RemappedMethods {
         for (Map.Entry<String, String> entry : Transformer.jarMapping.packages.entrySet()) {
             if (entry.getValue().equals(check)) {
                 String match = entry.getKey().replace('/', '.');
-                match = match.substring(0, match.length()-1);
+                match = match.substring(0, match.length() - 1);
                 return match;
             }
 

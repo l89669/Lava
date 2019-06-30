@@ -2,7 +2,13 @@ package com.maxqia.remapper;
 
 import java.lang.reflect.Method;
 
+/**
+ * Based on Apache's ReflectionUtil
+ *
+ * @author Maxqia
+ */
 public class RemapUtils {
+
     private static final Method GET_CALLER_CLASS;
 
     static {

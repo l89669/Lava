@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class ClassInheritanceProvider implements InheritanceProvider {
+
     @Override
     public Collection<String> getParents(String className) {
         className = Transformer.remapper.map(className);
