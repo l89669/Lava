@@ -469,8 +469,8 @@
 +                    PotionEffectType.registerPotionEffectType(new org.bukkit.craftbukkit.potion.CraftPotionEffectType((Potion) effect));
 +                }
 +                PotionEffectType.stopAcceptingRegistrations();
-+                server.loadPlugins();
-+                server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
++                //server.loadPlugins();
++                //server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
 +                // Lava end
 +                if (worlddata == null) {
 +                    worlddata = new WorldInfo(worldsettings, worldNameIn);
