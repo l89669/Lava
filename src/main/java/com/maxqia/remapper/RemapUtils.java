@@ -9,30 +9,19 @@ import java.lang.reflect.Method;
  */
 public class RemapUtils {
 
-    private static final Method GET_CALLER_CLASS;
-
-    static {
-        try {
-            final Class<?> reflection = Class.forName("sun.reflect.Reflection");
-            Method getCallerClass = reflection.getMethod("getCallerClass", int.class);
-            GET_CALLER_CLASS = getCallerClass;
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("getCallerClass doesn't exist!");
-        }
-    }
+    private static SecurityManager securityManager = new SecurityManager();
 
     public static Class<?> getCallerClass(int skip) {
-        if (GET_CALLER_CLASS != null) {
-            try {
-                return (Class<?>) GET_CALLER_CLASS.invoke(null, skip + 1);
-            } catch (ReflectiveOperationException e) {
-                throw new AssertionError(e.getMessage());
-            }
-        }
-        throw new RuntimeException("getCallerClass doesn't exist!");
+        return securityManager.getCallerClass(skip);
     }
 
     public static ClassLoader getCallerClassloader() {
         return getCallerClass(3).getClassLoader();
+    }
+
+    static class SecurityManager extends java.lang.SecurityManager {
+        public Class<?> getCallerClass(int skip) {
+            return getClassContext()[skip + 1];
+        }
     }
 }

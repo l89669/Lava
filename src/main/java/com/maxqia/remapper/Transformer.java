@@ -2,6 +2,9 @@ package com.maxqia.remapper;
 
 import net.md_5.specialsource.JarMapping;
 import net.md_5.specialsource.JarRemapper;
+import net.md_5.specialsource.provider.JointProvider;
+import net.md_5.specialsource.transformer.MavenShade;
+import org.lavapowered.lava.internal.Lava;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -10,23 +13,48 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import thermos.ThermosRemapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ListIterator;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class Transformer {
 
     public static JarMapping jarMapping;
     public static JarRemapper remapper;
 
-    public static void init(JarMapping mapping, JarRemapper remapper) {
-        if (Transformer.jarMapping == null) {
-            Transformer.jarMapping = mapping;
+    public static void init() {
+        jarMapping = new JarMapping();
+        try {
+            jarMapping.packages.put("org/bukkit/craftbukkit/libs/it/unimi/dsi/fastutil", "it/unimi/dsi/fastutil");
+            jarMapping.packages.put("org/bukkit/craftbukkit/libs/jline", "jline");
+            jarMapping.packages.put("org/bukkit/craftbukkit/libs/joptsimple", "joptsimple");
+            jarMapping.methods.put("org/bukkit/Bukkit/getOnlinePlayers ()[Lorg/bukkit/entity/Player;", "_INVALID_getOnlinePlayers");
+
+            Map<String, String> relocations = new HashMap<String, String>();
+            relocations.put("net.minecraft.server", "net.minecraft.server.v1_12_R1");
+
+            jarMapping.loadMappings(
+                    new BufferedReader(new InputStreamReader(Transformer.class.getClassLoader().getResourceAsStream("mappings/NMSMappings.srg"))),
+                    new MavenShade(relocations),
+                    null, false);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (Transformer.remapper == null) {
-            Transformer.remapper = remapper;
+        JointProvider provider = new JointProvider();
+        provider.add(new ClassInheritanceProvider());
+        jarMapping.setFallbackInheritanceProvider(provider);
+        remapper = new ThermosRemapper(jarMapping);
+    }
+
+    public static String mapClass(String className) {
+        String tRemapped = JarRemapper.mapTypeName(className, jarMapping.packages, jarMapping.classes, className);
+        if (tRemapped.equals(className) && className.startsWith(Lava.getNmsPrefix()) && !className.contains(Lava.getNativeVersion())) {
+            String tNewClassStr = Lava.getNmsPrefix() + Lava.getNativeVersion() + "/" + className.substring(Lava.getNmsPrefix().length());
+            return JarRemapper.mapTypeName(tNewClassStr, jarMapping.packages, jarMapping.classes, className);
         }
+        return tRemapped;
     }
 
     /**
@@ -41,12 +69,16 @@ public class Transformer {
             ListIterator<AbstractInsnNode> insnIterator = method.instructions.iterator();
             while (insnIterator.hasNext()) {
                 AbstractInsnNode insn = insnIterator.next();
-                switch (insn.getOpcode()) {
+                if (!(insn instanceof MethodInsnNode)) {
+                    continue;
+                }
+                MethodInsnNode mi = (MethodInsnNode) insn;
+                switch (mi.getOpcode()) {
                     case Opcodes.INVOKEVIRTUAL:
-                        remapVirtual(insn);
+                        remapVirtual(mi);
                         break;
                     case Opcodes.INVOKESTATIC:
-                        remapForName(insn);
+                        remapForName(mi);
                         break;
                 }
             }
@@ -62,19 +94,21 @@ public class Transformer {
         if (!"java/lang/Class".equals(method.owner) || !"forName".equals(method.name)) {
             return;
         }
-        method.owner = "com/maxqia/remapper/RemappedMethods";
-        ;
+        method.owner = Type.getInternalName(RemappedMethods.class);
     }
 
     public static void remapVirtual(AbstractInsnNode insn) {
         MethodInsnNode method = (MethodInsnNode) insn;
 
-        if (!("java/lang/Package".equals(method.owner) && "getName".equals(method.name)) &&
-                !("java/lang/Class".equals(method.owner) && ("getField".equals(method.name) || "getDeclaredField".equals(method.name)
-                        || "getMethod".equals(method.name) || "getDeclaredMethod".equals(method.name)
-                        || "getName".equals(method.name) || "getSimpleName".equals(method.name))) &&
-                !("java/lang/reflect/Field".equals(method.owner) && "getName".equals(method.name)) &&
-                !("java/lang/reflect/Method".equals(method.owner) && "getName".equals(method.name))) {
+        if (!(("java/lang/Class".equals(method.owner) && ("getField".equals(method.name)
+                || "getDeclaredField".equals(method.name)
+                || "getMethod".equals(method.name)
+                || "getDeclaredMethod".equals(method.name)
+                || "getSimpleName".equals(method.name))
+        )
+                || ("getName".equals(method.name) && ("java/lang/reflect/Field".equals(method.owner)
+                || "java/lang/reflect/Method".equals(method.owner)))
+                || ("java/lang/ClassLoader".equals(method.owner) && "loadClass".equals(method.name)))) {
             return;
         }
 
@@ -85,7 +119,7 @@ public class Transformer {
         args.addAll(Arrays.asList(Type.getArgumentTypes(method.desc)));
 
         method.setOpcode(Opcodes.INVOKESTATIC);
-        method.owner = "com/maxqia/remapper/RemappedMethods";
+        method.owner = Type.getInternalName(RemappedMethods.class);
         method.desc = Type.getMethodDescriptor(returnType, args.toArray(new Type[args.size()]));
     }
 

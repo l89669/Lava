@@ -1,12 +1,17 @@
 package com.maxqia.remapper;
 
+import org.lavapowered.lava.internal.Lava;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
-
-import static com.maxqia.remapper.Utils.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RemappedMethods {
+
+    private final static ConcurrentHashMap<String, String> fields = new ConcurrentHashMap<>();
+    private final static ConcurrentHashMap<String, String> methods = new ConcurrentHashMap<>();
+    private final static ConcurrentHashMap<String, String> simpleNames = new ConcurrentHashMap<>();
 
     // Classes
     public static Class<?> forName(String className) throws ClassNotFoundException {
@@ -14,7 +19,7 @@ public class RemappedMethods {
     } // Class.forName(String) grabs the caller's classloader, we replicate that
 
     public static Class<?> forName(String className, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
-        if (!className.startsWith("net.minecraft.server.v1_12_R1")) {
+        if (!className.startsWith("net.minecraft.server." + Lava.getNmsPrefix())) {
             return Class.forName(className, initialize, classLoader);
         }
         className = Transformer.jarMapping.classes.getOrDefault(className.replace('.', '/'), className).replace('/', '.');
@@ -23,79 +28,109 @@ public class RemappedMethods {
 
     // Get Fields
     public static Field getField(Class<?> inst, String name) throws NoSuchFieldException, SecurityException {
-        return inst.getField(Transformer.remapper.mapFieldName(
-                reverseMap(inst), name, null));
+        if (!inst.getName().startsWith("net.minecraft.")) {
+            return inst.getField(name);
+        }
+        return inst.getField(Transformer.remapper.mapFieldName(Utils.reverseMap(inst), name, null));
     }
 
     public static Field getDeclaredField(Class<?> inst, String name) throws NoSuchFieldException, SecurityException {
-        return inst.getDeclaredField(Transformer.remapper.mapFieldName(
-                reverseMap(inst), name, null));
+        if (!inst.getName().startsWith("net.minecraft.")) {
+            return inst.getDeclaredField(name);
+        }
+        return inst.getDeclaredField(Transformer.remapper.mapFieldName(Utils.reverseMap(inst), name, null));
     }
 
     // Get Methods
     public static Method getMethod(Class<?> inst, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
-        return inst.getMethod(mapMethod(inst, name, parameterTypes), parameterTypes);
+        if (!inst.getName().startsWith("net.minecraft.")) {
+            return inst.getMethod(name, parameterTypes);
+        }
+        return inst.getMethod(Utils.mapMethod(inst, name, parameterTypes), parameterTypes);
     }
 
     public static Method getDeclaredMethod(Class<?> inst, String name, Class<?>... parameterTypes) throws NoSuchMethodException, SecurityException {
-        return inst.getDeclaredMethod(mapMethod(inst, name, parameterTypes), parameterTypes);
+        if (!inst.getName().startsWith("net.minecraft.")) {
+            return inst.getDeclaredMethod(name, parameterTypes);
+        }
+        return inst.getDeclaredMethod(Utils.mapMethod(inst, name, parameterTypes), parameterTypes);
     }
 
     // getName
     public static String getName(Field field) {
-        String name = field.getName();
-        String match = reverseMap(field.getDeclaringClass());
-
-        for (Map.Entry<String, String> entry : Transformer.jarMapping.fields.entrySet()) {
-            if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
-                String[] matched = entry.getKey().split("\\/");
-                return matched[matched.length - 1];
-            }
+        if (!field.getDeclaringClass().getName().startsWith("net.minecraft.")) {
+            return field.getName();
         }
-
-        return name;
+        String hash = String.valueOf(field.hashCode());
+        String cache = fields.get(hash);
+        if (cache != null) {
+            return cache;
+        }
+        String retn = demapFieldName(field);
+        fields.put(hash, retn);
+        return retn;
     }
 
     public static String getName(Method method) {
-        String name = method.getName();
-        String match = reverseMap(method.getDeclaringClass());
+        if (!method.getDeclaringClass().getName().startsWith("net.minecraft.")) {
+            return method.getName();
+        }
+        String hash = String.valueOf(method.hashCode());
+        String cache = methods.get(hash);
+        if (cache != null) {
+            return cache;
+        }
+        String retn = demapMethodName(method);
+        methods.put(hash, retn);
+        return retn;
+    }
 
-        for (Map.Entry<String, String> entry : Transformer.jarMapping.methods.entrySet()) {
-            if (entry.getKey().startsWith(match) && entry.getValue().equals(name)) {
-                String[] matched = entry.getKey().split("\\s+")[0].split("/");
-                return matched[matched.length - 1];
-            }
+    public static String demapFieldName(Field field) {
+        String name = field.getName();
+        String match = Utils.reverseMap(field.getDeclaringClass());
+        Map<String, String> map = Transformer.jarMapping.fields;
+        for (String value : map.keySet()) {
+            String[] matched = value.split("\\/");
+            String rtr = matched[matched.length - 1];
+            return rtr;
         }
 
         return name;
     }
 
-    // Package names
-    public static String getName(Package inst) {
-        if (inst == null) {
-            return null;
+    public static String demapMethodName(Method method) {
+        String name = method.getName();
+        String match = Utils.reverseMap(method.getDeclaringClass());
+        Map<String, String> map = Transformer.jarMapping.methods;
+        for (String value : map.keySet()) {
+            String[] matched = value.split("\\s+")[0].split("\\/");
+            String rtr = matched[matched.length - 1];
+            return rtr;
         }
-        String name = inst.getName();
-        String check = name.replace('.', '/').concat("/");
-        for (Map.Entry<String, String> entry : Transformer.jarMapping.packages.entrySet()) {
-            if (entry.getValue().equals(check)) {
-                String match = entry.getKey().replace('/', '.');
-                match = match.substring(0, match.length() - 1);
-                return match;
-            }
 
-        }
         return name;
     }
 
     // getSimpleName
     public static String getSimpleName(Class<?> inst) {
-        String[] name = getName(inst).split("\\.");
-        return name[name.length - 1];
+        if (!inst.getName().startsWith("net.minecraft.")) {
+            return inst.getSimpleName();
+        }
+        String hash = String.valueOf(inst.hashCode());
+        String cache = simpleNames.get(hash);
+        if (cache != null) {
+            return cache;
+        }
+        String[] name = Utils.reverseMapExternal(inst).split("\\.");
+        String SimpleName = name[name.length - 1];
+        simpleNames.put(hash, SimpleName);
+        return SimpleName;
     }
 
-    public static String getName(Class<?> inst) {
-        return reverseMapExternal(inst);
+    public static Class<?> loadClass(ClassLoader inst, String className) throws ClassNotFoundException {
+        if (className.startsWith("net.minecraft.")) {
+            className = Transformer.mapClass(className.replace('.', '/')).replace('/', '.');
+        }
+        return inst.loadClass(className);
     }
-
 }

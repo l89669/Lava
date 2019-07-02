@@ -2,8 +2,6 @@ package com.maxqia.remapper;
 
 import org.objectweb.asm.Type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 public class Utils {
@@ -16,12 +14,7 @@ public class Utils {
     }
 
     public static String reverseMap(String check) {
-        for (Map.Entry<String, String> entry : Transformer.jarMapping.classes.entrySet()) {
-            if (entry.getValue().equals(check)) {
-                return entry.getKey();
-            }
-        }
-        return check;
+        return Transformer.jarMapping.classes.getOrDefault(check, check);
     }
 
     public static String mapMethod(Class<?> inst, String name, Class<?>... parameterTypes) {
@@ -35,36 +28,27 @@ public class Utils {
     public static String mapMethodInternal(Class<?> inst, String name, Class<?>... parameterTypes) {
         String match = reverseMap(inst) + "/" + name;
 
-        for (Map.Entry<String, String> entry : Transformer.jarMapping.methods.entrySet()) {
-            if (entry.getKey().startsWith(match)) {
-
-                // Check type to see if it matches
-                String[] str = entry.getKey().split("\\s+");
-                int i = 0;
-                boolean failed = false;
-                for (Type type : Type.getArgumentTypes(str[1])) {
-                    if (!type.getClassName().equals(reverseMapExternal(parameterTypes[i]))) {
-                        failed = true;
-                        break;
-                    }
+        Map<String, String> map = Transformer.jarMapping.methods;
+        for (String value : map.keySet()) {
+            String[] str = value.split("\\s+");
+            int i = 0;
+            for (Type type : Type.getArgumentTypes(str[1])) {
+                if (i >= parameterTypes.length || !type.getClassName().equals(reverseMapExternal(parameterTypes[i]))) {
+                    i = -1;
+                    break;
                 }
+                i++;
+            }
 
-                if (!failed) {
-                    return entry.getValue();
-                }
+            if (i >= parameterTypes.length) {
+                return map.get(value);
             }
         }
 
-        // Search interfaces
-        ArrayList<Class<?>> parents = new ArrayList<>();
-        parents.add(inst.getSuperclass());
-        parents.addAll(Arrays.asList(inst.getInterfaces()));
-
-        for (Class<?> superClass : parents) {
-            if (superClass == null) {
-                continue;
-            }
-            mapMethodInternal(superClass, name, parameterTypes);
+        Class interfaces = inst.getSuperclass();
+        if (interfaces != null) {
+            String superMethodName = mapMethodInternal(interfaces, name, parameterTypes);
+            return String.valueOf(superMethodName);
         }
         return null;
     }
