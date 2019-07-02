@@ -188,7 +188,8 @@ build.dependsOn signUniversal
 installer.dependsOn signUniversal
 
 outputJar {
-    classifier = 'universal'
+    classifier = 'server'
+    archivesBaseName = 'lavaserver-1.12.2'
 
     manifest.attributes([
             "Implementation-Title": "Lava",
