@@ -1894,11 +1894,6 @@
 +    public static MinecraftServer getServerInstance() {
 +        return instance;
 +    }
-
-+    // For plugin compat
-+    public static MinecraftServer getServerInst() {
-+        return instance;
-+    }
 +
 +    @Nullable
 +    @Deprecated
