@@ -248,7 +248,7 @@ task dumpLibs(type: Copy) {
 
 task renameArtifacts(type: Copy) {
     from ('build/distributions/')
-    include 'Lava-' + version + '.jar'
+    include 'Lava-git-Lava-' + versioning.info.build + '.jar'
     destinationDir file('build/distributions/')
-    rename 'Lava-' + version + '.jar', "lavaserver-1.12.2.jar"
+    rename 'Lava-git-Lava-' + versioning.info.build + '.jar', "lavaserver-1.12.2.jar"
 }
