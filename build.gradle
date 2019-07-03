@@ -245,3 +245,10 @@ task dumpLibs(type: Copy) {
     into "$buildDir/libs/libraries"
     from configurations.compile
 }
+
+task renameArtifacts(type: Copy) {
+    from ('build/distributions/')
+    include 'Lava-' + version + '.jar'
+    destinationDir file('build/distributions/')
+    rename 'Lava-' + version + '.jar', "lavaserver-1.12.2.jar"
+}
