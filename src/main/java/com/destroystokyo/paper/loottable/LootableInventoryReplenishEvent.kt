@@ -5,7 +5,7 @@ import org.bukkit.event.Cancellable
 import org.bukkit.event.HandlerList
 import org.bukkit.event.player.PlayerEvent
 
-class LootableInventoryReplenishEvent(player: Player, val inventory: LootableInventory) : PlayerEvent(player), Cancellable {
+open class LootableInventoryReplenishEvent(player: Player, val inventory: LootableInventory) : PlayerEvent(player), Cancellable {
 
     private var cancelled = false
 
