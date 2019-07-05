@@ -44,3 +44,30 @@ Feel free to drop in on the [LavaPowered Discord](https://discord.gg/QuEhEXY).
 ## Donate/Support
 
 You can pledge to support GMatrixGames and his team's work through a one-time [PayPal](http://paypal.me/GMatrixCodes) donation.
+
+## Build Requirements
+* Java 8u222 JDK or higher *(Tested using AdoptOpenJDK 8u222 with Eclipse OpenJ9 VM)*
+
+## Build Instructions
+* Clone Project
+    * You can use an IDE or clone from a terminal
+    `git clone https://github.com/LavaPowered/Lava`
+* Setup
+    `git submodule update --init --recursive`
+* Build
+    * Linux / Git Bash / MacOS
+    `./gradlew launch4j`
+    * Windows
+    `.\gradlew.bat launch4j`
+
+All builds are available in `build/distributions`
+
+## Updating local repository
+
+* Pull from source
+    * `git pull origin`
+* Reapply patches & build bianaries
+    * Linux / Git Bash / MacOS
+    `./gradlew clean launch4j`
+    * Windows
+    `.\gradlew.bat clean launch4j`
