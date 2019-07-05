@@ -87,6 +87,8 @@ public interface PluginManager {
      */
     public void disablePlugins();
 
+    public void disablePlugin(Plugin plugin, boolean closeClassloader);
+
     /**
      * Disables and removes all plugins
      */

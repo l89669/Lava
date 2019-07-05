@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.logging.Logger;
 
 /**
  * A ClassLoader for plugins, to allow shared classes across multiple plugins
@@ -41,6 +42,7 @@ final class PluginClassLoader extends URLClassLoader {
     final JavaPlugin plugin;
     private JavaPlugin pluginInit;
     private IllegalStateException pluginState;
+    private Logger logger; // Paper add field
 
     private JarRemapper remapper;
     private JarMapping jarMapping;
@@ -56,6 +58,7 @@ final class PluginClassLoader extends URLClassLoader {
         this.jar = new JarFile(file);
         this.manifest = jar.getManifest();
         this.url = file.toURI().toURL();
+        this.logger = com.destroystokyo.paper.utils.PaperPluginLogger.getLogger(description); // Paper - Register logger early
         jarMapping = new JarMapping();
 
         try {
@@ -166,6 +169,7 @@ final class PluginClassLoader extends URLClassLoader {
         pluginState = new IllegalStateException("Initial initialization");
         this.pluginInit = javaPlugin;
 
+        javaPlugin.logger = this.logger; // Paper - set logger
         javaPlugin.init(loader, loader.server, description, dataFolder, file, this);
     }
 

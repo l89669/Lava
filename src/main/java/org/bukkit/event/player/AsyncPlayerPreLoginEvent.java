@@ -1,5 +1,7 @@
 package org.bukkit.event.player;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -25,7 +27,24 @@ public class AsyncPlayerPreLoginEvent extends Event {
     }
 
     public AsyncPlayerPreLoginEvent(final String name, final InetAddress ipAddress, final UUID uniqueId) {
+        // Paper start
+        this(name, ipAddress, uniqueId, Bukkit.createProfile(uniqueId, name));
+    }
+
+    private PlayerProfile profile;
+
+    public PlayerProfile getPlayerProfile() {
+        return profile;
+    }
+
+    public void setPlayerProfile(PlayerProfile profile) {
+        this.profile = profile;
+    }
+
+    public AsyncPlayerPreLoginEvent(final String name, final InetAddress ipAddress, final UUID uniqueId, PlayerProfile profile) {
         super(true);
+        this.profile = profile;
+        // Paper end
         this.result = Result.ALLOWED;
         this.message = "";
         this.name = name;

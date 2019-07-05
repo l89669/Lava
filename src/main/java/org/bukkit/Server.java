@@ -26,6 +26,8 @@ import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serializable;
@@ -216,6 +218,7 @@ public interface Server extends PluginMessageRecipient {
     public int broadcastMessage(String message);
 
     // Paper start
+
     /**
      * Sends the component to all online players.
      *
@@ -339,6 +342,9 @@ public interface Server extends PluginMessageRecipient {
      * @return a player object if one was found, null otherwise
      */
     public Player getPlayer(UUID id);
+
+    @Nullable
+    public UUID getPlayerUniqueId(String playerName);
 
     /**
      * Gets the plugin manager for interfacing with plugins.
@@ -925,6 +931,7 @@ public interface Server extends PluginMessageRecipient {
     Entity getEntity(UUID uuid);
 
     // Paper start
+
     /**
      * Gets the current server TPS
      *
@@ -998,4 +1005,42 @@ public interface Server extends PluginMessageRecipient {
 
     Spigot spigot();
     // Spigot end
+
+    // Paper start - allow preventing player name suggestions by default
+
+    /**
+     * Checks if player names should be suggested when a command returns {@code null} as
+     * their tab completion result.
+     *
+     * @return true if player names should be suggested
+     */
+    boolean suggestPlayerNamesWhenNullTabCompletions();
+
+    /**
+     * Creates a PlayerProfile for the specified uuid, with name as null
+     *
+     * @param uuid UUID to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid);
+
+    /**
+     * Creates a PlayerProfile for the specified name, with UUID as null
+     *
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name);
+
+    /**
+     * Creates a PlayerProfile for the specified name/uuid
+     * <p>
+     * Both UUID and Name can not be null at same time. One must be supplied.
+     *
+     * @param uuid UUID to create profile for
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name);
+    // Paper end
 }

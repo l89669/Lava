@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.CachedServerIcon;
 
+import javax.annotation.Nonnull;
 import java.net.InetAddress;
 import java.util.Iterator;
 
@@ -82,7 +83,7 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
         int numPlayers = this.numPlayers;
         if (numPlayers == MAGIC_PLAYER_COUNT) {
             numPlayers = 0;
-            for (@SuppressWarnings("unused") final Player player : this) {
+            for (final Player player : this) {
                 numPlayers++;
             }
         }
@@ -142,7 +143,30 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
      *                                       not support removing players
      */
     @Override
+    @Nonnull
     public Iterator<Player> iterator() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
+
+    // Paper start
+    private java.util.List<String> sample;
+
+    /**
+     * @param sample the new player list sample
+     * @deprecated Will be replaced in 1.13
+     */
+    @Deprecated
+    public void setSampleText(java.util.List<String> sample) {
+        this.sample = sample;
+    }
+
+    /**
+     * @return the player list sample
+     * @deprecated Will be replaced in 1.13
+     */
+    @Deprecated
+    public java.util.List<String> getSampleText() {
+        return sample;
+    }
+    // Paper end
 }

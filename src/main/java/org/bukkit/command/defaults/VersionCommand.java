@@ -236,18 +236,16 @@ public class VersionCommand extends BukkitCommand {
 
     private static int getFromJenkins(int currentVer) {
         try {
-            BufferedReader reader = Resources.asCharSource(
+            // Lava
+            try (BufferedReader reader = Resources.asCharSource(
                     new URL("https://ci.codemc.org/job/LavaPowered/job/Lava/lastSuccessfulBuild/buildNumber"), // Lava
                     Charsets.UTF_8
-            ).openBufferedStream();
-            try {
+            ).openBufferedStream()) {
                 int newVer = Integer.decode(reader.readLine());
                 return newVer - currentVer;
             } catch (NumberFormatException ex) {
                 ex.printStackTrace();
                 return -2;
-            } finally {
-                reader.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -256,7 +254,7 @@ public class VersionCommand extends BukkitCommand {
     }
 
     // Contributed by Techcable <Techcable@outlook.com> in GH PR #65 of Paper / Modified by GMatrixGames
-    private static final String BRANCH = "master";
+    private static final String BRANCH = "rewrite";
 
     private static int getFromRepo(String repo, String hash) {
         try {

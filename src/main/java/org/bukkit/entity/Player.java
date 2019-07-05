@@ -1,6 +1,8 @@
 package org.bukkit.entity;
 
 import com.destroystokyo.paper.Title;
+import com.destroystokyo.paper.network.NetworkClient;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
@@ -13,11 +15,12 @@ import org.bukkit.plugin.messaging.PluginMessageRecipient;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 
 /**
  * Represents a player, connected or not
  */
-public interface Player extends HumanEntity, Conversable, CommandSender, OfflinePlayer, PluginMessageRecipient {
+public interface Player extends HumanEntity, Conversable, CommandSender, OfflinePlayer, PluginMessageRecipient, NetworkClient { // Paper - extend NetworkClient
 
     /**
      * Gets the "friendly" name to display of this player. This may include
@@ -383,6 +386,25 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     public void sendMap(MapView map);
 
     // Paper start
+
+    /**
+     * Sends an Action Bar message to the client.
+     * <p>
+     * Use Section symbols for legacy color codes to send formatting.
+     *
+     * @param message The message to send
+     */
+    public void sendActionBar(String message);
+
+    /**
+     * Sends an Action Bar message to the client.
+     * <p>
+     * Use supplied alternative character to the section symbol to represent legacy color codes.
+     *
+     * @param alternateChar Alternate symbol such as '&'
+     * @param message       The message to send
+     */
+    public void sendActionBar(char alternateChar, String message);
 
     /**
      * Sends the component to the player
@@ -884,7 +906,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param amount Exp amount to give
      */
-    public void giveExp(int amount);
+    public void giveExp(int amount, boolean applyMending);
+
+    public Integer applyMending(int amount);
 
     /**
      * Gives the player the amount of experience levels specified. Levels can
@@ -1751,5 +1775,149 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * was {@link org.bukkit.event.player.PlayerResourcePackStatusEvent.Status#SUCCESSFULLY_LOADED}
      */
     boolean hasResourcePack();
+
+    PlayerProfile getPlayerProfile();
+
+    void setPlayerProfile(PlayerProfile profile);
+
+    /**
+     * Permanently Bans the Profile and IP address currently used by the player.
+     *
+     * @param reason Reason for ban
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerFull(String reason) {
+        return banPlayerFull(reason, null, null);
+    }
+
+    /**
+     * Permanently Bans the Profile and IP address currently used by the player.
+     *
+     * @param reason Reason for ban
+     * @param source Source of ban, or null for default
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerFull(String reason, String source) {
+        return banPlayerFull(reason, null, source);
+    }
+
+    /**
+     * Bans the Profile and IP address currently used by the player.
+     *
+     * @param reason  Reason for Ban
+     * @param expires When to expire the ban
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerFull(String reason, Date expires) {
+        return banPlayerFull(reason, expires, null);
+    }
+
+    /**
+     * Bans the Profile and IP address currently used by the player.
+     *
+     * @param reason  Reason for Ban
+     * @param expires When to expire the ban
+     * @param source  Source of the ban, or null for default
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerFull(String reason, Date expires, String source) {
+        banPlayer(reason, expires, source);
+        return banPlayerIP(reason, expires, source, true);
+    }
+
+    /**
+     * Permanently Bans the IP address currently used by the player.
+     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
+     *
+     * @param reason     Reason for ban
+     * @param kickPlayer Whether or not to kick the player afterwards
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerIP(String reason, boolean kickPlayer) {
+        return banPlayerIP(reason, null, null, kickPlayer);
+    }
+
+    /**
+     * Permanently Bans the IP address currently used by the player.
+     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
+     *
+     * @param reason     Reason for ban
+     * @param source     Source of ban, or null for default
+     * @param kickPlayer Whether or not to kick the player afterwards
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerIP(String reason, String source, boolean kickPlayer) {
+        return banPlayerIP(reason, null, source, kickPlayer);
+    }
+
+    /**
+     * Bans the IP address currently used by the player.
+     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
+     *
+     * @param reason     Reason for Ban
+     * @param expires    When to expire the ban
+     * @param kickPlayer Whether or not to kick the player afterwards
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerIP(String reason, Date expires, boolean kickPlayer) {
+        return banPlayerIP(reason, expires, null, kickPlayer);
+    }
+
+    /**
+     * Permanently Bans the IP address currently used by the player.
+     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
+     *
+     * @param reason Reason for ban
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerIP(String reason) {
+        return banPlayerIP(reason, null, null);
+    }
+
+    /**
+     * Permanently Bans the IP address currently used by the player.
+     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
+     *
+     * @param reason Reason for ban
+     * @param source Source of ban, or null for default
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerIP(String reason, String source) {
+        return banPlayerIP(reason, null, source);
+    }
+
+    /**
+     * Bans the IP address currently used by the player.
+     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
+     *
+     * @param reason  Reason for Ban
+     * @param expires When to expire the ban
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerIP(String reason, Date expires) {
+        return banPlayerIP(reason, expires, null);
+    }
+
+    /**
+     * Bans the IP address currently used by the player.
+     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
+     *
+     * @param reason  Reason for Ban
+     * @param expires When to expire the ban
+     * @param source  Source of the banm or null for default
+     * @return Ban Entry
+     */
+    public default BanEntry banPlayerIP(String reason, Date expires, String source) {
+        return banPlayerIP(reason, expires, source, true);
+    }
+
+    public default BanEntry banPlayerIP(String reason, Date expires, String source, boolean kickPlayer) {
+        BanEntry banEntry = Bukkit.getServer().getBanList(BanList.Type.IP).addBan(getAddress().getAddress().getHostAddress(), reason, expires, source);
+        if (kickPlayer && isOnline()) {
+            getPlayer().kickPlayer(reason);
+        }
+
+        return banEntry;
+    }
     // Paper end
 }

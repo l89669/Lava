@@ -493,6 +493,7 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
     // Spigot end
 
     // Paper start
+
     /**
      * Gets the location where this entity originates from.
      * <p>
@@ -501,5 +502,14 @@ public interface Entity extends Metadatable, CommandSender, Nameable {
      * @return Location where entity originates or null if not yet added
      */
     Location getOrigin();
+
+    /**
+     * Returns whether this entity was spawned from a mob spawner.
+     *
+     * @return True if entity spawned from a mob spawner
+     */
+    boolean fromMobSpawner();
+
+    Chunk getChunk();
     // Paper end
 }

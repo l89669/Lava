@@ -5,10 +5,12 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -167,6 +169,8 @@ public interface LivingEntity extends Attributable, Entity, Damageable, Projecti
      * @return killer player, or null if none found
      */
     public Player getKiller();
+
+    public void setKiller(@Nullable Player killer);
 
     /**
      * Adds the given {@link PotionEffect} to the living entity.
@@ -377,5 +381,25 @@ public interface LivingEntity extends Attributable, Entity, Damageable, Projecti
      * @param arrows Number of arrows to stick in this entity
      */
     void setArrowsStuck(int arrows);
+
+    int getShieldBlockingDelay();
+
+    void setShieldBlockingDelay(int delay);
+
+    ItemStack getActiveItem();
+
+    int getItemUseRemainingTime();
+
+    int getHandRaisedTime();
+
+    boolean isHandRaised();
+
+    // Paper start - Add method to open already placed sign
+    /**
+     * Opens an editor window for the specified sign
+     *
+     * @param sign The sign to open
+     */
+    void openSign(org.bukkit.block.Sign sign);
     // Paper end
 }

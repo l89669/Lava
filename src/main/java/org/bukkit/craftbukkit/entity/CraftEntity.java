@@ -55,7 +55,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             // Players
             if (entity instanceof EntityPlayer) {
                 if (entity instanceof EntityPlayerMP) {
-                    return new CraftPlayer(server, (EntityPlayer) entity);
+                    return new CraftPlayer(server, (EntityPlayerMP) entity);
                 } else {
                     return new CraftHumanEntity(server, (EntityPlayer) entity);
                 } // TODO add support fake player classes from mods( using FakePlayerFactory.class)

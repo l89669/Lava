@@ -362,7 +362,7 @@ public final class SimplePluginManager implements PluginManager {
      * @param name Name of the plugin to check
      * @return true if the plugin is enabled, otherwise false
      */
-    public boolean isPluginEnabled(String name) {
+    public synchronized boolean isPluginEnabled(String name) {
         Plugin plugin = getPlugin(name);
 
         return isPluginEnabled(plugin);
@@ -374,7 +374,7 @@ public final class SimplePluginManager implements PluginManager {
      * @param plugin Plugin to check
      * @return true if the plugin is enabled, otherwise false
      */
-    public boolean isPluginEnabled(Plugin plugin) {
+    public synchronized boolean isPluginEnabled(Plugin plugin) {
         if ((plugin != null) && (plugins.contains(plugin))) {
             return plugin.isEnabled();
         } else {
@@ -400,17 +400,30 @@ public final class SimplePluginManager implements PluginManager {
         }
     }
 
+    // Paper start - close Classloader on disable
     public void disablePlugins() {
+        disablePlugins(false);
+    }
+
+    // Paper start - close Classloader on disable
+    public synchronized void disablePlugins(boolean closeClassloaders) {
+        // Paper end - close Classloader on disable
         Plugin[] plugins = getPlugins();
         for (int i = plugins.length - 1; i >= 0; i--) {
-            disablePlugin(plugins[i]);
+            disablePlugin(plugins[i], closeClassloaders); // Paper - close Classloader on disable
         }
     }
 
-    public void disablePlugin(final Plugin plugin) {
+    // Paper start - close Classloader on disable
+    public void disablePlugin(Plugin plugin) {
+        disablePlugin(plugin, false);
+    }
+
+    public void disablePlugin(final Plugin plugin, boolean closeClassloader) {
+        // Paper end - close Classloader on disable
         if (plugin.isEnabled()) {
             try {
-                plugin.getPluginLoader().disablePlugin(plugin);
+                plugin.getPluginLoader().disablePlugin(plugin, closeClassloader); // Paper - close Classloader on disable
             } catch (Throwable ex) {
                 handlePluginException("Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex, plugin); // Paper
             }
@@ -451,7 +464,7 @@ public final class SimplePluginManager implements PluginManager {
 
     public void clearPlugins() {
         synchronized (this) {
-            disablePlugins();
+            disablePlugins(true);
             plugins.clear();
             lookupNames.clear();
             HandlerList.unregisterAll();
@@ -462,6 +475,8 @@ public final class SimplePluginManager implements PluginManager {
         }
     }
 
+    private void fireEvent(Event event) { callEvent(event); } // Paper - support old method incase plugin uses reflection
+
     /**
      * Calls an event with the given details.
      * <p>
@@ -470,22 +485,6 @@ public final class SimplePluginManager implements PluginManager {
      * @param event Event details
      */
     public void callEvent(Event event) {
-        if (event.isAsynchronous()) {
-            if (Thread.holdsLock(this)) {
-                throw new IllegalStateException(event.getEventName() + " cannot be triggered asynchronously from inside synchronized code.");
-            }
-            if (server.isPrimaryThread()) {
-                throw new IllegalStateException(event.getEventName() + " cannot be triggered asynchronously from primary server thread.");
-            }
-            fireEvent(event);
-        } else {
-            synchronized (this) {
-                fireEvent(event);
-            }
-        }
-    }
-
-    private void fireEvent(Event event) {
         HandlerList handlers = event.getHandlers();
         RegisteredListener[] listeners = handlers.getRegisteredListeners();
 

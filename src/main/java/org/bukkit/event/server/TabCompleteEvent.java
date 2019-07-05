@@ -1,11 +1,14 @@
 package org.bukkit.event.server;
 
 import org.apache.commons.lang3.Validate;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,13 +18,20 @@ import java.util.List;
 public class TabCompleteEvent extends Event implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
-    //
     private final CommandSender sender;
     private final String buffer;
     private List<String> completions;
     private boolean cancelled;
 
     public TabCompleteEvent(CommandSender sender, String buffer, List<String> completions) {
+        // Paper start
+        this(sender, buffer, completions, sender instanceof ConsoleCommandSender || buffer.startsWith("/"), null);
+    }
+
+    public TabCompleteEvent(CommandSender sender, String buffer, List<String> completions, boolean isCommand, Location location) {
+        this.isCommand = isCommand;
+        this.loc = location;
+        // Paper end
         Validate.notNull(sender, "sender");
         Validate.notNull(buffer, "buffer");
         Validate.notNull(completions, "completions");
@@ -59,6 +69,25 @@ public class TabCompleteEvent extends Event implements Cancellable {
         return completions;
     }
 
+    // Paper start
+    private final boolean isCommand;
+    private final Location loc;
+
+    /**
+     * @return True if it is a command being tab completed, false if it is a chat message.
+     */
+    public boolean isCommand() {
+        return isCommand;
+    }
+
+    /**
+     * @return The position looked at by the sender, or null if none
+     */
+    public Location getLocation() {
+        return loc;
+    }
+    // Paper end
+
     /**
      * Set the completions offered, overriding any already set.
      *
@@ -66,7 +95,7 @@ public class TabCompleteEvent extends Event implements Cancellable {
      */
     public void setCompletions(List<String> completions) {
         Validate.notNull(completions);
-        this.completions = completions;
+        this.completions = new ArrayList<>(completions); // Paper
     }
 
     @Override
