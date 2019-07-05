@@ -194,7 +194,7 @@ installer.dependsOn signUniversal
 
 outputJar {
     classifier = 'server'
-    archivesBaseName = 'lavaserver-1.12.2'
+    archiveName = "lavaserver-1.12.2.jar"
 
     manifest.attributes([
             "Implementation-Title": "Lava",
@@ -249,13 +249,6 @@ String getServerClasspath(File file) {
 task dumpLibs(type: Copy) {
     into "$buildDir/libs/libraries"
     from configurations.compile
-}
-
-task renameArtifacts(type: Copy) {
-    from ('build/distributions/')
-    include 'Lava-git-Lava-' + versioning.info.build + '.jar'
-    destinationDir file('build/distributions/')
-    rename 'Lava-git-Lava-' + versioning.info.build + '.jar', "lavaserver-1.12.2.jar"
 }
 
 compileKotlin {
