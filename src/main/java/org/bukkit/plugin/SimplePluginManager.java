@@ -1,23 +1,9 @@
 package org.bukkit.plugin;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.destroystokyo.paper.event.server.ServerExceptionEvent;
+import com.destroystokyo.paper.exception.ServerEventException;
+import com.destroystokyo.paper.exception.ServerPluginEnableDisableException;
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -32,30 +18,36 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.util.FileUtil;
 
-import com.google.common.collect.ImmutableSet;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Handles all plugin management from the Server
  */
 public final class SimplePluginManager implements PluginManager {
     private final Server server;
-    private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<Pattern, PluginLoader>();
-    private final List<Plugin> plugins = new ArrayList<Plugin>();
-    private final Map<String, Plugin> lookupNames = new HashMap<String, Plugin>();
+    private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<>();
+    private final List<Plugin> plugins = new ArrayList<>();
+    private final Map<String, Plugin> lookupNames = new HashMap<>();
     private File updateDirectory;
     private final SimpleCommandMap commandMap;
-    private final Map<String, Permission> permissions = new HashMap<String, Permission>();
-    private final Map<Boolean, Set<Permission>> defaultPerms = new LinkedHashMap<Boolean, Set<Permission>>();
-    private final Map<String, Map<Permissible, Boolean>> permSubs = new HashMap<String, Map<Permissible, Boolean>>();
-    private final Map<Boolean, Map<Permissible, Boolean>> defSubs = new HashMap<Boolean, Map<Permissible, Boolean>>();
+    private final Map<String, Permission> permissions = new HashMap<>();
+    private final Map<Boolean, Set<Permission>> defaultPerms = new LinkedHashMap<>();
+    private final Map<String, Map<Permissible, Boolean>> permSubs = new HashMap<>();
+    private final Map<Boolean, Map<Permissible, Boolean>> defSubs = new HashMap<>();
     private boolean useTimings = false;
 
     public SimplePluginManager(Server instance, SimpleCommandMap commandMap) {
         server = instance;
         this.commandMap = commandMap;
 
-        defaultPerms.put(true, new HashSet<Permission>());
-        defaultPerms.put(false, new HashSet<Permission>());
+        defaultPerms.put(true, new HashSet<>());
+        defaultPerms.put(false, new HashSet<>());
     }
 
     /**
@@ -63,7 +55,7 @@ public final class SimplePluginManager implements PluginManager {
      *
      * @param loader Class name of the PluginLoader to register
      * @throws IllegalArgumentException Thrown when the given Class is not a
-     *     valid PluginLoader
+     *                                  valid PluginLoader
      */
     public void registerInterface(Class<? extends PluginLoader> loader) throws IllegalArgumentException {
         PluginLoader instance;
@@ -147,11 +139,11 @@ public final class SimplePluginManager implements PluginManager {
             File replacedFile = plugins.put(description.getName(), file);
             if (replacedFile != null) {
                 server.getLogger().severe(String.format(
-                    "Ambiguous plugin name `%s' for files `%s' and `%s' in `%s'",
-                    description.getName(),
-                    file.getPath(),
-                    replacedFile.getPath(),
-                    directory.getPath()
+                        "Ambiguous plugin name `%s' for files `%s' and `%s' in `%s'",
+                        description.getName(),
+                        file.getPath(),
+                        replacedFile.getPath(),
+                        directory.getPath()
                 ));
             }
 
@@ -203,7 +195,7 @@ public final class SimplePluginManager implements PluginManager {
                         if (loadedPlugins.contains(dependency)) {
                             dependencyIterator.remove();
 
-                        // We have a dependency not found
+                            // We have a dependency not found
                         } else if (!plugins.containsKey(dependency)) {
                             missingDependency = false;
                             pluginIterator.remove();
@@ -211,9 +203,9 @@ public final class SimplePluginManager implements PluginManager {
                             dependencies.remove(plugin);
 
                             server.getLogger().log(
-                                Level.SEVERE,
-                                "Could not load '" + entry.getValue().getPath() + "' in folder '" + directory.getPath() + "'",
-                                new UnknownDependencyException(dependency));
+                                    Level.SEVERE,
+                                    "Could not load '" + entry.getValue().getPath() + "' in folder '" + directory.getPath() + "'",
+                                    new UnknownDependencyException(dependency));
                             break;
                         }
                     }
@@ -303,10 +295,10 @@ public final class SimplePluginManager implements PluginManager {
      *
      * @param file File containing the plugin to load
      * @return The Plugin loaded, or null if it was invalid
-     * @throws InvalidPluginException Thrown when the specified file is not a
-     *     valid plugin
+     * @throws InvalidPluginException     Thrown when the specified file is not a
+     *                                    valid plugin
      * @throws UnknownDependencyException If a required dependency could not
-     *     be found
+     *                                    be found
      */
     public synchronized Plugin loadPlugin(File file) throws InvalidPluginException, UnknownDependencyException {
         Validate.notNull(file, "File cannot be null");
@@ -401,7 +393,7 @@ public final class SimplePluginManager implements PluginManager {
             try {
                 plugin.getPluginLoader().enablePlugin(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while enabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                handlePluginException("Error occurred (in the plugin loader) while enabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex, plugin);
             }
 
             HandlerList.bakeAll();
@@ -420,35 +412,42 @@ public final class SimplePluginManager implements PluginManager {
             try {
                 plugin.getPluginLoader().disablePlugin(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                handlePluginException("Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex, plugin); // Paper
             }
 
             try {
                 server.getScheduler().cancelTasks(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while cancelling tasks for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                handlePluginException("Error occurred (in the plugin loader) while cancelling tasks for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex, plugin); // Paper
             }
 
             try {
                 server.getServicesManager().unregisterAll(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while unregistering services for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                handlePluginException("Error occurred (in the plugin loader) while unregistering services for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex, plugin); // Paper
             }
 
             try {
                 HandlerList.unregisterAll(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while unregistering events for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                handlePluginException("Error occurred (in the plugin loader) while unregistering events for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex, plugin); // Paper
             }
 
             try {
                 server.getMessenger().unregisterIncomingPluginChannel(plugin);
                 server.getMessenger().unregisterOutgoingPluginChannel(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while unregistering plugin channels for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                handlePluginException("Error occurred (in the plugin loader) while unregistering plugin channels for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex, plugin); // Paper
             }
         }
     }
+
+    // Paper start
+    private void handlePluginException(String msg, Throwable ex, Plugin plugin) {
+        server.getLogger().log(Level.SEVERE, msg, ex);
+        callEvent(new ServerExceptionEvent(new ServerPluginEnableDisableException(msg, ex, plugin)));
+    }
+    // Paper end
 
     public void clearPlugins() {
         synchronized (this) {
@@ -508,10 +507,16 @@ public final class SimplePluginManager implements PluginManager {
                             plugin.getDescription().getAuthors(),
                             plugin.getDescription().getFullName(),
                             ex.getMessage()
-                            ));
+                    ));
                 }
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getPlugin().getDescription().getFullName(), ex);
+                // Paper start - error reporting
+                String msg = "Could not pass event " + event.getEventName() + " to " + registration.getPlugin().getDescription().getFullName();
+                server.getLogger().log(Level.SEVERE, msg, ex);
+                if (!(event instanceof ServerExceptionEvent)) { // We don't want to cause an endless event loop
+                    callEvent(new ServerExceptionEvent(new ServerEventException(msg, ex, registration.getPlugin(), registration.getListener(), event)));
+                }
+                // Paper end
             }
         }
     }
@@ -535,13 +540,13 @@ public final class SimplePluginManager implements PluginManager {
      * Registers the given event to the specified listener using a directly
      * passed EventExecutor
      *
-     * @param event Event class to register
-     * @param listener PlayerListener to register
-     * @param priority Priority of this event
-     * @param executor EventExecutor to register
-     * @param plugin Plugin to register
+     * @param event           Event class to register
+     * @param listener        PlayerListener to register
+     * @param priority        Priority of this event
+     * @param executor        EventExecutor to register
+     * @param plugin          Plugin to register
      * @param ignoreCancelled Do not call executor if event was already
-     *     cancelled
+     *                        cancelled
      */
     public void registerEvent(Class<? extends Event> event, Listener listener, EventPriority priority, EventExecutor executor, Plugin plugin, boolean ignoreCancelled) {
         Validate.notNull(listener, "Listener cannot be null");

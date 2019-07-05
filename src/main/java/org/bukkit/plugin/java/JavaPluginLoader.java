@@ -34,8 +34,8 @@ import java.util.regex.Pattern;
 public final class JavaPluginLoader implements PluginLoader {
     final Server server;
     private final Pattern[] fileFilters = new Pattern[]{Pattern.compile("\\.jar$"),};
-    private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<String, Class<?>>(); // Spigot
-    private final List<PluginClassLoader> loaders = new CopyOnWriteArrayList<PluginClassLoader>();
+    private final Map<String, Class<?>> classes = new java.util.concurrent.ConcurrentHashMap<>(); // Spigot
+    private final List<PluginClassLoader> loaders = new CopyOnWriteArrayList<>();
 
     /**
      * This class was not meant to be constructed explicitly
@@ -316,6 +316,10 @@ public final class JavaPluginLoader implements PluginLoader {
                 jPlugin.setEnabled(true);
             } catch (Throwable ex) {
                 server.getLogger().log(Level.SEVERE, "Error occurred while enabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                // Paper start - Disable plugins that fail to load
+                disablePlugin(jPlugin);
+                return;
+                // Paper end
             }
 
             // Perhaps abort here, rather than continue going, but as it stands,

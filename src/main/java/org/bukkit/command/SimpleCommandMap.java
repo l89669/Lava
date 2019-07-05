@@ -1,5 +1,8 @@
 package org.bukkit.command;
 
+import com.destroystokyo.paper.event.server.ServerExceptionEvent;
+import com.destroystokyo.paper.exception.ServerCommandException;
+import com.destroystokyo.paper.exception.ServerTabCompleteException;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -133,9 +136,12 @@ public class SimpleCommandMap implements CommandMap {
             // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
             target.execute(sender, sentCommandLabel, Arrays.copyOfRange(args, 1, args.length));
         } catch (CommandException ex) {
+            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
             throw ex;
         } catch (Throwable ex) {
-            throw new CommandException("Unhandled exception executing '" + commandLine + "' in " + target, ex);
+            String msg = "Unhandled exception executing '" + commandLine + "' in " + target;
+            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
+            throw new CommandException(msg, ex);
         }
 
         // return true as command was handled
@@ -208,7 +214,9 @@ public class SimpleCommandMap implements CommandMap {
         } catch (CommandException ex) {
             throw ex;
         } catch (Throwable ex) {
-            throw new CommandException("Unhandled exception executing tab-completer for '" + cmdLine + "' in " + target, ex);
+            String msg = "Unhandled exception executing tab-completer for '" + cmdLine + "' in " + target;
+            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerTabCompleteException(msg, ex, target, sender, args))); // Paper
+            throw new CommandException(msg, ex);
         }
     }
 

@@ -3,6 +3,8 @@ package org.bukkit.command;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FormattedCommandAlias extends Command {
     private final String[] formatStrings;
@@ -15,10 +17,10 @@ public class FormattedCommandAlias extends Command {
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         boolean result = false;
-        ArrayList<String> commands = new ArrayList<String>();
+        ArrayList<String> commands = new ArrayList<>();
         for (String formatString : formatStrings) {
             try {
-                commands.add(buildCommand(formatString, args));
+                commands.add(buildCommand(sender, formatString, args)); // Paper
             } catch (Throwable throwable) {
                 if (throwable instanceof IllegalArgumentException) {
                     sender.sendMessage(throwable.getMessage());
@@ -36,7 +38,10 @@ public class FormattedCommandAlias extends Command {
         return result;
     }
 
-    private String buildCommand(String formatString, String[] args) {
+    private String buildCommand(CommandSender sender, String formatString, String[] args) { // Paper
+        if (formatString.contains("$sender")) {
+            formatString = formatString.replaceAll(Pattern.quote("$sender"), Matcher.quoteReplacement(sender.getName())); // Paper
+        }
         int index = formatString.indexOf('$');
         while (index != -1) {
             int start = index;

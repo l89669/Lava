@@ -7,10 +7,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.command.CommandException;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.command.PluginCommand;
+import org.bukkit.command.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -217,6 +214,26 @@ public interface Server extends PluginMessageRecipient {
      * @return the number of players
      */
     public int broadcastMessage(String message);
+
+    // Paper start
+    /**
+     * Sends the component to all online players.
+     *
+     * @param component the component to send
+     */
+    public default void broadcast(net.md_5.bungee.api.chat.BaseComponent component) {
+        spigot().broadcast(component);
+    }
+
+    /**
+     * Sends an array of components as a single message to all online players.
+     *
+     * @param components the components to send
+     */
+    public default void broadcast(net.md_5.bungee.api.chat.BaseComponent... components) {
+        spigot().broadcast(components);
+    }
+    // Paper end
 
     /**
      * Gets the name of the update folder. The update folder is used to safely
@@ -906,6 +923,22 @@ public interface Server extends PluginMessageRecipient {
      * @return the entity with the given UUID, or null if it isn't found
      */
     Entity getEntity(UUID uuid);
+
+    // Paper start
+    /**
+     * Gets the current server TPS
+     *
+     * @return current server TPS (1m, 5m, 15m in Paper-Server)
+     */
+    public double[] getTPS();
+
+    /**
+     * Gets the active {@link CommandMap}
+     *
+     * @return the active command map
+     */
+    CommandMap getCommandMap();
+    // Paper end
 
     /**
      * Get the advancement specified by this key.
