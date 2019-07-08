@@ -37,10 +37,6 @@ repositories {
     maven { url 'https://raw.githubusercontent.com/LavaPowered/LavaPowered/repository' }
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
-
 configurations.all {
     transitive = false
 }
@@ -194,7 +190,6 @@ installer.dependsOn signUniversal
 
 outputJar {
     classifier = 'server'
-    archiveName = "lavaserver-1.12.2.jar"
 
     manifest.attributes([
             "Implementation-Title": "Lava",
@@ -249,6 +244,16 @@ String getServerClasspath(File file) {
 task dumpLibs(type: Copy) {
     into "$buildDir/libs/libraries"
     from configurations.compile
+}
+
+compileJava {
+    dependsOn(':compileKotlin')
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
 }
 
 compileKotlin {
