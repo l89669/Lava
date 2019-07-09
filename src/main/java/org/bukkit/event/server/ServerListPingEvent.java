@@ -1,11 +1,10 @@
 package org.bukkit.event.server;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.CachedServerIcon;
 
-import javax.annotation.Nonnull;
 import java.net.InetAddress;
 import java.util.Iterator;
 
@@ -17,12 +16,11 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
     private static final int MAGIC_PLAYER_COUNT = Integer.MIN_VALUE;
     private static final HandlerList handlers = new HandlerList();
     private final InetAddress address;
-    private String motd;
     private final int numPlayers;
+    private String motd;
     private int maxPlayers;
 
     public ServerListPingEvent(final InetAddress address, final String motd, final int numPlayers, final int maxPlayers) {
-        super(); // Paper - Is this event being fired async?
         Validate.isTrue(numPlayers >= 0, "Cannot have negative number of players online", numPlayers);
         this.address = address;
         this.motd = motd;
@@ -35,16 +33,19 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
      * {@link #iterator()} method, thus provided the {@link #getNumPlayers()}
      * count.
      *
-     * @param address    the address of the pinger
-     * @param motd       the message of the day
+     * @param address the address of the pinger
+     * @param motd the message of the day
      * @param maxPlayers the max number of players
      */
     protected ServerListPingEvent(final InetAddress address, final String motd, final int maxPlayers) {
-        super(); // Paper - Is this event being fired async?
         this.numPlayers = MAGIC_PLAYER_COUNT;
         this.address = address;
         this.motd = motd;
         this.maxPlayers = maxPlayers;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     /**
@@ -83,7 +84,7 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
         int numPlayers = this.numPlayers;
         if (numPlayers == MAGIC_PLAYER_COUNT) {
             numPlayers = 0;
-            for (final Player player : this) {
+            for (@SuppressWarnings("unused") final Player player : this) {
                 numPlayers++;
             }
         }
@@ -112,11 +113,11 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
      * Sets the server-icon sent to the client.
      *
      * @param icon the icon to send to the client
-     * @throws IllegalArgumentException      if the {@link CachedServerIcon} is not
-     *                                       created by the caller of this event; null may be accepted for some
-     *                                       implementations
+     * @throws IllegalArgumentException if the {@link CachedServerIcon} is not
+     *     created by the caller of this event; null may be accepted for some
+     *     implementations
      * @throws UnsupportedOperationException if the caller of this event does
-     *                                       not support setting the server icon
+     *     not support setting the server icon
      */
     public void setServerIcon(CachedServerIcon icon) throws IllegalArgumentException, UnsupportedOperationException {
         throw new UnsupportedOperationException();
@@ -124,10 +125,6 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 
@@ -140,33 +137,10 @@ public class ServerListPingEvent extends ServerEvent implements Iterable<Player>
      * any new iterator.
      *
      * @throws UnsupportedOperationException if the caller of this event does
-     *                                       not support removing players
+     *     not support removing players
      */
     @Override
-    @Nonnull
     public Iterator<Player> iterator() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
-
-    // Paper start
-    private java.util.List<String> sample;
-
-    /**
-     * @param sample the new player list sample
-     * @deprecated Will be replaced in 1.13
-     */
-    @Deprecated
-    public void setSampleText(java.util.List<String> sample) {
-        this.sample = sample;
-    }
-
-    /**
-     * @return the player list sample
-     * @deprecated Will be replaced in 1.13
-     */
-    @Deprecated
-    public java.util.List<String> getSampleText() {
-        return sample;
-    }
-    // Paper end
 }

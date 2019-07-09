@@ -1,6 +1,6 @@
 package org.bukkit.event.entity;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -11,14 +11,18 @@ import org.bukkit.event.HandlerList;
 public class EnderDragonChangePhaseEvent extends EntityEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
-    private boolean cancel;
     private final EnderDragon.Phase currentPhase;
+    private boolean cancel;
     private EnderDragon.Phase newPhase;
 
     public EnderDragonChangePhaseEvent(EnderDragon enderDragon, EnderDragon.Phase currentPhase, EnderDragon.Phase newPhase) {
         super(enderDragon);
         this.currentPhase = currentPhase;
         this.setNewPhase(newPhase);
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     @Override
@@ -67,10 +71,6 @@ public class EnderDragonChangePhaseEvent extends EntityEvent implements Cancella
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

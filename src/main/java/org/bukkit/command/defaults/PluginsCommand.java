@@ -20,7 +20,7 @@ public class PluginsCommand extends BukkitCommand {
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
         if (!testPermission(sender)) return true;
 
-        sender.sendMessage(ChatColor.RED + "Plugins " + getPluginList());
+        sender.sendMessage("Plugins " + getPluginList());
         return true;
     }
 
@@ -43,7 +43,6 @@ public class PluginsCommand extends BukkitCommand {
                 pluginList.append(ChatColor.WHITE);
                 pluginList.append(", ");
             }
-
             pluginList.append(entry.getValue());
             pluginList.append(entry.getKey());
         }

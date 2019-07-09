@@ -5,8 +5,11 @@ package org.bukkit.map;
  */
 public class MinecraftFont extends MapFont {
 
+    /**
+     * A static non-malleable MinecraftFont.
+     */
+    public static final MinecraftFont Font = new MinecraftFont(false);
     private static final int spaceSize = 2;
-
     private static final String fontChars =
             " !\"#$%&'()*+,-./0123456789:;<=>?" +
                     "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_" +
@@ -17,7 +20,6 @@ public class MinecraftFont extends MapFont {
                     "\u00FF\u00D6\u00DC\u00F8\u00A3\u00D8\u00D7\u0191" + // ÿÖÜø£Ø×ƒ
                     "\u00E1\u00ED\u00F3\u00FA\u00F1\u00D1\u00AA\u00BA" + // áíóúñÑªº
                     "\u00BF\u00AE\u00AC\u00BD\u00BC\u00A1\u00AB\u00BB";  // ¿®¬½¼¡«»
-
     private static final int[][] fontData = new int[][]{
             /* null */  {0, 0, 0, 0, 0, 0, 0, 0},
             /* 1 */  {126, 129, 165, 129, 189, 153, 129, 126},
@@ -276,11 +278,6 @@ public class MinecraftFont extends MapFont {
             /* 254 */  {0, 0, 60, 60, 60, 60, 0, 0},
             /* 255 */  {0, 0, 0, 0, 0, 0, 0, 0},
     };
-
-    /**
-     * A static non-malleable MinecraftFont.
-     */
-    public static final MinecraftFont Font = new MinecraftFont(false);
 
     /**
      * Initialize a new MinecraftFont.

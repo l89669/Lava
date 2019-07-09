@@ -35,6 +35,30 @@ public enum PotionType {
         this.extendable = extendable;
     }
 
+    /**
+     * @deprecated Non-functional
+     */
+
+    public static PotionType getByDamageValue(int damage) {
+        return null;
+    }
+
+    /**
+     * @deprecated Misleading
+     */
+
+    public static PotionType getByEffect(PotionEffectType effectType) {
+        if (effectType == null) {
+            return WATER;
+        }
+        for (PotionType type : PotionType.values()) {
+            if (effectType.equals(type.effect)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     public PotionEffectType getEffectType() {
         return effect;
     }
@@ -67,34 +91,12 @@ public enum PotionType {
     /**
      * @deprecated Non-functional
      */
-    @Deprecated
+
     public int getDamageValue() {
         return this.ordinal();
     }
 
     public int getMaxLevel() {
         return upgradeable ? 2 : 1;
-    }
-
-    /**
-     * @deprecated Non-functional
-     */
-    @Deprecated
-    public static PotionType getByDamageValue(int damage) {
-        return null;
-    }
-
-    /**
-     * @deprecated Misleading
-     */
-    @Deprecated
-    public static PotionType getByEffect(PotionEffectType effectType) {
-        if (effectType == null)
-            return WATER;
-        for (PotionType type : PotionType.values()) {
-            if (effectType.equals(type.effect))
-                return type;
-        }
-        return null;
     }
 }

@@ -30,7 +30,7 @@ public enum EntityEffect {
      * @deprecated although this effect may trigger other events on non-living
      * entities, it's only supported usage is on living ones.
      */
-    @Deprecated
+
     DEATH(3, Entity.class),
     // PAIL - SPIGOT-3641 duplicate
     // GOLEM_ATTACK(4, IronGolem.class),
@@ -54,7 +54,7 @@ public enum EntityEffect {
      * @deprecated although this effect may trigger other events on non-living
      * entities, it's only supported usage is on living ones.
      */
-    @Deprecated
+
     SHEEP_EAT(10, Entity.class),
     /**
      * When an Iron Golem gives a rose.
@@ -135,13 +135,33 @@ public enum EntityEffect {
      */
     HURT_EXPLOSION(37, LivingEntity.class);
 
+    private final static Map<Byte, EntityEffect> BY_DATA = Maps.newHashMap();
+
+    static {
+        for (EntityEffect entityEffect : values()) {
+            BY_DATA.put(entityEffect.data, entityEffect);
+        }
+    }
+
     private final byte data;
     private final Class<? extends Entity> applicable;
-    private final static Map<Byte, EntityEffect> BY_DATA = Maps.newHashMap();
 
     EntityEffect(final int data, Class<? extends Entity> clazz) {
         this.data = (byte) data;
         this.applicable = clazz;
+    }
+
+    /**
+     * Gets the EntityEffect with the given data value
+     *
+     * @param data Data value to fetch
+     * @return The {@link EntityEffect} representing the given value, or null
+     *     if it doesn't exist
+     * @deprecated Magic value
+     */
+
+    public static EntityEffect getByData(final byte data) {
+        return BY_DATA.get(data);
     }
 
     /**
@@ -150,7 +170,7 @@ public enum EntityEffect {
      * @return The data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public byte getData() {
         return data;
     }
@@ -162,24 +182,5 @@ public enum EntityEffect {
      */
     public Class<? extends Entity> getApplicable() {
         return applicable;
-    }
-
-    /**
-     * Gets the EntityEffect with the given data value
-     *
-     * @param data Data value to fetch
-     * @return The {@link EntityEffect} representing the given value, or null
-     * if it doesn't exist
-     * @deprecated Magic value
-     */
-    @Deprecated
-    public static EntityEffect getByData(final byte data) {
-        return BY_DATA.get(data);
-    }
-
-    static {
-        for (EntityEffect entityEffect : values()) {
-            BY_DATA.put(entityEffect.data, entityEffect);
-        }
     }
 }

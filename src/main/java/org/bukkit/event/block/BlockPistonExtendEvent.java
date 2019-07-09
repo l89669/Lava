@@ -16,7 +16,6 @@ public class BlockPistonExtendEvent extends BlockPistonEvent {
     private final int length;
     private List<Block> blocks;
 
-    @Deprecated
     public BlockPistonExtendEvent(final Block block, final int length, final BlockFace direction) {
         super(block, direction);
 
@@ -30,14 +29,17 @@ public class BlockPistonExtendEvent extends BlockPistonEvent {
         this.blocks = blocks;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Get the amount of blocks which will be moved while extending.
      *
      * @return the amount of moving blocks
      * @deprecated slime blocks make the value of this method
-     * inaccurate due to blocks being pushed at the side
+     *          inaccurate due to blocks being pushed at the side
      */
-    @Deprecated
     public int getLength() {
         return this.length;
     }
@@ -61,10 +63,6 @@ public class BlockPistonExtendEvent extends BlockPistonEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

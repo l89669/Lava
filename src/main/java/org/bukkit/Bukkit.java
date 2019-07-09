@@ -7,7 +7,10 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
-import org.bukkit.command.*;
+import org.bukkit.command.CommandException;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
@@ -24,6 +27,7 @@ import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
+import org.lavapowered.lava.internal.Lava;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,11 +67,11 @@ public final class Bukkit {
      */
     public static void setServer(Server server) {
         if (Bukkit.server != null) {
-            throw new UnsupportedOperationException("Cannot redefine singleton Server");
+            Bukkit.server = server;
         }
 
         Bukkit.server = server;
-        server.getLogger().info("This server is running " + getName() + " version " + getVersion() + " (Implementing API version " + getBukkitVersion() + ")");
+        Lava.LOGGER.info("This server is running " + getName() + " version " + getVersion() + " (Implementing API version " + getBukkitVersion() + ")");
     }
 
     /**
@@ -272,27 +276,6 @@ public final class Bukkit {
         return server.broadcastMessage(message);
     }
 
-    // Paper start
-
-    /**
-     * Sends the component to all online players.
-     *
-     * @param component the component to send
-     */
-    public static void broadcast(net.md_5.bungee.api.chat.BaseComponent component) {
-        server.broadcast(component);
-    }
-
-    /**
-     * Sends an array of components as a single message to all online players.
-     *
-     * @param components the components to send
-     */
-    public static void broadcast(net.md_5.bungee.api.chat.BaseComponent... components) {
-        server.broadcast(components);
-    }
-    // Paper end
-
     /**
      * Gets the name of the update folder. The update folder is used to safely
      * update plugins at the right moment on a plugin load.
@@ -377,7 +360,10 @@ public final class Bukkit {
      *
      * @param name the name to look up
      * @return a player if one was found, null otherwise
+     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
+     * guaranteed to be unique
      */
+
     public static Player getPlayer(String name) {
         return server.getPlayer(name);
     }
@@ -387,7 +373,10 @@ public final class Bukkit {
      *
      * @param name Exact name of the player to retrieve
      * @return a player object if one was found, null otherwise
+     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
+     * guaranteed to be unique
      */
+
     public static Player getPlayerExact(String name) {
         return server.getPlayerExact(name);
     }
@@ -401,7 +390,10 @@ public final class Bukkit {
      *
      * @param name the (partial) name to match
      * @return list of all possible players
+     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
+     * guaranteed to be unique
      */
+
     public static List<Player> matchPlayer(String name) {
         return server.matchPlayer(name);
     }
@@ -414,11 +406,6 @@ public final class Bukkit {
      */
     public static Player getPlayer(UUID id) {
         return server.getPlayer(id);
-    }
-
-    @Nullable
-    public static UUID getPlayerUniqueId(String playerName) {
-        return server.getPlayerUniqueId(playerName);
     }
 
     /**
@@ -520,7 +507,7 @@ public final class Bukkit {
      * @return a map view if it exists, or null otherwise
      * @deprecated Magic value
      */
-    @Deprecated
+
     public static MapView getMap(short id) {
         return server.getMap(id);
     }
@@ -580,7 +567,7 @@ public final class Bukkit {
      * Dispatches a command on this server, and executes it if found.
      *
      * @param sender      the apparent sender of the command
-     * @param commandLine the command + arguments. Example: <code>test abc
+     * @param commandLine the command arguments. Example: <code>test abc
      *                    123</code>
      * @return returns false if no target is found
      * @throws CommandException thrown when the executor for the given command
@@ -725,7 +712,7 @@ public final class Bukkit {
      * @deprecated Persistent storage of users should be by UUID as names are no longer
      * unique past a single session.
      */
-    @Deprecated
+
     public static OfflinePlayer getOfflinePlayer(String name) {
         return server.getOfflinePlayer(name);
     }
@@ -1085,6 +1072,15 @@ public final class Bukkit {
     }
 
     /**
+     * Gets the idle kick timeout.
+     *
+     * @return the idle timeout in minutes
+     */
+    public static int getIdleTimeout() {
+        return server.getIdleTimeout();
+    }
+
+    /**
      * Set the idle kick timeout. Any players idle for the specified amount of
      * time will be automatically kicked.
      * <p>
@@ -1097,18 +1093,9 @@ public final class Bukkit {
     }
 
     /**
-     * Gets the idle kick timeout.
-     *
-     * @return the idle timeout in minutes
-     */
-    public static int getIdleTimeout() {
-        return server.getIdleTimeout();
-    }
-
-    /**
      * Create a ChunkData for use in a generator.
      * <p>
-     * See {@link ChunkGenerator#generateChunkData(World, java.util.Random, int, int, ChunkGenerator.BiomeGrid)}
+     * See {@link ChunkGenerator#generateChunkData(World, Random, int, int, ChunkGenerator.BiomeGrid)}
      *
      * @param world the world to create the ChunkData for
      * @return a new ChunkData for the world
@@ -1177,24 +1164,13 @@ public final class Bukkit {
      * @return the unsafe values instance
      * @see UnsafeValues
      */
-    @Deprecated
+
     public static UnsafeValues getUnsafe() {
         return server.getUnsafe();
     }
 
     public static Server.Spigot spigot() {
         return server.spigot();
-    }
-
-    // Paper start
-
-    /**
-     * Gets the active {@link CommandMap}
-     *
-     * @return the active command map
-     */
-    public static CommandMap getCommandMap() {
-        return server.getCommandMap();
     }
 
     /**

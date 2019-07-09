@@ -605,7 +605,7 @@
          }
      }
  
-@@ -379,112 +475,108 @@
+@@ -379,112 +475,155 @@
  
      public abstract boolean shouldBroadcastConsoleToOps();
  
@@ -758,61 +758,136 @@
 -        {
 -            if (this.init())
 -            {
++    private static final int TPS = 20;
++    private static final long SEC_IN_NANO = 1000000000;
++    public static final Long TICK_TIME = SEC_IN_NANO / TPS;
++    private static final long MAX_CATCHUP_BUFFER = TICK_TIME * TPS * 60L;
++    private static final Integer SAMPLE_INTERVAL = 20;
++    public final RollingAverage tps1 = new RollingAverage(60);
++    public final RollingAverage tps5 = new RollingAverage(60 * 5);
++    public final RollingAverage tps15 = new RollingAverage(60 * 15);
++    public double[] recentTps = new double[3];
++
++    public static class RollingAverage {
++        private final int size;
++        private long time;
++        private double total;
++        private int index = 0;
++        private final double[] samples;
++        private final long[] times;
++
++        RollingAverage(int size) {
++            this.size = size;
++            this.time = size * SEC_IN_NANO;
++            this.total = TPS * SEC_IN_NANO * size;
++            this.samples = new double[size];
++            this.times = new long[size];
++            for (int i = 0; i < size; i++) {
++                this.samples[i] = TPS;
++                this.times[i] = SEC_IN_NANO;
++            }
++        }
++
++        public void add(double x, long t) {
++            time -= times[index];
++            total -= samples[index] * times[index];
++            samples[index] = x;
++            times[index] = t;
++            time += t;
++            total += x * t;
++            if (++index == size) {
++                index = 0;
++            }
++        }
++
++        public double getAverage() {
++            return total / time;
++        }
++    }
++
 +    public void run() {
 +        try {
 +            if (this.init()) {
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
                  this.currentTime = getCurrentTimeMillis();
                  long i = 0L;
-@@ -492,20 +584,20 @@
+@@ -492,120 +631,113 @@
                  this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                  this.applyServerIconToResponse(this.statusResponse);
  
 -                while (this.serverRunning)
 -                {
-+                while (this.serverRunning) {
-                     long k = getCurrentTimeMillis();
-                     long j = k - this.currentTime;
- 
+-                    long k = getCurrentTimeMillis();
+-                    long j = k - this.currentTime;
+-
 -                    if (j > 2000L && this.currentTime - this.timeOfLastWarning >= 15000L)
 -                    {
 -                        LOGGER.warn("Can't keep up! Did the system time change, or is the server overloaded? Running {}ms behind, skipping {} tick(s)", Long.valueOf(j), Long.valueOf(j / 50L));
-+                    if (j > 2000L && this.currentTime - this.timeOfLastWarning >= 15000L) {
-+                        if (server.getWarnOnOverload()) // CraftBukkit
-+                            LOGGER.warn(
-+                                    "Can't keep up! Did the system time change, or is the server overloaded? Running {}ms behind, skipping {} tick(s)",
-+                                    Long.valueOf(j), Long.valueOf(j / 50L));
-                         j = 2000L;
-                         this.timeOfLastWarning = this.currentTime;
+-                        j = 2000L;
+-                        this.timeOfLastWarning = this.currentTime;
++                // Spigot start
++                Arrays.fill(recentTps, 20);
++                long start = System.nanoTime(), lastTick = start - TICK_TIME, catchupTime = 0, curTime, wait, tickSection = start;
++                while (this.serverRunning) {
++                    this.currentTime = getCurrentTimeMillis();
++                    curTime = System.nanoTime();
++                    wait = TICK_TIME - (curTime - lastTick);
++                    if (wait > 0) {
++                        if (catchupTime < 2E6) {
++                            wait += Math.abs(catchupTime);
++                        } else if (wait < catchupTime) {
++                            catchupTime -= wait;
++                            wait = 0;
++                        } else {
++                            wait -= catchupTime;
++                            catchupTime = 0;
++                        }
                      }
  
 -                    if (j < 0L)
 -                    {
-+                    if (j < 0L) {
-                         LOGGER.warn("Time ran backwards! Did the system time change?");
-                         j = 0L;
+-                        LOGGER.warn("Time ran backwards! Did the system time change?");
+-                        j = 0L;
++                    if (wait > 0) {
++                        Thread.sleep(wait / 1000000);
++                        curTime = System.nanoTime();
++                        wait = TICK_TIME - (curTime - lastTick);
                      }
-@@ -513,15 +605,12 @@
-                     i += j;
-                     this.currentTime = k;
  
+-                    i += j;
+-                    this.currentTime = k;
+-
 -                    if (this.worlds[0].areAllPlayersAsleep())
 -                    {
-+                    if (this.worldServerList.get(0).areAllPlayersAsleep()) {
-                         this.tick();
-                         i = 0L;
--                    }
+-                        this.tick();
+-                        i = 0L;
++                    catchupTime = Math.min(MAX_CATCHUP_BUFFER, catchupTime - wait);
++                    if (++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0) {
++                        final long diff = curTime - tickSection;
++                        double currentTps = 1E9 / diff * SAMPLE_INTERVAL;
++                        tps1.add(currentTps, diff);
++                        tps5.add(currentTps, diff);
++                        tps15.add(currentTps, diff);
++                        // Backwards compat with bad plugins
++                        recentTps[0] = tps1.getAverage();
++                        recentTps[1] = tps5.getAverage();
++                        recentTps[2] = tps15.getAverage();
++                        tickSection = curTime;
+                     }
 -                    else
 -                    {
 -                        while (i > 50L)
 -                        {
-+                    } else {
-+                        while (i > 50L) {
-+                            MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
-                             i -= 50L;
-                             this.tick();
-                         }
-@@ -532,80 +621,67 @@
+-                            i -= 50L;
+-                            this.tick();
+-                        }
+-                    }
+ 
+-                    Thread.sleep(Math.max(1L, 50L - i));
++                    lastTick = curTime;
++
++                    this.tick();
+                     this.serverIsRunning = true;
                  }
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopping();
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
@@ -923,7 +998,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +689,41 @@
+@@ -613,52 +745,41 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -986,7 +1061,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +732,15 @@
+@@ -667,16 +788,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -1008,7 +1083,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,7 +748,7 @@
+@@ -684,7 +804,7 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -1017,7 +1092,7 @@
          {
              this.profiler.startSection("save");
              this.playerList.saveAllPlayerData();
-@@ -697,13 +761,11 @@
+@@ -697,13 +817,11 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1033,7 +1108,7 @@
              this.usageSnooper.addMemoryStatsToSnooper();
          }
  
-@@ -712,76 +774,82 @@
+@@ -712,76 +830,82 @@
          net.minecraftforge.fml.common.FMLCommonHandler.instance().onPostServerTick();
      }
  
@@ -1169,7 +1244,7 @@
          }
  
          this.profiler.endStartSection("dim_unloading");
-@@ -794,94 +862,87 @@
+@@ -794,94 +918,87 @@
          this.getFunctionManager().update();
          this.profiler.endStartSection("tickables");
  
@@ -1298,7 +1373,7 @@
                  }
              });
          }
-@@ -889,145 +950,110 @@
+@@ -889,145 +1006,110 @@
          return report;
      }
  
@@ -1484,7 +1559,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1061,75 @@
+@@ -1035,80 +1117,75 @@
          }
      }
  
@@ -1594,7 +1669,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1138,186 @@
+@@ -1117,228 +1194,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1871,7 +1946,7 @@
                      return entity;
                  }
              }
-@@ -1347,130 +1326,120 @@
+@@ -1347,130 +1382,120 @@
          return null;
      }
  
@@ -2045,7 +2120,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1534,13 +1503,19 @@
+@@ -1534,13 +1559,19 @@
                      ++i1;
                  }
              }
@@ -2070,7 +2145,7 @@
              if (s != null)
              {
                  dedicatedserver.setServerOwner(s);
-@@ -1579,84 +1554,87 @@
+@@ -1579,84 +1610,87 @@
                      dedicatedserver.stopServer();
                  }
              });

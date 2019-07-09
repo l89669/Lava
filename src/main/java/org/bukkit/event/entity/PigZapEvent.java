@@ -1,6 +1,5 @@
 package org.bukkit.event.entity;
 
-import com.destroystokyo.paper.event.entity.EntityZapEvent;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.PigZombie;
@@ -10,16 +9,20 @@ import org.bukkit.event.HandlerList;
 /**
  * Stores data for pigs being zapped
  */
-public class PigZapEvent extends EntityZapEvent implements Cancellable {
+public class PigZapEvent extends EntityEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private boolean canceled;
     private final PigZombie pigzombie;
     private final LightningStrike bolt;
+    private boolean canceled;
 
     public PigZapEvent(final Pig pig, final LightningStrike bolt, final PigZombie pigzombie) {
-        super(pig, bolt, pigzombie);
+        super(pig);
         this.bolt = bolt;
         this.pigzombie = pigzombie;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public boolean isCancelled() {
@@ -52,5 +55,10 @@ public class PigZapEvent extends EntityZapEvent implements Cancellable {
      */
     public PigZombie getPigZombie() {
         return pigzombie;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return handlers;
     }
 }

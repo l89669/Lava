@@ -16,7 +16,7 @@ public class Rails extends MaterialData {
      * @param type the raw type id
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Rails(final int type) {
         super(type);
     }
@@ -30,7 +30,7 @@ public class Rails extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Rails(final int type, final byte data) {
         super(type, data);
     }
@@ -40,7 +40,7 @@ public class Rails extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Rails(final Material type, final byte data) {
         super(type, data);
     }
@@ -65,10 +65,10 @@ public class Rails extends MaterialData {
 
     /**
      * @return the direction these tracks are set
-     * <p>
-     * Note that tracks are bidirectional and that the direction returned
-     * is the ascending direction if the track is set on a slope. If it is
-     * set as a curve, the corner of the track is returned.
+     *     <p>
+     *     Note that tracks are bidirectional and that the direction returned
+     *     is the ascending direction if the track is set on a slope. If it is
+     *     set as a curve, the corner of the track is returned.
      */
     public BlockFace getDirection() {
         byte d = getConvertedData();
@@ -120,7 +120,7 @@ public class Rails extends MaterialData {
      * @return the data without the extended part
      * @deprecated Magic value
      */
-    @Deprecated
+
     protected byte getConvertedData() {
         return getData();
     }
@@ -132,7 +132,7 @@ public class Rails extends MaterialData {
      * the ascending direction if the track is set on a slope. If it is set as
      * a curve, the corner of the track should be supplied.
      *
-     * @param face      the direction the track should be facing
+     * @param face the direction the track should be facing
      * @param isOnSlope whether or not the track should be on a slope
      */
     public void setDirection(BlockFace face, boolean isOnSlope) {

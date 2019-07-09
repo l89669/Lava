@@ -26,7 +26,7 @@ public class MonsterEggs extends TexturedMaterial {
      * @param type the raw type id
      * @deprecated Magic value
      */
-    @Deprecated
+
     public MonsterEggs(final int type) {
         super(type);
     }
@@ -43,7 +43,7 @@ public class MonsterEggs extends TexturedMaterial {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public MonsterEggs(final int type, final byte data) {
         super(type, data);
     }
@@ -53,7 +53,7 @@ public class MonsterEggs extends TexturedMaterial {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public MonsterEggs(final Material type, final byte data) {
         super(type, data);
     }

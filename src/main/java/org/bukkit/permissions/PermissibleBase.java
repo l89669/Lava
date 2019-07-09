@@ -2,18 +2,18 @@ package org.bukkit.permissions;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.lavapowered.lava.internal.Lava;
 
 import java.util.*;
-import java.util.logging.Level;
 
 /**
  * Base Permissible for use in any Permissible object via proxy or extension
  */
 public class PermissibleBase implements Permissible {
-    private ServerOperator opable = null;
-    private Permissible parent = this;
     private final List<PermissionAttachment> attachments = new LinkedList<PermissionAttachment>();
     private final Map<String, PermissionAttachmentInfo> permissions = new HashMap<String, PermissionAttachmentInfo>();
+    private ServerOperator opable = null;
+    private Permissible parent = this;
 
     public PermissibleBase(ServerOperator opable) {
         this.opable = opable;
@@ -46,7 +46,7 @@ public class PermissibleBase implements Permissible {
             throw new IllegalArgumentException("Permission name cannot be null");
         }
 
-        return permissions.containsKey(name.toLowerCase(java.util.Locale.ENGLISH));
+        return permissions.containsKey(name.toLowerCase(Locale.ENGLISH));
     }
 
     public boolean isPermissionSet(Permission perm) {
@@ -62,7 +62,7 @@ public class PermissibleBase implements Permissible {
             throw new IllegalArgumentException("Permission name cannot be null");
         }
 
-        String name = inName.toLowerCase(java.util.Locale.ENGLISH);
+        String name = inName.toLowerCase(Locale.ENGLISH);
 
         // Paper start
         PermissionAttachmentInfo info = permissions.get(name);
@@ -85,7 +85,7 @@ public class PermissibleBase implements Permissible {
             throw new IllegalArgumentException("Permission cannot be null");
         }
 
-        String name = perm.getName().toLowerCase(java.util.Locale.ENGLISH);
+        String name = perm.getName().toLowerCase(Locale.ENGLISH);
 
         // Paper start
         PermissionAttachmentInfo info = permissions.get(name);
@@ -96,7 +96,7 @@ public class PermissibleBase implements Permissible {
         return perm.getDefault().getValue(isOp());
     }
 
-    public synchronized PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
+    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
         if (name == null) {
             throw new IllegalArgumentException("Permission name cannot be null");
         } else if (plugin == null) {
@@ -113,7 +113,7 @@ public class PermissibleBase implements Permissible {
         return result;
     }
 
-    public synchronized PermissionAttachment addAttachment(Plugin plugin) {
+    public PermissionAttachment addAttachment(Plugin plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         } else if (!plugin.isEnabled()) {
@@ -128,7 +128,7 @@ public class PermissibleBase implements Permissible {
         return result;
     }
 
-    public synchronized void removeAttachment(PermissionAttachment attachment) {
+    public void removeAttachment(PermissionAttachment attachment) {
         if (attachment == null) {
             throw new IllegalArgumentException("Attachment cannot be null");
         }
@@ -147,13 +147,13 @@ public class PermissibleBase implements Permissible {
         }
     }
 
-    public synchronized void recalculatePermissions() {
+    public void recalculatePermissions() {
         clearPermissions();
         Set<Permission> defaults = Bukkit.getServer().getPluginManager().getDefaultPermissions(isOp());
         Bukkit.getServer().getPluginManager().subscribeToDefaultPerms(isOp(), parent);
 
         for (Permission perm : defaults) {
-            String name = perm.getName().toLowerCase(java.util.Locale.ENGLISH);
+            String name = perm.getName().toLowerCase(Locale.ENGLISH);
             permissions.put(name, new PermissionAttachmentInfo(parent, name, null, true));
             Bukkit.getServer().getPluginManager().subscribeToPermission(name, parent);
             calculateChildPermissions(perm.getChildren(), false, null);
@@ -183,7 +183,7 @@ public class PermissibleBase implements Permissible {
 
             Permission perm = Bukkit.getServer().getPluginManager().getPermission(name);
             boolean value = entry.getValue() ^ invert;
-            String lname = name.toLowerCase(java.util.Locale.ENGLISH);
+            String lname = name.toLowerCase(Locale.ENGLISH);
 
             permissions.put(lname, new PermissionAttachmentInfo(parent, lname, attachment, value));
             Bukkit.getServer().getPluginManager().subscribeToPermission(name, parent);
@@ -194,7 +194,7 @@ public class PermissibleBase implements Permissible {
         }
     }
 
-    public synchronized PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
+    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
         if (name == null) {
             throw new IllegalArgumentException("Permission name cannot be null");
         } else if (plugin == null) {
@@ -212,7 +212,7 @@ public class PermissibleBase implements Permissible {
         return result;
     }
 
-    public synchronized PermissionAttachment addAttachment(Plugin plugin, int ticks) {
+    public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         } else if (!plugin.isEnabled()) {
@@ -222,7 +222,7 @@ public class PermissibleBase implements Permissible {
         PermissionAttachment result = addAttachment(plugin);
 
         if (Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new RemoveAttachmentRunnable(result), ticks) == -1) {
-            Bukkit.getServer().getLogger().log(Level.WARNING, "Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
+            Lava.LOGGER.error("Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
             result.remove();
             return null;
         } else {
@@ -230,7 +230,7 @@ public class PermissibleBase implements Permissible {
         }
     }
 
-    public synchronized Set<PermissionAttachmentInfo> getEffectivePermissions() {
+    public Set<PermissionAttachmentInfo> getEffectivePermissions() {
         return new HashSet<>(permissions.values());
     }
 

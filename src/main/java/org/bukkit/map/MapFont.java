@@ -10,13 +10,13 @@ import java.util.HashMap;
 public class MapFont {
 
     private final HashMap<Character, CharacterSprite> chars = new HashMap<Character, CharacterSprite>();
-    private int height = 0;
     protected boolean malleable = true;
+    private int height = 0;
 
     /**
      * Set the sprite for a given character.
      *
-     * @param ch     The character to set the sprite for.
+     * @param ch The character to set the sprite for.
      * @param sprite The CharacterSprite to set.
      * @throws IllegalStateException if this font is static.
      */
@@ -36,7 +36,7 @@ public class MapFont {
      *
      * @param ch The character to get the sprite for.
      * @return The CharacterSprite associated with the character, or null if
-     * there is none.
+     *     there is none.
      */
     public CharacterSprite getChar(char ch) {
         return chars.get(ch);
@@ -61,7 +61,9 @@ public class MapFont {
         int result = 0;
         for (int i = 0; i < text.length(); ++i) {
             char ch = text.charAt(i);
-            if (ch == ChatColor.COLOR_CHAR) continue;
+            if (ch == ChatColor.COLOR_CHAR) {
+                continue;
+            }
             result += chars.get(ch).getWidth();
         }
         result += text.length() - 1; // Account for 1px spacing between characters
@@ -83,13 +85,17 @@ public class MapFont {
      *
      * @param text The text.
      * @return True if the string contains only defined characters, false
-     * otherwise.
+     *     otherwise.
      */
     public boolean isValid(String text) {
         for (int i = 0; i < text.length(); ++i) {
             char ch = text.charAt(i);
-            if (ch == ChatColor.COLOR_CHAR || ch == '\n') continue;
-            if (chars.get(ch) == null) return false;
+            if (ch == ChatColor.COLOR_CHAR || ch == '\n') {
+                continue;
+            }
+            if (chars.get(ch) == null) {
+                return false;
+            }
         }
         return true;
     }
@@ -121,7 +127,9 @@ public class MapFont {
          * @return True if the pixel is solid, false if transparent.
          */
         public boolean get(int row, int col) {
-            if (row < 0 || col < 0 || row >= height || col >= width) return false;
+            if (row < 0 || col < 0 || row >= height || col >= width) {
+                return false;
+            }
             return data[row * width + col];
         }
 

@@ -1,18 +1,13 @@
 package org.bukkit;
 
-import com.google.common.base.Preconditions;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Predicate;
 
 /**
  * Represents a 3-dimensional position in a world.
@@ -34,9 +29,9 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * Constructs a new Location with the given coordinates
      *
      * @param world The world in which this location resides
-     * @param x     The x-coordinate of this new location
-     * @param y     The y-coordinate of this new location
-     * @param z     The z-coordinate of this new location
+     * @param x The x-coordinate of this new location
+     * @param y The y-coordinate of this new location
+     * @param z The z-coordinate of this new location
      */
     public Location(final World world, final double x, final double y, final double z) {
         this(world, x, y, z, 0, 0);
@@ -46,10 +41,10 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * Constructs a new Location with the given coordinates and direction
      *
      * @param world The world in which this location resides
-     * @param x     The x-coordinate of this new location
-     * @param y     The y-coordinate of this new location
-     * @param z     The z-coordinate of this new location
-     * @param yaw   The absolute rotation on the x-plane, in degrees
+     * @param x The x-coordinate of this new location
+     * @param y The y-coordinate of this new location
+     * @param z The z-coordinate of this new location
+     * @param yaw The absolute rotation on the x-plane, in degrees
      * @param pitch The absolute rotation on the y-plane, in degrees
      */
     public Location(final World world, final double x, final double y, final double z, final float yaw, final float pitch) {
@@ -62,12 +57,31 @@ public class Location implements Cloneable, ConfigurationSerializable {
     }
 
     /**
-     * Sets the world that this location resides in
+     * Safely converts a double (location coordinate) to an int (block
+     * coordinate)
      *
-     * @param world New world that this location resides in
+     * @param loc Precise coordinate
+     * @return Block coordinate
      */
-    public void setWorld(World world) {
-        this.world = world;
+    public static int locToBlock(double loc) {
+        return NumberConversions.floor(loc);
+    }
+
+    /**
+     * Required method for deserialization
+     *
+     * @param args map to deserialize
+     * @return deserialized location
+     * @throws IllegalArgumentException if the world don't exists
+     * @see ConfigurationSerializable
+     */
+    public static Location deserialize(Map<String, Object> args) {
+        World world = Bukkit.getWorld((String) args.get("world"));
+        if (world == null) {
+            throw new IllegalArgumentException("unknown world");
+        }
+
+        return new Location(world, NumberConversions.toDouble(args.get("x")), NumberConversions.toDouble(args.get("y")), NumberConversions.toDouble(args.get("z")), NumberConversions.toFloat(args.get("yaw")), NumberConversions.toFloat(args.get("pitch")));
     }
 
     /**
@@ -77,6 +91,15 @@ public class Location implements Cloneable, ConfigurationSerializable {
      */
     public World getWorld() {
         return world;
+    }
+
+    /**
+     * Sets the world that this location resides in
+     *
+     * @param world New world that this location resides in
+     */
+    public void setWorld(World world) {
+        this.world = world;
     }
 
     /**
@@ -98,21 +121,21 @@ public class Location implements Cloneable, ConfigurationSerializable {
     }
 
     /**
-     * Sets the x-coordinate of this location
-     *
-     * @param x X-coordinate
-     */
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    /**
      * Gets the x-coordinate of this location
      *
      * @return x-coordinate
      */
     public double getX() {
         return x;
+    }
+
+    /**
+     * Sets the x-coordinate of this location
+     *
+     * @param x X-coordinate
+     */
+    public void setX(double x) {
+        this.x = x;
     }
 
     /**
@@ -126,21 +149,21 @@ public class Location implements Cloneable, ConfigurationSerializable {
     }
 
     /**
-     * Sets the y-coordinate of this location
-     *
-     * @param y y-coordinate
-     */
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    /**
      * Gets the y-coordinate of this location
      *
      * @return y-coordinate
      */
     public double getY() {
         return y;
+    }
+
+    /**
+     * Sets the y-coordinate of this location
+     *
+     * @param y y-coordinate
+     */
+    public void setY(double y) {
+        this.y = y;
     }
 
     /**
@@ -154,21 +177,21 @@ public class Location implements Cloneable, ConfigurationSerializable {
     }
 
     /**
-     * Sets the z-coordinate of this location
-     *
-     * @param z z-coordinate
-     */
-    public void setZ(double z) {
-        this.z = z;
-    }
-
-    /**
      * Gets the z-coordinate of this location
      *
      * @return z-coordinate
      */
     public double getZ() {
         return z;
+    }
+
+    /**
+     * Sets the z-coordinate of this location
+     *
+     * @param z z-coordinate
+     */
+    public void setZ(double z) {
+        this.z = z;
     }
 
     /**
@@ -179,24 +202,6 @@ public class Location implements Cloneable, ConfigurationSerializable {
      */
     public int getBlockZ() {
         return locToBlock(z);
-    }
-
-    /**
-     * Sets the yaw of this location, measured in degrees.
-     * <ul>
-     * <li>A yaw of 0 or 360 represents the positive z direction.
-     * <li>A yaw of 180 represents the negative z direction.
-     * <li>A yaw of 90 represents the negative x direction.
-     * <li>A yaw of 270 represents the positive x direction.
-     * </ul>
-     * Increasing yaw values are the equivalent of turning to your
-     * right-facing, increasing the scale of the next respective axis, and
-     * decreasing the scale of the previous axis.
-     *
-     * @param yaw new rotation's yaw
-     */
-    public void setYaw(float yaw) {
-        this.yaw = yaw;
     }
 
     /**
@@ -218,19 +223,21 @@ public class Location implements Cloneable, ConfigurationSerializable {
     }
 
     /**
-     * Sets the pitch of this location, measured in degrees.
+     * Sets the yaw of this location, measured in degrees.
      * <ul>
-     * <li>A pitch of 0 represents level forward facing.
-     * <li>A pitch of 90 represents downward facing, or negative y
-     *     direction.
-     * <li>A pitch of -90 represents upward facing, or positive y direction.
+     * <li>A yaw of 0 or 360 represents the positive z direction.
+     * <li>A yaw of 180 represents the negative z direction.
+     * <li>A yaw of 90 represents the negative x direction.
+     * <li>A yaw of 270 represents the positive x direction.
      * </ul>
-     * Increasing pitch values the equivalent of looking down.
+     * Increasing yaw values are the equivalent of turning to your
+     * right-facing, increasing the scale of the next respective axis, and
+     * decreasing the scale of the previous axis.
      *
-     * @param pitch new incline's pitch
+     * @param yaw new rotation's yaw
      */
-    public void setPitch(float pitch) {
-        this.pitch = pitch;
+    public void setYaw(float yaw) {
+        this.yaw = yaw;
     }
 
     /**
@@ -250,11 +257,27 @@ public class Location implements Cloneable, ConfigurationSerializable {
     }
 
     /**
+     * Sets the pitch of this location, measured in degrees.
+     * <ul>
+     * <li>A pitch of 0 represents level forward facing.
+     * <li>A pitch of 90 represents downward facing, or negative y
+     *     direction.
+     * <li>A pitch of -90 represents upward facing, or positive y direction.
+     * </ul>
+     * Increasing pitch values the equivalent of looking down.
+     *
+     * @param pitch new incline's pitch
+     */
+    public void setPitch(float pitch) {
+        this.pitch = pitch;
+    }
+
+    /**
      * Gets a unit-vector pointing in the direction that this Location is
      * facing.
      *
      * @return a vector pointing the direction of this location's {@link
-     * #getPitch() pitch} and {@link #getYaw() yaw}
+     *     #getPitch() pitch} and {@link #getYaw() yaw}
      */
     public Vector getDirection() {
         Vector vector = new Vector();
@@ -311,10 +334,10 @@ public class Location implements Cloneable, ConfigurationSerializable {
     /**
      * Adds the location by another.
      *
+     * @see Vector
      * @param vec The other location
      * @return the same location
      * @throws IllegalArgumentException for differing worlds
-     * @see Vector
      */
     public Location add(Location vec) {
         if (vec == null || vec.getWorld() != getWorld()) {
@@ -330,9 +353,9 @@ public class Location implements Cloneable, ConfigurationSerializable {
     /**
      * Adds the location by a vector.
      *
+     * @see Vector
      * @param vec Vector to use
      * @return the same location
-     * @see Vector
      */
     public Location add(Vector vec) {
         this.x += vec.getX();
@@ -344,11 +367,11 @@ public class Location implements Cloneable, ConfigurationSerializable {
     /**
      * Adds the location by another. Not world-aware.
      *
+     * @see Vector
      * @param x X coordinate
      * @param y Y coordinate
      * @param z Z coordinate
      * @return the same location
-     * @see Vector
      */
     public Location add(double x, double y, double z) {
         this.x += x;
@@ -360,10 +383,10 @@ public class Location implements Cloneable, ConfigurationSerializable {
     /**
      * Subtracts the location by another.
      *
+     * @see Vector
      * @param vec The other location
      * @return the same location
      * @throws IllegalArgumentException for differing worlds
-     * @see Vector
      */
     public Location subtract(Location vec) {
         if (vec == null || vec.getWorld() != getWorld()) {
@@ -379,9 +402,9 @@ public class Location implements Cloneable, ConfigurationSerializable {
     /**
      * Subtracts the location by a vector.
      *
+     * @see Vector
      * @param vec The vector to use
      * @return the same location
-     * @see Vector
      */
     public Location subtract(Vector vec) {
         this.x -= vec.getX();
@@ -394,11 +417,11 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * Subtracts the location by another. Not world-aware and
      * orientation independent.
      *
+     * @see Vector
      * @param x X coordinate
      * @param y Y coordinate
      * @param z Z coordinate
      * @return the same location
-     * @see Vector
      */
     public Location subtract(double x, double y, double z) {
         this.x -= x;
@@ -415,8 +438,8 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * function overflows, which will be caused if the length is too long. Not
      * world-aware and orientation independent.
      *
-     * @return the magnitude
      * @see Vector
+     * @return the magnitude
      */
     public double length() {
         return Math.sqrt(NumberConversions.square(x) + NumberConversions.square(y) + NumberConversions.square(z));
@@ -426,8 +449,8 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * Gets the magnitude of the location squared. Not world-aware and
      * orientation independent.
      *
-     * @return the magnitude
      * @see Vector
+     * @return the magnitude
      */
     public double lengthSquared() {
         return NumberConversions.square(x) + NumberConversions.square(y) + NumberConversions.square(z);
@@ -440,10 +463,10 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * be returned if the inner result of the sqrt() function overflows, which
      * will be caused if the distance is too long.
      *
+     * @see Vector
      * @param o The other location
      * @return the distance
      * @throws IllegalArgumentException for differing worlds
-     * @see Vector
      */
     public double distance(Location o) {
         return Math.sqrt(distanceSquared(o));
@@ -452,10 +475,10 @@ public class Location implements Cloneable, ConfigurationSerializable {
     /**
      * Get the squared distance between this location and another.
      *
+     * @see Vector
      * @param o The other location
      * @return the distance
      * @throws IllegalArgumentException for differing worlds
-     * @see Vector
      */
     public double distanceSquared(Location o) {
         if (o == null) {
@@ -474,8 +497,8 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * scalar. Not world-aware.
      *
      * @param m The factor
-     * @return the same location
      * @see Vector
+     * @return the same location
      */
     public Location multiply(double m) {
         x *= m;
@@ -487,278 +510,14 @@ public class Location implements Cloneable, ConfigurationSerializable {
     /**
      * Zero this location's components. Not world-aware.
      *
-     * @return the same location
      * @see Vector
+     * @return the same location
      */
     public Location zero() {
         x = 0;
         y = 0;
         z = 0;
         return this;
-    }
-
-    public boolean isChunkLoaded() { return world.isChunkLoaded(locToBlock(x) >> 4, locToBlock(z) >> 4); } // Paper
-
-    public Location set(double x, double y, double z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        return this;
-    }
-
-    public Location add(Location base, double x, double y, double z) {
-        return this.set(base.x + x, base.y + y, base.z + z);
-    }
-
-    public Location subtract(Location base, double x, double y, double z) {
-        return this.set(base.x - x, base.y - y, base.z - z);
-    }
-    // Paper start
-    /**
-     * @return A new location where X/Y/Z are on the Block location (integer value of X/Y/Z)
-     */
-    public Location toBlockLocation() {
-        Location blockLoc = clone();
-        blockLoc.setX(getBlockX());
-        blockLoc.setY(getBlockY());
-        blockLoc.setZ(getBlockZ());
-        return blockLoc;
-    }
-
-    public long toBlockKey() {
-        return ((long)getBlockX() & 0x7FFFFFF) | (((long)getBlockZ() & 0x7FFFFFF) << 27) | ((long)getBlockY() << 54);
-    }
-    /**
-     * @return A new location where X/Y/Z are the center of the block
-     */
-    public Location toCenterLocation() {
-        Location centerLoc = clone();
-        centerLoc.setX(getBlockX() + 0.5);
-        centerLoc.setY(getBlockY() + 0.5);
-        centerLoc.setZ(getBlockZ() + 0.5);
-        return centerLoc;
-    }
-
-    /**
-     * Returns a list of entities within a bounding box centered around a Location.
-     *
-     * Some implementations may impose artificial restrictions on the size of the search bounding box.
-     *
-     * @param x 1/2 the size of the box along x axis
-     * @param y 1/2 the size of the box along y axis
-     * @param z 1/2 the size of the box along z axis
-     * @return the collection of entities near location. This will always be a non-null collection.
-     */
-    public Collection<Entity> getNearbyEntities(double x, double y, double z) {
-        if (world == null) {
-            throw new IllegalArgumentException("Location has no world");
-        }
-        return world.getNearbyEntities(this, x, y, z);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param radius X Radius
-     * @return the collection of entities near location. This will always be a non-null collection.
-     */
-    public Collection<LivingEntity> getNearbyLivingEntities(double radius) {
-        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, radius, radius, radius);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xzRadius X/Z Radius
-     * @param yRadius Y Radius
-     * @return the collection of living entities near location. This will always be a non-null collection.
-     */
-    public Collection<LivingEntity> getNearbyLivingEntities(double xzRadius, double yRadius) {
-        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xzRadius, yRadius, xzRadius);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xRadius X Radius
-     * @param yRadius Y Radius
-     * @param zRadius Z radius
-     * @return the collection of living entities near location. This will always be a non-null collection.
-     */
-    public Collection<LivingEntity> getNearbyLivingEntities(double xRadius, double yRadius, double zRadius) {
-        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xRadius, yRadius, zRadius);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param radius Radius
-     * @param predicate a predicate used to filter results
-     * @return the collection of living entities near location. This will always be a non-null collection.
-     */
-    public Collection<LivingEntity> getNearbyLivingEntities(double radius, Predicate<LivingEntity> predicate) {
-        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, radius, radius, radius, predicate);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xzRadius X/Z Radius
-     * @param yRadius Y Radius
-     * @param predicate a predicate used to filter results
-     * @return the collection of living entities near location. This will always be a non-null collection.
-     */
-    public Collection<LivingEntity> getNearbyLivingEntities(double xzRadius, double yRadius, Predicate<LivingEntity> predicate) {
-        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xzRadius, yRadius, xzRadius, predicate);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xRadius X Radius
-     * @param yRadius Y Radius
-     * @param zRadius Z radius
-     * @param predicate a predicate used to filter results
-     * @return the collection of living entities near location. This will always be a non-null collection.
-     */
-    public Collection<LivingEntity> getNearbyLivingEntities(double xRadius, double yRadius, double zRadius, Predicate<LivingEntity> predicate) {
-        return getNearbyEntitiesByType(org.bukkit.entity.LivingEntity.class, xRadius, yRadius, zRadius, predicate);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param radius X/Y/Z Radius
-     * @return the collection of players near location. This will always be a non-null collection.
-     */
-
-    public Collection<Player> getNearbyPlayers(double radius) {
-        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, radius, radius, radius);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xzRadius X/Z Radius
-     * @param yRadius Y Radius
-     * @return the collection of players near location. This will always be a non-null collection.
-     */
-    public Collection<Player> getNearbyPlayers(double xzRadius, double yRadius) {
-        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xzRadius, yRadius, xzRadius);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xRadius X Radius
-     * @param yRadius Y Radius
-     * @param zRadius Z Radius
-     * @return the collection of players near location. This will always be a non-null collection.
-     */
-    public Collection<Player> getNearbyPlayers(double xRadius, double yRadius, double zRadius) {
-        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xRadius, yRadius, zRadius);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param radius X/Y/Z Radius
-     * @param predicate a predicate used to filter results
-     * @return the collection of players near location. This will always be a non-null collection.
-     */
-    public Collection<Player> getNearbyPlayers(double radius, Predicate<Player> predicate) {
-        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, radius, radius, radius, predicate);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xzRadius X/Z Radius
-     * @param yRadius Y Radius
-     * @param predicate a predicate used to filter results
-     * @return the collection of players near location. This will always be a non-null collection.
-     */
-    public Collection<Player> getNearbyPlayers(double xzRadius, double yRadius, Predicate<Player> predicate) {
-        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xzRadius, yRadius, xzRadius, predicate);
-    }
-
-    /**
-     * Gets nearby players within the specified radius (bounding box)
-     * @param xRadius X Radius
-     * @param yRadius Y Radius
-     * @param zRadius Z Radius
-     * @param predicate a predicate used to filter results
-     * @return the collection of players near location. This will always be a non-null collection.
-     */
-    public Collection<Player> getNearbyPlayers(double xRadius, double yRadius, double zRadius, Predicate<Player> predicate) {
-        return getNearbyEntitiesByType(org.bukkit.entity.Player.class, xRadius, yRadius, zRadius, predicate);
-    }
-
-    /**
-     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
-     * @param clazz Type to filter by
-     * @param radius X/Y/Z radius to search within
-     * @param <T> the entity type
-     * @return the collection of entities of type clazz near location. This will always be a non-null collection.
-     */
-    public <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, double radius) {
-        return getNearbyEntitiesByType(clazz, radius, radius, radius, null);
-    }
-
-    /**
-     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
-     * @param clazz Type to filter by
-     * @param xzRadius X/Z radius to search within
-     * @param yRadius Y radius to search within
-     * @param <T> the entity type
-     * @return the collection of entities near location. This will always be a non-null collection.
-     */
-    public <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, double xzRadius, double yRadius) {
-        return getNearbyEntitiesByType(clazz, xzRadius, yRadius, xzRadius, null);
-    }
-
-    /**
-     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
-     * @param clazz Type to filter by
-     * @param xRadius X Radius
-     * @param yRadius Y Radius
-     * @param zRadius Z Radius
-     * @param <T> the entity type
-     * @return the collection of entities near location. This will always be a non-null collection.
-     */
-    public <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, double xRadius, double yRadius, double zRadius) {
-        return getNearbyEntitiesByType(clazz, xRadius, yRadius, zRadius, null);
-    }
-
-    /**
-     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
-     * @param clazz Type to filter by
-     * @param radius X/Y/Z radius to search within
-     * @param predicate a predicate used to filter results
-     * @param <T> the entity type
-     * @return the collection of entities near location. This will always be a non-null collection.
-     */
-    public <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, double radius, Predicate<T> predicate) {
-        return getNearbyEntitiesByType(clazz, radius, radius, radius, predicate);
-    }
-
-    /**
-     * Gets all nearby entities of the specified type, within the specified radius, with x and x radius matching (bounding box)
-     * @param clazz Type to filter by
-     * @param xzRadius X/Z radius to search within
-     * @param yRadius Y radius to search within
-     * @param predicate a predicate used to filter results
-     * @param <T> the entity type
-     * @return the collection of entities near location. This will always be a non-null collection.
-     */
-    public <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends T> clazz, double xzRadius, double yRadius, Predicate<T> predicate) {
-        return getNearbyEntitiesByType(clazz, xzRadius, yRadius, xzRadius, predicate);
-    }
-
-    /**
-     * Gets all nearby entities of the specified type, within the specified radius (bounding box)
-     * @param clazz Type to filter by
-     * @param xRadius X Radius
-     * @param yRadius Y Radius
-     * @param zRadius Z Radius
-     * @param predicate a predicate used to filter results
-     * @param <T> the entity type
-     * @return the collection of entities near location. This will always be a non-null collection.
-     */
-    public <T extends Entity> Collection<T> getNearbyEntitiesByType(Class<? extends Entity> clazz, double xRadius, double yRadius, double zRadius, Predicate<T> predicate) {
-        if (world == null) {
-            throw new IllegalArgumentException("Location has no world");
-        }
-        return world.getNearbyEntitiesByType(clazz, this, xRadius, yRadius, zRadius, predicate);
     }
 
     /**
@@ -841,7 +600,6 @@ public class Location implements Cloneable, ConfigurationSerializable {
     public boolean createExplosion(Entity source, float power, boolean setFire, boolean breakBlocks) {
         return world.createExplosion(source, source.getLocation(), power, setFire, breakBlocks);
     }
-    // Paper end
 
     @Override
     public boolean equals(Object obj) {
@@ -896,7 +654,7 @@ public class Location implements Cloneable, ConfigurationSerializable {
      * Constructs a new {@link Vector} based on this Location
      *
      * @return New Vector containing the coordinates represented by this
-     * Location
+     *     Location
      */
     public Vector toVector() {
         return new Vector(x, y, z);
@@ -924,17 +682,6 @@ public class Location implements Cloneable, ConfigurationSerializable {
         NumberConversions.checkFinite(yaw, "yaw not finite");
     }
 
-    /**
-     * Safely converts a double (location coordinate) to an int (block
-     * coordinate)
-     *
-     * @param loc Precise coordinate
-     * @return Block coordinate
-     */
-    public static int locToBlock(double loc) {
-        return NumberConversions.floor(loc);
-    }
-
     @Utility
     public Map<String, Object> serialize() {
         Map<String, Object> data = new HashMap<String, Object>();
@@ -948,27 +695,5 @@ public class Location implements Cloneable, ConfigurationSerializable {
         data.put("pitch", this.pitch);
 
         return data;
-    }
-
-    /**
-     * Required method for deserialization
-     *
-     * @param args map to deserialize
-     * @return deserialized location
-     * @throws IllegalArgumentException if the world don't exists
-     * @see ConfigurationSerializable
-     */
-    public static Location deserialize(Map<String, Object> args) {
-        World world = Bukkit.getWorld((String) args.get("world"));
-        if (world == null) {
-            throw new IllegalArgumentException("unknown world");
-        }
-
-        return new Location(world, NumberConversions.toDouble(args.get("x")), NumberConversions.toDouble(args.get("y")), NumberConversions.toDouble(args.get("z")), NumberConversions.toFloat(args.get("yaw")), NumberConversions.toFloat(args.get("pitch")));
-    }
-
-    public boolean isGenerated() {
-        Preconditions.checkNotNull(world, "Location has no world!");
-        return world.isChunkGenerated(locToBlock(x) >> 4, locToBlock(z) >> 4);
     }
 }

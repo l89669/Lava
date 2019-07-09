@@ -39,17 +39,17 @@ public interface WorldBorder {
     /**
      * Sets the new border center.
      *
-     * @param x The new center x-coordinate.
-     * @param z The new center z-coordinate.
+     * @param location The new location of the border center. (Only x/z used)
      */
-    public void setCenter(double x, double z);
+    public void setCenter(Location location);
 
     /**
      * Sets the new border center.
      *
-     * @param location The new location of the border center. (Only x/z used)
+     * @param x The new center x-coordinate.
+     * @param z The new center z-coordinate.
      */
-    public void setCenter(Location location);
+    public void setCenter(double x, double z);
 
     /**
      * Gets the current border damage buffer.
@@ -114,19 +114,4 @@ public interface WorldBorder {
      * @return if this location is inside the border or not
      */
     public boolean isInside(Location location);
-
-    // Paper start
-
-    /**
-     * Checks if the location is within the boundaries of this border.
-     *
-     * @param location specific location to check
-     * @return true if the location is within the bounds of this border, false otherwise.
-     * @deprecated use {@link #isInside(Location)} for an upstream compatible replacement
-     */
-    @Deprecated
-    public default boolean isInBounds(Location location) {
-        return this.isInside(location);
-    }
-    // Paper end
 }

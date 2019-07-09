@@ -8,7 +8,7 @@ import java.util.Random;
  * Generates noise using the "classic" perlin generator
  *
  * @see SimplexNoiseGenerator "Improved" and faster version with slightly
- * different results
+ *     different results
  */
 public class PerlinNoiseGenerator extends NoiseGenerator {
     protected static final int grad3[][] = {{1, 1, 0}, {-1, 1, 0}, {1, -1, 0}, {-1, -1, 0},
@@ -128,6 +128,51 @@ public class PerlinNoiseGenerator extends NoiseGenerator {
         return instance;
     }
 
+    /**
+     * Generates noise for the 1D coordinates using the specified number of
+     * octaves and parameters
+     *
+     * @param x X-coordinate
+     * @param octaves Number of octaves to use
+     * @param frequency How much to alter the frequency by each octave
+     * @param amplitude How much to alter the amplitude by each octave
+     * @return Resulting noise
+     */
+    public static double getNoise(double x, int octaves, double frequency, double amplitude) {
+        return instance.noise(x, octaves, frequency, amplitude);
+    }
+
+    /**
+     * Generates noise for the 2D coordinates using the specified number of
+     * octaves and parameters
+     *
+     * @param x X-coordinate
+     * @param y Y-coordinate
+     * @param octaves Number of octaves to use
+     * @param frequency How much to alter the frequency by each octave
+     * @param amplitude How much to alter the amplitude by each octave
+     * @return Resulting noise
+     */
+    public static double getNoise(double x, double y, int octaves, double frequency, double amplitude) {
+        return instance.noise(x, y, octaves, frequency, amplitude);
+    }
+
+    /**
+     * Generates noise for the 3D coordinates using the specified number of
+     * octaves and parameters
+     *
+     * @param x X-coordinate
+     * @param y Y-coordinate
+     * @param z Z-coordinate
+     * @param octaves Number of octaves to use
+     * @param frequency How much to alter the frequency by each octave
+     * @param amplitude How much to alter the amplitude by each octave
+     * @return Resulting noise
+     */
+    public static double getNoise(double x, double y, double z, int octaves, double frequency, double amplitude) {
+        return instance.noise(x, y, z, octaves, frequency, amplitude);
+    }
+
     @Override
     public double noise(double x, double y, double z) {
         x += offsetX;
@@ -169,50 +214,5 @@ public class PerlinNoiseGenerator extends NoiseGenerator {
                         grad(perm[BA + 1], x - 1, y, z - 1)),
                         lerp(fX, grad(perm[AB + 1], x, y - 1, z - 1),
                                 grad(perm[BB + 1], x - 1, y - 1, z - 1))));
-    }
-
-    /**
-     * Generates noise for the 1D coordinates using the specified number of
-     * octaves and parameters
-     *
-     * @param x         X-coordinate
-     * @param octaves   Number of octaves to use
-     * @param frequency How much to alter the frequency by each octave
-     * @param amplitude How much to alter the amplitude by each octave
-     * @return Resulting noise
-     */
-    public static double getNoise(double x, int octaves, double frequency, double amplitude) {
-        return instance.noise(x, octaves, frequency, amplitude);
-    }
-
-    /**
-     * Generates noise for the 2D coordinates using the specified number of
-     * octaves and parameters
-     *
-     * @param x         X-coordinate
-     * @param y         Y-coordinate
-     * @param octaves   Number of octaves to use
-     * @param frequency How much to alter the frequency by each octave
-     * @param amplitude How much to alter the amplitude by each octave
-     * @return Resulting noise
-     */
-    public static double getNoise(double x, double y, int octaves, double frequency, double amplitude) {
-        return instance.noise(x, y, octaves, frequency, amplitude);
-    }
-
-    /**
-     * Generates noise for the 3D coordinates using the specified number of
-     * octaves and parameters
-     *
-     * @param x         X-coordinate
-     * @param y         Y-coordinate
-     * @param z         Z-coordinate
-     * @param octaves   Number of octaves to use
-     * @param frequency How much to alter the frequency by each octave
-     * @param amplitude How much to alter the amplitude by each octave
-     * @return Resulting noise
-     */
-    public static double getNoise(double x, double y, double z, int octaves, double frequency, double amplitude) {
-        return instance.noise(x, y, z, octaves, frequency, amplitude);
     }
 }

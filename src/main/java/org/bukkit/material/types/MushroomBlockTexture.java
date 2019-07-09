@@ -66,6 +66,13 @@ public enum MushroomBlockTexture {
     private final static Map<Byte, MushroomBlockTexture> BY_DATA = Maps.newHashMap();
     private final static Map<BlockFace, MushroomBlockTexture> BY_BLOCKFACE = Maps.newHashMap();
 
+    static {
+        for (MushroomBlockTexture type : values()) {
+            BY_DATA.put(type.data, type);
+            BY_BLOCKFACE.put(type.capFace, type);
+        }
+    }
+
     private final Byte data;
     private final BlockFace capFace;
 
@@ -75,12 +82,36 @@ public enum MushroomBlockTexture {
     }
 
     /**
+     * Gets the MushroomBlockType with the given data value.
+     *
+     * @param data Data value to fetch
+     * @return The {@link MushroomBlockTexture} representing the given value, or
+     * null if it doesn't exist
+     * @deprecated Magic value
+     */
+    public static MushroomBlockTexture getByData(final byte data) {
+        return BY_DATA.get(data);
+    }
+
+    /**
+     * Gets the MushroomBlockType with cap texture on the given block face.
+     *
+     * @param face the required block face with cap texture
+     * @return The {@link MushroomBlockTexture} representing the given block
+     * face, or null if it doesn't exist
+     *
+     * @see BlockFace
+     */
+    public static MushroomBlockTexture getCapByFace(final BlockFace face) {
+        return BY_BLOCKFACE.get(face);
+    }
+
+    /**
      * Gets the associated data value representing this mushroom block face.
      *
      * @return A byte containing the data value of this mushroom block face
      * @deprecated Magic value
      */
-    @Deprecated
     public byte getData() {
         return data;
     }
@@ -92,37 +123,5 @@ public enum MushroomBlockTexture {
      */
     public BlockFace getCapFace() {
         return capFace;
-    }
-
-    /**
-     * Gets the MushroomBlockType with the given data value.
-     *
-     * @param data Data value to fetch
-     * @return The {@link MushroomBlockTexture} representing the given value, or
-     * null if it doesn't exist
-     * @deprecated Magic value
-     */
-    @Deprecated
-    public static MushroomBlockTexture getByData(final byte data) {
-        return BY_DATA.get(data);
-    }
-
-    /**
-     * Gets the MushroomBlockType with cap texture on the given block face.
-     *
-     * @param face the required block face with cap texture
-     * @return The {@link MushroomBlockTexture} representing the given block
-     * face, or null if it doesn't exist
-     * @see BlockFace
-     */
-    public static MushroomBlockTexture getCapByFace(final BlockFace face) {
-        return BY_BLOCKFACE.get(face);
-    }
-
-    static {
-        for (MushroomBlockTexture type : values()) {
-            BY_DATA.put(type.data, type);
-            BY_BLOCKFACE.put(type.capFace, type);
-        }
     }
 }

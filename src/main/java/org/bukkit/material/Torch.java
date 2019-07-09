@@ -15,7 +15,7 @@ public class Torch extends SimpleAttachableMaterialData {
      * @param type the raw type id
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Torch(final int type) {
         super(type);
     }
@@ -29,7 +29,7 @@ public class Torch extends SimpleAttachableMaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Torch(final int type, final byte data) {
         super(type, data);
     }
@@ -39,7 +39,7 @@ public class Torch extends SimpleAttachableMaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Torch(final Material type, final byte data) {
         super(type, data);
     }

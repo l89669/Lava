@@ -12,18 +12,17 @@ public class HelpTopicComparator implements Comparator<HelpTopic> {
 
     // Singleton implementations
     private static final TopicNameComparator tnc = new TopicNameComparator();
+    private static final HelpTopicComparator htc = new HelpTopicComparator();
+
+    private HelpTopicComparator() {
+    }
 
     public static TopicNameComparator topicNameComparatorInstance() {
         return tnc;
     }
 
-    private static final HelpTopicComparator htc = new HelpTopicComparator();
-
     public static HelpTopicComparator helpTopicComparatorInstance() {
         return htc;
-    }
-
-    private HelpTopicComparator() {
     }
 
     public int compare(HelpTopic lhs, HelpTopic rhs) {

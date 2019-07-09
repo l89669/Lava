@@ -6,10 +6,9 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 
 /**
  * Represents a spawn egg that can be used to spawn mobs
- *
  * @deprecated use {@link SpawnEggMeta}
  */
-@Deprecated
+
 public class SpawnEgg extends MaterialData {
 
     public SpawnEgg() {
@@ -21,7 +20,7 @@ public class SpawnEgg extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public SpawnEgg(int type, byte data) {
         super(type, data);
     }
@@ -30,7 +29,7 @@ public class SpawnEgg extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public SpawnEgg(byte data) {
         super(Material.MONSTER_EGG, data);
     }
@@ -46,7 +45,7 @@ public class SpawnEgg extends MaterialData {
      * @return The entity type.
      * @deprecated This is now stored in {@link SpawnEggMeta}.
      */
-    @Deprecated
+
     public EntityType getSpawnedType() {
         return EntityType.fromId(getData());
     }
@@ -57,7 +56,7 @@ public class SpawnEgg extends MaterialData {
      * @param type The entity type.
      * @deprecated This is now stored in {@link SpawnEggMeta}.
      */
-    @Deprecated
+
     public void setSpawnedType(EntityType type) {
         setData((byte) type.getTypeId());
     }

@@ -22,7 +22,7 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * Get the player's inventory.
      *
      * @return The inventory of the player, this also contains the armor
-     * slots.
+     *     slots.
      */
     public PlayerInventory getInventory();
 
@@ -44,7 +44,7 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * If the player currently has an inventory window open, this method will
      * set a property of that window, such as the state of a progress bar.
      *
-     * @param prop  The property.
+     * @param prop The property.
      * @param value The value to set the property to.
      * @return True if the property was successfully set.
      */
@@ -72,11 +72,11 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * on the bottom.
      *
      * @param location The location to attach it to. If null, the player's
-     *                 location is used.
-     * @param force    If false, and there is no workbench block at the location,
-     *                 no inventory will be opened and null will be returned.
+     *     location is used.
+     * @param force If false, and there is no workbench block at the location,
+     *     no inventory will be opened and null will be returned.
      * @return The newly opened inventory view, or null if it could not be
-     * opened.
+     *     opened.
      */
     public InventoryView openWorkbench(Location location, boolean force);
 
@@ -85,11 +85,11 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * on the bottom.
      *
      * @param location The location to attach it to. If null, the player's
-     *                 location is used.
-     * @param force    If false, and there is no enchanting table at the
-     *                 location, no inventory will be opened and null will be returned.
+     *     location is used.
+     * @param force If false, and there is no enchanting table at the
+     *     location, no inventory will be opened and null will be returned.
      * @return The newly opened inventory view, or null if it could not be
-     * opened.
+     *     opened.
      */
     public InventoryView openEnchanting(Location location, boolean force);
 
@@ -102,12 +102,12 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
 
     /**
      * Starts a trade between the player and the villager.
-     * <p>
+     *
      * Note that only one player may trade with a villager at once. You must use
      * the force parameter for this.
      *
      * @param trader The merchant to trade with. Cannot be null.
-     * @param force  whether to force the trade even if another player is trading
+     * @param force whether to force the trade even if another player is trading
      * @return The newly opened inventory view, or null if it could not be
      * opened.
      */
@@ -115,12 +115,12 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
 
     /**
      * Starts a trade between the player and the merchant.
-     * <p>
+     *
      * Note that only one player may trade with a merchant at once. You must use
      * the force parameter for this.
      *
      * @param merchant The merchant to trade with. Cannot be null.
-     * @param force    whether to force the trade even if another player is trading
+     * @param force whether to force the trade even if another player is trading
      * @return The newly opened inventory view, or null if it could not be
      * opened.
      */
@@ -130,8 +130,6 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * Force-closes the currently open inventory view for this player, if any.
      */
     public void closeInventory();
-
-    public void closeInventory(org.bukkit.event.inventory.InventoryCloseEvent.Reason reason);
 
     /**
      * Returns the ItemStack currently in your hand, can be empty.
@@ -198,7 +196,7 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * for attacking.
      *
      * @param material the material to set the cooldown for
-     * @param ticks    the amount of ticks to set or 0 to remove
+     * @param ticks the amount of ticks to set or 0 to remove
      */
     public void setCooldown(Material material, int ticks);
 
@@ -251,25 +249,6 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      * @return Experience required to level up
      */
     public int getExpToLevel();
-
-    // Paper start
-
-    /**
-     * If there is an Entity on this entities left shoulder, it will be released to the world and returned.
-     * If no Entity is released, null will be returned.
-     *
-     * @return The released entity, or null
-     */
-    public Entity releaseLeftShoulderEntity();
-
-    /**
-     * If there is an Entity on this entities left shoulder, it will be released to the world and returned.
-     * If no Entity is released, null will be returned.
-     *
-     * @return The released entity, or null
-     */
-    public Entity releaseRightShoulderEntity();
-    // Paper end
 
     /**
      * Gets the entity currently perched on the left shoulder or null if no
@@ -332,14 +311,4 @@ public interface HumanEntity extends LivingEntity, AnimalTamer, Permissible, Inv
      */
     @Deprecated
     public void setShoulderEntityRight(Entity entity);
-
-    // Paper start - Add method to open already placed sign
-
-    /**
-     * Opens an editor window for the specified sign
-     *
-     * @param sign The sign to open
-     */
-    void openSign(org.bukkit.block.Sign sign);
-    // Paper end
 }

@@ -12,6 +12,9 @@ public interface LightningStrike extends Weather {
      */
     public boolean isEffect();
 
+    @Override
+    Spigot spigot();
+
     // Spigot start
     public class Spigot extends Entity.Spigot {
 
@@ -24,8 +27,5 @@ public interface LightningStrike extends Weather {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
-
-    @Override
-    Spigot spigot();
     // Spigot end
 }

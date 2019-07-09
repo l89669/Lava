@@ -10,7 +10,6 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityTracker;
@@ -19,12 +18,9 @@ import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.attributes.RangedAttribute;
-import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Enchantments;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -52,16 +48,13 @@ import org.bukkit.craftbukkit.advancement.CraftAdvancement;
 import org.bukkit.craftbukkit.advancement.CraftAdvancementProgress;
 import org.bukkit.craftbukkit.block.CraftSign;
 import org.bukkit.craftbukkit.conversations.ConversationTracker;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.craftbukkit.map.CraftMapView;
 import org.bukkit.craftbukkit.map.RenderData;
 import org.bukkit.craftbukkit.scoreboard.CraftScoreboard;
 import org.bukkit.craftbukkit.util.CraftChatMessage;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerUnregisterChannelEvent;
@@ -929,6 +922,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     @Override
+    public void giveExp(int amount) {
+        getHandle().addExperience(amount);
+    }
+
+    @Override
     public boolean isBanned() {
         return server.getBanList(BanList.Type.NAME).isBanned(getName());
     }
@@ -963,39 +961,6 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         }
 
         getHandle().setGameType(GameType.getByID(mode.getValue()));
-    }
-
-    @Override
-    public Integer applyMending(int amount) {
-        EntityPlayer handle = getHandle();
-        ItemStack itemstack = EnchantmentHelper.getEnchantedItem(Enchantments.MENDING, handle);
-        if (!itemstack.isEmpty() && itemstack.getItem().isDamageable()) {
-            EntityXPOrb orb = new EntityXPOrb(handle.world);
-            orb.xpValue = amount;
-            orb.reason = ExperienceOrb.SpawnReason.CUSTOM;
-            orb.posX = handle.posX;
-            orb.posY = handle.posY;
-            orb.posZ = handle.posZ;
-
-            int i = Math.min(orb.xpToDurability(amount), itemstack.getItemDamage());
-            PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(handle, orb, itemstack, i);
-            i = event.getRepairAmount();
-            orb.isDead = true;
-            if (!event.isCancelled()) {
-                amount -= orb.durabilityToXp(i);
-                itemstack.setItemDamage(itemstack.getItemDamage() - i);
-            }
-        }
-        return amount;
-    }
-
-    @Override
-    public void giveExp(int exp, boolean applyMending) {
-        if (applyMending) {
-            exp = this.applyMending(exp);
-        }
-
-        getHandle().addExperience(exp);
     }
 
     @Override
@@ -1621,7 +1586,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         double healthMod = scaledHealth ? healthScale : getMaxHealth();
         if (healthMod >= Float.MAX_VALUE || healthMod <= 0) {
             healthMod = 20; // Reset health
-            Lava.LOGGER.warning(getName() + " tried to crash the server with a large health attribute");
+            Lava.LOGGER.warn(getName() + " tried to crash the server with a large health attribute");
         }
         collection.add(new ModifiableAttributeInstance(getHandle().getAttributeMap(), (new RangedAttribute(null, "generic.maxHealth", healthMod, 0.0D, Float.MAX_VALUE)).setDescription("Max Health").setShouldWatch(true)));
         // Spigot end

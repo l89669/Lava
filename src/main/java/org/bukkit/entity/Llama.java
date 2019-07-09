@@ -1,35 +1,11 @@
 package org.bukkit.entity;
 
-import com.destroystokyo.paper.entity.RangedEntity;
 import org.bukkit.inventory.LlamaInventory;
 
 /**
  * Represents a Llama.
  */
-public interface Llama extends ChestedHorse, RangedEntity { // Paper
-
-    /**
-     * Represents the base color that the llama has.
-     */
-    public enum Color {
-
-        /**
-         * A cream-colored llama.
-         */
-        CREAMY,
-        /**
-         * A white llama.
-         */
-        WHITE,
-        /**
-         * A brown llama.
-         */
-        BROWN,
-        /**
-         * A gray llama.
-         */
-        GRAY;
-    }
+public interface Llama extends ChestedHorse {
 
     /**
      * Gets the llama's color.
@@ -64,4 +40,27 @@ public interface Llama extends ChestedHorse, RangedEntity { // Paper
 
     @Override
     LlamaInventory getInventory();
+
+    /**
+     * Represents the base color that the llama has.
+     */
+    public enum Color {
+
+        /**
+         * A cream-colored llama.
+         */
+        CREAMY,
+        /**
+         * A white llama.
+         */
+        WHITE,
+        /**
+         * A brown llama.
+         */
+        BROWN,
+        /**
+         * A gray llama.
+         */
+        GRAY;
+    }
 }

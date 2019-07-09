@@ -77,7 +77,7 @@
  import net.minecraft.util.math.AxisAlignedBB;
  import net.minecraft.util.math.BlockPos;
  import net.minecraft.util.math.MathHelper;
-@@ -76,20 +49,33 @@
+@@ -76,20 +49,34 @@
  import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -85,6 +85,7 @@
 +import org.bukkit.craftbukkit.attribute.CraftAttributeMap;
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
 +import org.bukkit.craftbukkit.inventory.CraftItemStack;
++import org.bukkit.entity.ExperienceOrb;
 +import org.bukkit.entity.LivingEntity;
 +import org.bukkit.entity.Player;
 +import org.bukkit.event.entity.EntityDamageEvent;
@@ -116,7 +117,7 @@
      private final Map<Potion, PotionEffect> activePotionsMap = Maps.<Potion, PotionEffect>newHashMap();
      private final NonNullList<ItemStack> handInventory = NonNullList.<ItemStack>withSize(2, ItemStack.EMPTY);
      private final NonNullList<ItemStack> armorArray = NonNullList.<ItemStack>withSize(4, ItemStack.EMPTY);
-@@ -117,7 +103,7 @@
+@@ -117,7 +104,7 @@
      public float rotationYawHead;
      public float prevRotationYawHead;
      public float jumpMovementFactor = 0.02F;
@@ -125,7 +126,7 @@
      protected int recentlyHit;
      protected boolean dead;
      protected int idleTime;
-@@ -127,7 +113,7 @@
+@@ -127,7 +114,7 @@
      protected float prevMovedDistance;
      protected float unused180;
      protected int scoreValue;
@@ -134,7 +135,7 @@
      protected boolean isJumping;
      public float moveStrafing;
      public float moveVertical;
-@@ -139,9 +125,9 @@
+@@ -139,9 +126,9 @@
      protected double interpTargetZ;
      protected double interpTargetYaw;
      protected double interpTargetPitch;
@@ -147,7 +148,7 @@
      private EntityLivingBase lastAttackedEntity;
      private int lastAttackedEntityTime;
      private float landMovementFactor;
-@@ -154,36 +140,44 @@
+@@ -154,36 +141,44 @@
      private DamageSource lastDamageSource;
      private long lastDamageStamp;
  
@@ -205,7 +206,7 @@
          this.getAttributeMap().registerAttribute(SharedMonsterAttributes.MAX_HEALTH);
          this.getAttributeMap().registerAttribute(SharedMonsterAttributes.KNOCKBACK_RESISTANCE);
          this.getAttributeMap().registerAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-@@ -192,162 +186,141 @@
+@@ -192,162 +187,141 @@
          this.getAttributeMap().registerAttribute(SWIM_SPEED);
      }
  
@@ -424,7 +425,7 @@
          }
  
          this.updatePotionEffects();
-@@ -359,136 +332,122 @@
+@@ -359,136 +333,122 @@
          this.world.profiler.endSection();
      }
  
@@ -482,7 +483,7 @@
 +            while (i > 0) {
 +                int j = EntityXPOrb.getXPSplit(i);
 +                i -= j;
-+                this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, j));
++                this.world.spawnEntity(new EntityXPOrb(this.world, this.posX, this.posY, this.posZ, j, ExperienceOrb.SpawnReason.ENTITY_DEATH, this.attackingPlayer));
              }
 +            this.expToDrop = 0;
  
@@ -609,7 +610,7 @@
                  soundevent = SoundEvents.ITEM_ARMOR_EQIIP_ELYTRA;
              }
  
-@@ -496,42 +455,35 @@
+@@ -496,42 +456,35 @@
          }
      }
  
@@ -661,7 +662,7 @@
                  nbttaglist.appendTag(potioneffect.writeCustomPotionEffectToNBT(new NBTTagCompound()));
              }
  
-@@ -541,33 +493,38 @@
+@@ -541,33 +494,38 @@
          compound.setBoolean("FallFlying", this.isElytraFlying());
      }
  
@@ -712,7 +713,7 @@
              this.setHealth(compound.getFloat("Health"));
          }
  
-@@ -575,103 +532,97 @@
+@@ -575,103 +533,97 @@
          this.deathTime = compound.getShort("DeathTime");
          this.revengeTimer = compound.getInteger("HurtByTimestamp");
  
@@ -860,7 +861,7 @@
              Collection<PotionEffect> collection = this.activePotionsMap.values();
              net.minecraftforge.event.entity.living.PotionColorCalculationEvent event = new net.minecraftforge.event.entity.living.PotionColorCalculationEvent(this, PotionUtils.getPotionColorFromEffectList(collection), areAllPotionsAmbient(collection), collection);
              net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
-@@ -681,12 +632,9 @@
+@@ -681,12 +633,9 @@
          }
      }
  
@@ -876,7 +877,7 @@
                  return false;
              }
          }
-@@ -694,81 +642,64 @@
+@@ -694,81 +643,64 @@
          return true;
      }
  
@@ -980,7 +981,7 @@
                  return false;
              }
          }
-@@ -776,129 +707,139 @@
+@@ -776,129 +708,139 @@
          return true;
      }
  
@@ -1180,7 +1181,7 @@
                          }
                      }
  
-@@ -908,142 +849,128 @@
+@@ -908,142 +850,128 @@
                  this.limbSwingAmount = 1.5F;
                  boolean flag1 = true;
  
@@ -1380,7 +1381,7 @@
                  }
  
                  return flag2;
-@@ -1051,38 +978,38 @@
+@@ -1051,38 +979,38 @@
          }
      }
  
@@ -1439,7 +1440,7 @@
                      entityplayermp.addStat(StatList.getObjectUseStats(Items.TOTEM_OF_UNDYING));
                      CriteriaTriggers.USED_TOTEM.trigger(entityplayermp, itemstack);
                  }
-@@ -1091,48 +1018,41 @@
+@@ -1091,48 +1019,41 @@
                  this.clearActivePotions();
                  this.addPotionEffect(new PotionEffect(MobEffects.REGENERATION, 900, 1));
                  this.addPotionEffect(new PotionEffect(MobEffects.ABSORPTION, 100, 1));
@@ -1499,7 +1500,7 @@
                      return true;
                  }
              }
-@@ -1141,108 +1061,108 @@
+@@ -1141,108 +1062,108 @@
          return false;
      }
  
@@ -1651,7 +1652,7 @@
                      this.motionY = 0.4000000059604645D;
                  }
              }
-@@ -1250,38 +1170,30 @@
+@@ -1250,38 +1171,30 @@
      }
  
      @Nullable
@@ -1697,7 +1698,7 @@
              BlockPos blockpos = new BlockPos(i, j, k);
              IBlockState iblockstate = this.world.getBlockState(blockpos);
              Block block = iblockstate.getBlock();
-@@ -1289,14 +1201,11 @@
+@@ -1289,14 +1202,11 @@
          }
      }
  
@@ -1715,7 +1716,7 @@
                  return true;
              }
          }
-@@ -1304,32 +1213,34 @@
+@@ -1304,32 +1214,34 @@
          return false;
      }
  
@@ -1761,7 +1762,7 @@
                  SoundType soundtype = iblockstate.getBlock().getSoundType(iblockstate, world, new BlockPos(j, k, l), this);
                  this.playSound(soundtype.getFallSound(), soundtype.getVolume() * 0.5F, soundtype.getPitch() * 0.75F);
              }
-@@ -1337,65 +1248,51 @@
+@@ -1337,65 +1249,51 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -1845,7 +1846,7 @@
                  }
  
                  return damage;
-@@ -1403,8 +1300,9 @@
+@@ -1403,8 +1301,9 @@
          }
      }
  
@@ -1857,7 +1858,7 @@
          if (!this.isEntityInvulnerable(damageSrc))
          {
              damageAmount = net.minecraftforge.common.ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
-@@ -1424,143 +1322,244 @@
+@@ -1424,143 +1323,244 @@
                  this.setAbsorptionAmount(this.getAbsorptionAmount() - damageAmount);
              }
          }
@@ -2170,7 +2171,7 @@
                  this.playSound(soundevent, this.getSoundVolume(), (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
              }
  
-@@ -1568,89 +1567,67 @@
+@@ -1568,89 +1568,67 @@
          }
      }
  
@@ -2281,7 +2282,7 @@
                  throw new IllegalArgumentException("Invalid hand " + hand);
              }
  
-@@ -1658,8 +1635,7 @@
+@@ -1658,8 +1636,7 @@
          }
      }
  
@@ -2291,7 +2292,7 @@
          return !this.getItemStackFromSlot(p_190630_1_).isEmpty();
      }
  
-@@ -1669,83 +1645,68 @@
+@@ -1669,83 +1646,68 @@
  
      public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
  
@@ -2394,7 +2395,7 @@
                          d1 = d11;
                          d13 = this.posY + 2.0D;
                          d14 = d12;
-@@ -1754,98 +1715,77 @@
+@@ -1754,98 +1716,77 @@
              }
  
              this.setPositionAndUpdate(d1, d13, d14);
@@ -2526,7 +2527,7 @@
                              this.fallDistance = 1.0F;
                          }
  
-@@ -1855,27 +1795,24 @@
+@@ -1855,27 +1796,24 @@
                          double d8 = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
                          double d1 = vec3d.lengthVector();
                          float f4 = MathHelper.cos(f);
@@ -2561,7 +2562,7 @@
                              this.motionX += (vec3d.x / d6 * d8 - this.motionX) * 0.1D;
                              this.motionZ += (vec3d.z / d6 * d8 - this.motionZ) * 0.1D;
                          }
-@@ -1885,31 +1822,26 @@
+@@ -1885,31 +1823,26 @@
                          this.motionZ *= 0.9900000095367432D;
                          this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
  
@@ -2602,7 +2603,7 @@
                              IBlockState underState = this.world.getBlockState(blockpos$pooledmutableblockpos);
                              f6 = underState.getBlock().getSlipperiness(underState, this.world, blockpos$pooledmutableblockpos, this) * 0.91F;
                          }
-@@ -1917,84 +1849,65 @@
+@@ -1917,84 +1850,65 @@
                          float f7 = 0.16277136F / (f6 * f6 * f6);
                          float f8;
  
@@ -2704,7 +2705,7 @@
                      double d4 = this.posY;
                      this.moveRelative(strafe, vertical, forward, 0.02F);
                      this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-@@ -2002,53 +1915,44 @@
+@@ -2002,53 +1916,44 @@
                      this.motionY *= 0.5D;
                      this.motionZ *= 0.5D;
  
@@ -2769,7 +2770,7 @@
                      this.motionY = 0.30000001192092896D;
                  }
              }
-@@ -2060,8 +1964,7 @@
+@@ -2060,8 +1965,7 @@
          double d9 = this instanceof net.minecraft.entity.passive.EntityFlying ? this.posY - this.prevPosY : 0.0D;
          float f10 = MathHelper.sqrt(d5 * d5 + d9 * d9 + d7 * d7) * 4.0F;
  
@@ -2779,7 +2780,7 @@
              f10 = 1.0F;
          }
  
-@@ -2069,58 +1972,47 @@
+@@ -2069,58 +1973,47 @@
          this.limbSwing += this.limbSwingAmount;
      }
  
@@ -2849,7 +2850,7 @@
                      case HAND:
                          itemstack = this.handInventory.get(entityequipmentslot.getIndex());
                          break;
-@@ -2133,24 +2025,20 @@
+@@ -2133,24 +2026,20 @@
  
                  ItemStack itemstack1 = this.getItemStackFromSlot(entityequipmentslot);
  
@@ -2879,7 +2880,7 @@
                          case HAND:
                              this.handInventory.set(entityequipmentslot.getIndex(), itemstack1.isEmpty() ? ItemStack.EMPTY : itemstack1.copy());
                              break;
-@@ -2160,17 +2048,14 @@
+@@ -2160,17 +2049,14 @@
                  }
              }
  
@@ -2900,7 +2901,7 @@
                      this.setFlag(6, flag);
                  }
              }
-@@ -2179,36 +2064,30 @@
+@@ -2179,36 +2065,30 @@
          this.onLivingUpdate();
          double d0 = this.posX - this.prevPosX;
          double d1 = this.posZ - this.prevPosZ;
@@ -2945,7 +2946,7 @@
              f = 0.0F;
          }
  
-@@ -2218,143 +2097,116 @@
+@@ -2218,143 +2098,116 @@
          this.world.profiler.endSection();
          this.world.profiler.startSection("rangeChecks");
  
@@ -3119,7 +3120,7 @@
              this.world.profiler.startSection("newAi");
              this.updateEntityActionState();
              this.world.profiler.endSection();
-@@ -2363,24 +2215,16 @@
+@@ -2363,24 +2216,16 @@
          this.world.profiler.endSection();
          this.world.profiler.startSection("jump");
  
@@ -3149,7 +3150,7 @@
              this.jumpTicks = 0;
          }
  
-@@ -2397,95 +2241,75 @@
+@@ -2397,95 +2242,75 @@
          this.world.profiler.endSection();
      }
  
@@ -3266,7 +3267,7 @@
          super.updateRidden();
          this.prevOnGroundSpeedFactor = this.onGroundSpeedFactor;
          this.onGroundSpeedFactor = 0.0F;
-@@ -2493,47 +2317,37 @@
+@@ -2493,47 +2318,37 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -3327,7 +3328,7 @@
              float f = this.prevRotationPitch + (this.rotationPitch - this.prevRotationPitch) * partialTicks;
              float f1 = this.prevRotationYawHead + (this.rotationYawHead - this.prevRotationYawHead) * partialTicks;
              return this.getVectorForRotation(f, f1);
-@@ -2541,78 +2355,63 @@
+@@ -2541,78 +2356,63 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -3423,7 +3424,7 @@
          this.potionsNeedUpdate = true;
      }
  
-@@ -2620,17 +2419,14 @@
+@@ -2620,17 +2420,14 @@
       * Removes all potion effects that have curativeItem as a curative item for its effect
       * @param curativeItem The itemstack we are using to cure potion effects
       */
@@ -3444,7 +3445,7 @@
                  onFinishedPotionEffect(effect);
                  iterator.remove();
                  this.potionsNeedUpdate = true;
-@@ -2645,173 +2441,153 @@
+@@ -2645,173 +2442,153 @@
       * @param player The player who is riding the entity.
       * @return If the player should orient the same direction as this entity.
       */
@@ -3677,7 +3678,7 @@
              if (!net.minecraftforge.event.ForgeEventFactory.onUseItemStop(this, activeItemStack, this.getItemInUseCount()))
                  this.activeItemStack.onPlayerStoppedUsing(this.world, this, this.getItemInUseCount());
          }
-@@ -2819,51 +2595,39 @@
+@@ -2819,51 +2596,39 @@
          this.resetActiveHand();
      }
  
@@ -3740,7 +3741,7 @@
          double d0 = this.posX;
          double d1 = this.posY;
          double d2 = this.posZ;
-@@ -2875,69 +2639,67 @@
+@@ -2875,69 +2640,67 @@
          World world = this.world;
          Random random = this.getRNG();
  
@@ -3841,7 +3842,7 @@
          return true;
      }
  
-@@ -2949,10 +2711,8 @@
+@@ -2949,10 +2712,8 @@
      @SuppressWarnings("unchecked")
      @Override
      @Nullable
@@ -3854,7 +3855,7 @@
              if (facing == null) return (T) joinedHandler;
              else if (facing.getAxis().isVertical()) return (T) handHandler;
              else if (facing.getAxis().isHorizontal()) return (T) armorHandler;
-@@ -2961,44 +2721,38 @@
+@@ -2961,44 +2722,38 @@
      }
  
      @Override

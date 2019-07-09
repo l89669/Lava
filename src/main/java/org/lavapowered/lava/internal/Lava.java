@@ -1,11 +1,12 @@
 package org.lavapowered.lava.internal;
 
+import org.apache.logging.log4j.Logger;
+
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
 
 public class Lava {
 
-    public static Logger LOGGER = Logger.getLogger("LavaInternal");
+    public static Logger LOGGER;
     private static final String NATIVE_VERSON = "v1_12_R1";
     private static final String NMS_PREFIX = "net/minecraft/server/";
 

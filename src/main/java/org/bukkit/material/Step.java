@@ -30,7 +30,7 @@ public class Step extends TexturedMaterial {
      * @param type the raw type id
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Step(final int type) {
         super(type);
     }
@@ -47,7 +47,7 @@ public class Step extends TexturedMaterial {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Step(final int type, final byte data) {
         super(type, data);
     }
@@ -57,7 +57,7 @@ public class Step extends TexturedMaterial {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Step(final Material type, final byte data) {
         super(type, data);
     }
@@ -80,7 +80,7 @@ public class Step extends TexturedMaterial {
      * Set step inverted state
      *
      * @param inv - true if step is inverted (top half), false if step is
-     *            normal (bottom half)
+     *     normal (bottom half)
      */
     public void setInverted(boolean inv) {
         int dat = getData() & 0x7;
@@ -91,18 +91,20 @@ public class Step extends TexturedMaterial {
     }
 
     /**
+     *
      * @deprecated Magic value
      */
-    @Deprecated
+
     @Override
     protected int getTextureIndex() {
         return getData() & 0x7;
     }
 
     /**
+     *
      * @deprecated Magic value
      */
-    @Deprecated
+
     @Override
     protected void setTextureIndex(int idx) {
         setData((byte) ((getData() & 0x8) | idx));

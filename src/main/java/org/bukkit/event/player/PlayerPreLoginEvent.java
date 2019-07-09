@@ -11,20 +11,18 @@ import java.util.UUID;
  * Stores details for players attempting to log in
  *
  * @deprecated This event causes synchronization from the login thread; {@link
- * AsyncPlayerPreLoginEvent} is preferred to keep the secondary threads
- * asynchronous.
+ *     AsyncPlayerPreLoginEvent} is preferred to keep the secondary threads
+ *     asynchronous.
  */
-@Deprecated
 @Warning(reason = "This event causes a login thread to synchronize with the main thread")
 public class PlayerPreLoginEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private Result result;
-    private String message;
     private final String name;
     private final InetAddress ipAddress;
     private final UUID uniqueId;
+    private Result result;
+    private String message;
 
-    @Deprecated
     public PlayerPreLoginEvent(final String name, final InetAddress ipAddress) {
         this(name, ipAddress, null);
     }
@@ -35,6 +33,10 @@ public class PlayerPreLoginEvent extends Event {
         this.name = name;
         this.ipAddress = ipAddress;
         this.uniqueId = uniqueId;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     /**
@@ -85,7 +87,7 @@ public class PlayerPreLoginEvent extends Event {
     /**
      * Disallows the player from logging in, with the given reason
      *
-     * @param result  New result for disallowing the player
+     * @param result New result for disallowing the player
      * @param message Kick message to display to the user
      */
     public void disallow(final Result result, final String message) {
@@ -123,10 +125,6 @@ public class PlayerPreLoginEvent extends Event {
      */
     public UUID getUniqueId() {
         return uniqueId;
-    }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 
     /**

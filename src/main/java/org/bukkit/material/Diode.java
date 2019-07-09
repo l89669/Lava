@@ -19,7 +19,7 @@ public class Diode extends MaterialData implements Directional, Redstone {
     /**
      * Constructs a diode switched on, with a delay of 1 and facing the default
      * direction (north).
-     * <p>
+     *
      * By default this constructor creates a diode that is switched on for
      * backwards compatibility with past implementations.
      */
@@ -32,6 +32,7 @@ public class Diode extends MaterialData implements Directional, Redstone {
      * specified direction.
      *
      * @param facingDirection the direction the diode is facing
+     *
      * @see BlockFace
      */
     public Diode(BlockFace facingDirection) {
@@ -43,8 +44,9 @@ public class Diode extends MaterialData implements Directional, Redstone {
      * specified direction.
      *
      * @param facingDirection the direction the diode is facing
-     * @param delay           The number of ticks (1-4) before the diode turns on after
-     *                        being powered
+     * @param delay The number of ticks (1-4) before the diode turns on after
+     * being powered
+     *
      * @see BlockFace
      */
     public Diode(BlockFace facingDirection, int delay) {
@@ -56,9 +58,10 @@ public class Diode extends MaterialData implements Directional, Redstone {
      * facing the specified direction.
      *
      * @param facingDirection the direction the diode is facing
-     * @param delay           The number of ticks (1-4) before the diode turns on after
-     *                        being powered
-     * @param state           True if the diode is in the on state
+     * @param delay The number of ticks (1-4) before the diode turns on after
+     * being powered
+     * @param state True if the diode is in the on state
+     *
      * @see BlockFace
      */
     public Diode(BlockFace facingDirection, int delay, boolean state) {
@@ -71,7 +74,7 @@ public class Diode extends MaterialData implements Directional, Redstone {
      * @param type the raw type id
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Diode(int type) {
         super(type);
     }
@@ -85,7 +88,7 @@ public class Diode extends MaterialData implements Directional, Redstone {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Diode(int type, byte data) {
         super(type, data);
     }
@@ -95,9 +98,18 @@ public class Diode extends MaterialData implements Directional, Redstone {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Diode(Material type, byte data) {
         super(type, data);
+    }
+
+    /**
+     * Gets the delay of the repeater in ticks.
+     *
+     * @return The delay (1-4)
+     */
+    public int getDelay() {
+        return (getData() >> 2) + 1;
     }
 
     /**
@@ -118,18 +130,10 @@ public class Diode extends MaterialData implements Directional, Redstone {
     }
 
     /**
-     * Gets the delay of the repeater in ticks.
-     *
-     * @return The delay (1-4)
-     */
-    public int getDelay() {
-        return (getData() >> 2) + 1;
-    }
-
-    /**
      * Sets the direction this diode is facing.
      *
      * @param face The direction to set this diode to
+     *
      * @see BlockFace
      */
     @Override
@@ -160,6 +164,7 @@ public class Diode extends MaterialData implements Directional, Redstone {
      * Gets the direction this diode is facing
      *
      * @return The direction this diode is facing
+     *
      * @see BlockFace
      */
     @Override

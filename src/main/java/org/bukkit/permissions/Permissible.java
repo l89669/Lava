@@ -54,9 +54,9 @@ public interface Permissible extends ServerOperator {
      * name and value
      *
      * @param plugin Plugin responsible for this attachment, may not be null
-     *               or disabled
-     * @param name   Name of the permission to attach
-     * @param value  Value of the permission
+     *     or disabled
+     * @param name Name of the permission to attach
+     * @param value Value of the permission
      * @return The PermissionAttachment that was just created
      */
     public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value);
@@ -65,7 +65,7 @@ public interface Permissible extends ServerOperator {
      * Adds a new empty {@link PermissionAttachment} to this object
      *
      * @param plugin Plugin responsible for this attachment, may not be null
-     *               or disabled
+     *     or disabled
      * @return The PermissionAttachment that was just created
      */
     public PermissionAttachment addAttachment(Plugin plugin);
@@ -75,11 +75,11 @@ public interface Permissible extends ServerOperator {
      * permission by name and value
      *
      * @param plugin Plugin responsible for this attachment, may not be null
-     *               or disabled
-     * @param name   Name of the permission to attach
-     * @param value  Value of the permission
-     * @param ticks  Amount of ticks to automatically remove this attachment
-     *               after
+     *     or disabled
+     * @param name Name of the permission to attach
+     * @param value Value of the permission
+     * @param ticks Amount of ticks to automatically remove this attachment
+     *     after
      * @return The PermissionAttachment that was just created
      */
     public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks);
@@ -89,9 +89,9 @@ public interface Permissible extends ServerOperator {
      * object
      *
      * @param plugin Plugin responsible for this attachment, may not be null
-     *               or disabled
-     * @param ticks  Amount of ticks to automatically remove this attachment
-     *               after
+     *     or disabled
+     * @param ticks Amount of ticks to automatically remove this attachment
+     *     after
      * @return The PermissionAttachment that was just created
      */
     public PermissionAttachment addAttachment(Plugin plugin, int ticks);
@@ -101,7 +101,7 @@ public interface Permissible extends ServerOperator {
      *
      * @param attachment Attachment to remove
      * @throws IllegalArgumentException Thrown when the specified attachment
-     *                                  isn't part of this object
+     *     isn't part of this object
      */
     public void removeAttachment(PermissionAttachment attachment);
 

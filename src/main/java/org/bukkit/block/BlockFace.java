@@ -28,7 +28,7 @@ public enum BlockFace {
     private final int modY;
     private final int modZ;
 
-    private BlockFace(final int modX, final int modY, final int modZ) {
+    BlockFace(final int modX, final int modY, final int modZ) {
         this.modX = modX;
         this.modY = modY;
         this.modZ = modZ;

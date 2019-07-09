@@ -1,24 +1,21 @@
 package org.bukkit.command;
 
-import com.destroystokyo.paper.event.server.ServerExceptionEvent;
-import com.destroystokyo.paper.exception.ServerCommandException;
-import com.destroystokyo.paper.exception.ServerTabCompleteException;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.command.defaults.HelpCommand;
 import org.bukkit.command.defaults.PluginsCommand;
-import org.bukkit.command.defaults.VersionCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
+import org.lavapowered.lava.internal.Lava;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class SimpleCommandMap implements CommandMap {
     private static final Pattern PATTERN_ON_SPACE = Pattern.compile(" ", Pattern.LITERAL);
-    protected final Map<String, Command> knownCommands = new HashMap<String, Command>();
+    protected final Map<String, Command> knownCommands = new HashMap<>();
     private final Server server;
 
     public SimpleCommandMap(final Server server) {
@@ -28,7 +25,6 @@ public class SimpleCommandMap implements CommandMap {
 
     private void setDefaultCommands() {
         register("bukkit", new PluginsCommand("plugins"));
-        register("bukkit", new VersionCommand("version"));
     }
 
     public void setFallbackCommands() {
@@ -57,8 +53,8 @@ public class SimpleCommandMap implements CommandMap {
      * {@inheritDoc}
      */
     public boolean register(String label, String fallbackPrefix, Command command) {
-        label = label.toLowerCase(java.util.Locale.ENGLISH).trim();
-        fallbackPrefix = fallbackPrefix.toLowerCase(java.util.Locale.ENGLISH).trim();
+        label = label.toLowerCase(Locale.ENGLISH).trim();
+        fallbackPrefix = fallbackPrefix.toLowerCase(Locale.ENGLISH).trim();
         boolean registered = register(label, command, false, fallbackPrefix);
 
         Iterator<String> iterator = command.getAliases().iterator();
@@ -125,7 +121,7 @@ public class SimpleCommandMap implements CommandMap {
             return false;
         }
 
-        String sentCommandLabel = args[0].toLowerCase(java.util.Locale.ENGLISH);
+        String sentCommandLabel = args[0].toLowerCase(Locale.ENGLISH);
         Command target = getCommand(sentCommandLabel);
 
         if (target == null) {
@@ -136,12 +132,9 @@ public class SimpleCommandMap implements CommandMap {
             // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
             target.execute(sender, sentCommandLabel, Arrays.copyOfRange(args, 1, args.length));
         } catch (CommandException ex) {
-            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
             throw ex;
         } catch (Throwable ex) {
-            String msg = "Unhandled exception executing '" + commandLine + "' in " + target;
-            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerCommandException(ex, target, sender, args))); // Paper
-            throw new CommandException(msg, ex);
+            throw new CommandException("Unhandled exception executing '" + commandLine + "' in " + target, ex);
         }
 
         // return true as command was handled
@@ -157,8 +150,7 @@ public class SimpleCommandMap implements CommandMap {
     }
 
     public Command getCommand(String name) {
-        Command target = knownCommands.get(name.toLowerCase(java.util.Locale.ENGLISH));
-        return target;
+        return knownCommands.get(name.toLowerCase(Locale.ENGLISH));
     }
 
     public List<String> tabComplete(CommandSender sender, String cmdLine) {
@@ -172,7 +164,7 @@ public class SimpleCommandMap implements CommandMap {
         int spaceIndex = cmdLine.indexOf(' ');
 
         if (spaceIndex == -1) {
-            ArrayList<String> completions = new ArrayList<String>();
+            ArrayList<String> completions = new ArrayList<>();
             Map<String, Command> knownCommands = this.knownCommands;
 
             final String prefix = (sender instanceof Player ? "/" : "");
@@ -191,7 +183,7 @@ public class SimpleCommandMap implements CommandMap {
                 }
             }
 
-            Collections.sort(completions, String.CASE_INSENSITIVE_ORDER);
+            completions.sort(String.CASE_INSENSITIVE_ORDER);
             return completions;
         }
 
@@ -206,7 +198,7 @@ public class SimpleCommandMap implements CommandMap {
             return null;
         }
 
-        String argLine = cmdLine.substring(spaceIndex + 1, cmdLine.length());
+        String argLine = cmdLine.substring(spaceIndex + 1);
         String[] args = PATTERN_ON_SPACE.split(argLine, -1);
 
         try {
@@ -214,9 +206,7 @@ public class SimpleCommandMap implements CommandMap {
         } catch (CommandException ex) {
             throw ex;
         } catch (Throwable ex) {
-            String msg = "Unhandled exception executing tab-completer for '" + cmdLine + "' in " + target;
-            server.getPluginManager().callEvent(new ServerExceptionEvent(new ServerTabCompleteException(msg, ex, target, sender, args))); // Paper
-            throw new CommandException(msg, ex);
+            throw new CommandException("Unhandled exception executing tab-completer for '" + cmdLine + "' in " + target, ex);
         }
     }
 
@@ -230,12 +220,12 @@ public class SimpleCommandMap implements CommandMap {
         for (Map.Entry<String, String[]> entry : values.entrySet()) {
             String alias = entry.getKey();
             if (alias.contains(" ")) {
-                server.getLogger().warning("Could not register alias " + alias + " because it contains illegal characters");
+                Lava.LOGGER.warn("Could not register alias " + alias + " because it contains illegal characters");
                 continue;
             }
 
             String[] commandStrings = entry.getValue();
-            List<String> targets = new ArrayList<String>();
+            List<String> targets = new ArrayList<>();
             StringBuilder bad = new StringBuilder();
 
             for (String commandString : commandStrings) {
@@ -253,15 +243,15 @@ public class SimpleCommandMap implements CommandMap {
             }
 
             if (bad.length() > 0) {
-                server.getLogger().warning("Could not register alias " + alias + " because it contains commands that do not exist: " + bad);
+                Lava.LOGGER.warn("Could not register alias " + alias + " because it contains commands that do not exist: " + bad);
                 continue;
             }
 
             // We register these as commands so they have absolute priority.
             if (targets.size() > 0) {
-                knownCommands.put(alias.toLowerCase(java.util.Locale.ENGLISH), new FormattedCommandAlias(alias.toLowerCase(java.util.Locale.ENGLISH), targets.toArray(new String[targets.size()])));
+                knownCommands.put(alias.toLowerCase(Locale.ENGLISH), new FormattedCommandAlias(alias.toLowerCase(Locale.ENGLISH), targets.toArray(new String[targets.size()])));
             } else {
-                knownCommands.remove(alias.toLowerCase(java.util.Locale.ENGLISH));
+                knownCommands.remove(alias.toLowerCase(Locale.ENGLISH));
             }
         }
     }

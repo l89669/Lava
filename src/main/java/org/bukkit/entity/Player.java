@@ -1,8 +1,5 @@
 package org.bukkit.entity;
 
-import com.destroystokyo.paper.Title;
-import com.destroystokyo.paper.network.NetworkClient;
-import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
@@ -15,12 +12,11 @@ import org.bukkit.plugin.messaging.PluginMessageRecipient;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.net.InetSocketAddress;
-import java.util.Date;
 
 /**
  * Represents a player, connected or not
  */
-public interface Player extends HumanEntity, Conversable, CommandSender, OfflinePlayer, PluginMessageRecipient, NetworkClient { // Paper - extend NetworkClient
+public interface Player extends HumanEntity, Conversable, CommandSender, OfflinePlayer, PluginMessageRecipient {
 
     /**
      * Gets the "friendly" name to display of this player. This may include
@@ -69,17 +65,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param name new player list name
      * @throws IllegalArgumentException if the name is already used by someone
-     *                                  else
+     *     else
      * @throws IllegalArgumentException if the length of the name is too long
      */
     public void setPlayerListName(String name);
-
-    /**
-     * Set the target of the player's compass.
-     *
-     * @param loc Location to point to
-     */
-    public void setCompassTarget(Location loc);
 
     /**
      * Get the previously set compass target.
@@ -87,6 +76,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * @return location of the target
      */
     public Location getCompassTarget();
+
+    /**
+     * Set the target of the player's compass.
+     *
+     * @param loc Location to point to
+     */
+    public void setCompassTarget(Location loc);
 
     /**
      * Gets the socket address of this player
@@ -170,6 +166,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     public void loadData();
 
     /**
+     * Returns whether the player is sleeping ignored.
+     *
+     * @return Whether player is ignoring sleep.
+     */
+    public boolean isSleepingIgnored();
+
+    /**
      * Sets whether the player is ignored as not sleeping. If everyone is
      * either sleeping or has this flag set, then time will advance to the
      * next day. If everyone has this flag set but no one is actually in bed,
@@ -180,20 +183,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     public void setSleepingIgnored(boolean isSleeping);
 
     /**
-     * Returns whether the player is sleeping ignored.
-     *
-     * @return Whether player is ignoring sleep.
-     */
-    public boolean isSleepingIgnored();
-
-    /**
      * Play a note for a player at a location. This requires a note block
      * at the particular location (as far as the client is concerned). This
      * will not work without a note block. This will not work with cake.
      *
-     * @param loc        The location of a note block.
+     * @param loc The location of a note block.
      * @param instrument The instrument ID.
-     * @param note       The note ID.
+     * @param note The note ID.
      * @deprecated Magic value
      */
     @Deprecated
@@ -204,9 +200,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * at the particular location (as far as the client is concerned). This
      * will not work without a note block. This will not work with cake.
      *
-     * @param loc        The location of a note block
+     * @param loc The location of a note block
      * @param instrument The instrument
-     * @param note       The note
+     * @param note The note
      */
     public void playNote(Location loc, Instrument instrument, Note note);
 
@@ -217,9 +213,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * This function will fail silently if Location or Sound are null.
      *
      * @param location The location to play the sound
-     * @param sound    The sound to play
-     * @param volume   The volume of the sound
-     * @param pitch    The pitch of the sound
+     * @param sound The sound to play
+     * @param volume The volume of the sound
+     * @param pitch The pitch of the sound
      */
     public void playSound(Location location, Sound sound, float volume, float pitch);
 
@@ -231,9 +227,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * respective sound for the value passed.
      *
      * @param location the location to play the sound
-     * @param sound    the internal sound name to play
-     * @param volume   the volume of the sound
-     * @param pitch    the pitch of the sound
+     * @param sound the internal sound name to play
+     * @param volume the volume of the sound
+     * @param pitch the pitch of the sound
      */
     public void playSound(Location location, String sound, float volume, float pitch);
 
@@ -243,10 +239,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * This function will fail silently if Location or Sound are null.
      *
      * @param location The location to play the sound
-     * @param sound    The sound to play
+     * @param sound The sound to play
      * @param category The category of the sound
-     * @param volume   The volume of the sound
-     * @param pitch    The pitch of the sound
+     * @param volume The volume of the sound
+     * @param pitch The pitch of the sound
      */
     public void playSound(Location location, Sound sound, SoundCategory category, float volume, float pitch);
 
@@ -258,10 +254,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * sound for the value passed.
      *
      * @param location the location to play the sound
-     * @param sound    the internal sound name to play
+     * @param sound the internal sound name to play
      * @param category The category of the sound
-     * @param volume   the volume of the sound
-     * @param pitch    the pitch of the sound
+     * @param volume the volume of the sound
+     * @param pitch the pitch of the sound
      */
     public void playSound(Location location, String sound, SoundCategory category, float volume, float pitch);
 
@@ -282,7 +278,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     /**
      * Stop the specified sound from playing.
      *
-     * @param sound    the sound to stop
+     * @param sound the sound to stop
      * @param category the category of the sound
      */
     public void stopSound(Sound sound, SoundCategory category);
@@ -290,7 +286,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     /**
      * Stop the specified sound from playing.
      *
-     * @param sound    the sound to stop
+     * @param sound the sound to stop
      * @param category the category of the sound
      */
     public void stopSound(String sound, SoundCategory category);
@@ -298,9 +294,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     /**
      * Plays an effect to just this player.
      *
-     * @param loc    the location to play the effect at
+     * @param loc the location to play the effect at
      * @param effect the {@link Effect}
-     * @param data   a data bit needed for some effects
+     * @param data a data bit needed for some effects
      * @deprecated Magic value
      */
     @Deprecated
@@ -309,10 +305,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     /**
      * Plays an effect to just this player.
      *
-     * @param <T>    the data based based on the type of the effect
-     * @param loc    the location to play the effect at
+     * @param <T> the data based based on the type of the effect
+     * @param loc the location to play the effect at
      * @param effect the {@link Effect}
-     * @param data   a data bit needed for some effects
+     * @param data a data bit needed for some effects
      */
     public <T> void playEffect(Location loc, Effect effect, T data);
 
@@ -320,9 +316,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Send a block change. This fakes a block change packet for a user at a
      * certain location. This will not actually change the world in any way.
      *
-     * @param loc      The location of the changed block
+     * @param loc The location of the changed block
      * @param material The new block
-     * @param data     The block data
+     * @param data The block data
      * @deprecated Magic value
      */
     @Deprecated
@@ -337,10 +333,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * the data buffer must be 2.5*sx*sy*sz and formatted in accordance with
      * the Packet51 format.
      *
-     * @param loc  The location of the cuboid
-     * @param sx   The x size of the cuboid
-     * @param sy   The y size of the cuboid
-     * @param sz   The z size of the cuboid
+     * @param loc The location of the cuboid
+     * @param sx The x size of the cuboid
+     * @param sy The y size of the cuboid
+     * @param sz The z size of the cuboid
      * @param data The data to be sent
      * @return true if the chunk change packet was sent
      * @deprecated Magic value
@@ -352,9 +348,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Send a block change. This fakes a block change packet for a user at a
      * certain location. This will not actually change the world in any way.
      *
-     * @param loc      The location of the changed block
+     * @param loc The location of the changed block
      * @param material The new block ID
-     * @param data     The block data
+     * @param data The block data
      * @deprecated Magic value
      */
     @Deprecated
@@ -370,7 +366,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * If the client does not have a sign at the given location it will
      * display an error message to the user.
      *
-     * @param loc   the location of the sign
+     * @param loc the location of the sign
      * @param lines the new text on the sign or null to clear it
      * @throws IllegalArgumentException if location is null
      * @throws IllegalArgumentException if lines is non-null and has a length less than 4
@@ -385,172 +381,6 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      */
     public void sendMap(MapView map);
 
-    // Paper start
-
-    /**
-     * Sends an Action Bar message to the client.
-     * <p>
-     * Use Section symbols for legacy color codes to send formatting.
-     *
-     * @param message The message to send
-     */
-    public void sendActionBar(String message);
-
-    /**
-     * Sends an Action Bar message to the client.
-     * <p>
-     * Use supplied alternative character to the section symbol to represent legacy color codes.
-     *
-     * @param alternateChar Alternate symbol such as '&'
-     * @param message       The message to send
-     */
-    public void sendActionBar(char alternateChar, String message);
-
-    /**
-     * Sends the component to the player
-     *
-     * @param component the components to send
-     */
-    @Override
-    public default void sendMessage(net.md_5.bungee.api.chat.BaseComponent component) {
-        spigot().sendMessage(component);
-    }
-
-    /**
-     * Sends an array of components as a single message to the player
-     *
-     * @param components the components to send
-     */
-    @Override
-    public default void sendMessage(net.md_5.bungee.api.chat.BaseComponent... components) {
-        spigot().sendMessage(components);
-    }
-
-    /**
-     * Sends an array of components as a single message to the specified screen position of this player
-     *
-     * @param position   the screen position
-     * @param components the components to send
-     */
-    public default void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent... components) {
-        spigot().sendMessage(position, components);
-    }
-
-    /**
-     * Set the text displayed in the player list header and footer for this player
-     *
-     * @param header content for the top of the player list
-     * @param footer content for the bottom of the player list
-     */
-    public void setPlayerListHeaderFooter(net.md_5.bungee.api.chat.BaseComponent[] header, net.md_5.bungee.api.chat.BaseComponent[] footer);
-
-    /**
-     * Set the text displayed in the player list header and footer for this player
-     *
-     * @param header content for the top of the player list
-     * @param footer content for the bottom of the player list
-     */
-    public void setPlayerListHeaderFooter(net.md_5.bungee.api.chat.BaseComponent header, net.md_5.bungee.api.chat.BaseComponent footer);
-
-    /**
-     * Update the times for titles displayed to the player
-     *
-     * @param fadeInTicks  ticks to fade-in
-     * @param stayTicks    ticks to stay visible
-     * @param fadeOutTicks ticks to fade-out
-     * @deprecated Use {@link #updateTitle(Title)}
-     */
-    @Deprecated
-    public void setTitleTimes(int fadeInTicks, int stayTicks, int fadeOutTicks);
-
-    /**
-     * Update the subtitle of titles displayed to the player
-     *
-     * @deprecated Use {@link #updateTitle(Title)}
-     */
-    @Deprecated
-    public void setSubtitle(net.md_5.bungee.api.chat.BaseComponent[] subtitle);
-
-    /**
-     * Update the subtitle of titles displayed to the player
-     *
-     * @deprecated Use {@link #updateTitle(Title)}
-     */
-    @Deprecated
-    public void setSubtitle(net.md_5.bungee.api.chat.BaseComponent subtitle);
-
-    /**
-     * Show the given title to the player, along with the last subtitle set, using the last set times
-     *
-     * @deprecated Use {@link #sendTitle(Title)} or {@link #updateTitle(Title)}
-     */
-    @Deprecated
-    public void showTitle(net.md_5.bungee.api.chat.BaseComponent[] title);
-
-    /**
-     * Show the given title to the player, along with the last subtitle set, using the last set times
-     *
-     * @deprecated Use {@link #sendTitle(Title)} or {@link #updateTitle(Title)}
-     */
-    @Deprecated
-    public void showTitle(net.md_5.bungee.api.chat.BaseComponent title);
-
-    /**
-     * Show the given title and subtitle to the player using the given times
-     *
-     * @param title        big text
-     * @param subtitle     little text under it
-     * @param fadeInTicks  ticks to fade-in
-     * @param stayTicks    ticks to stay visible
-     * @param fadeOutTicks ticks to fade-out
-     * @deprecated Use {@link #sendTitle(Title)} or {@link #updateTitle(Title)}
-     */
-    @Deprecated
-    public void showTitle(net.md_5.bungee.api.chat.BaseComponent[] title, net.md_5.bungee.api.chat.BaseComponent[] subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks);
-
-    /**
-     * Show the given title and subtitle to the player using the given times
-     *
-     * @param title        big text
-     * @param subtitle     little text under it
-     * @param fadeInTicks  ticks to fade-in
-     * @param stayTicks    ticks to stay visible
-     * @param fadeOutTicks ticks to fade-out
-     * @deprecated Use {@link #sendTitle(Title)} or {@link #updateTitle(Title)}
-     */
-    @Deprecated
-    public void showTitle(net.md_5.bungee.api.chat.BaseComponent title, net.md_5.bungee.api.chat.BaseComponent subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks);
-
-    /**
-     * Show the title to the player, overriding any previously displayed title.
-     *
-     * <p>This method overrides any previous title, use {@link #updateTitle(Title)} to change the existing one.</p>
-     *
-     * @param title the title to send
-     * @throws NullPointerException if the title is null
-     */
-    void sendTitle(Title title);
-
-    /**
-     * Show the title to the player, overriding any previously displayed title.
-     *
-     * <p>This method doesn't override previous titles, but changes their values.</p>
-     *
-     * @param title the title to send
-     * @throws NullPointerException if title is null
-     */
-    void updateTitle(Title title);
-
-    /**
-     * Hide any title that is currently visible to the player
-     */
-    public void hideTitle();
-    // Paper end
-
-    /**
-     * Forces an update of the player's entire inventory.
-     */
-    //@Deprecated // Spigot - undeprecate
     public void updateInventory();
 
     /**
@@ -595,7 +425,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * @param statistic Statistic to increment
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if the statistic requires an
-     *                                  additional parameter
+     *     additional parameter
      */
     public void incrementStatistic(Statistic statistic) throws IllegalArgumentException;
 
@@ -608,7 +438,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * @param statistic Statistic to decrement
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if the statistic requires an
-     *                                  additional parameter
+     *     additional parameter
      */
     public void decrementStatistic(Statistic statistic) throws IllegalArgumentException;
 
@@ -616,11 +446,11 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Increments the given statistic for this player.
      *
      * @param statistic Statistic to increment
-     * @param amount    Amount to increment this statistic by
+     * @param amount Amount to increment this statistic by
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if amount is negative
      * @throws IllegalArgumentException if the statistic requires an
-     *                                  additional parameter
+     *     additional parameter
      */
     public void incrementStatistic(Statistic statistic, int amount) throws IllegalArgumentException;
 
@@ -628,11 +458,11 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Decrements the given statistic for this player.
      *
      * @param statistic Statistic to decrement
-     * @param amount    Amount to decrement this statistic by
+     * @param amount Amount to decrement this statistic by
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if amount is negative
      * @throws IllegalArgumentException if the statistic requires an
-     *                                  additional parameter
+     *     additional parameter
      */
     public void decrementStatistic(Statistic statistic, int amount) throws IllegalArgumentException;
 
@@ -640,11 +470,11 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Sets the given statistic for this player.
      *
      * @param statistic Statistic to set
-     * @param newValue  The value to set this statistic to
+     * @param newValue The value to set this statistic to
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if newValue is negative
      * @throws IllegalArgumentException if the statistic requires an
-     *                                  additional parameter
+     *     additional parameter
      */
     public void setStatistic(Statistic statistic, int newValue) throws IllegalArgumentException;
 
@@ -655,7 +485,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * @return the value of the given statistic
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if the statistic requires an
-     *                                  additional parameter
+     *     additional parameter
      */
     public int getStatistic(Statistic statistic) throws IllegalArgumentException;
 
@@ -666,11 +496,11 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * <code>incrementStatistic(Statistic, Material, 1)</code>
      *
      * @param statistic Statistic to increment
-     * @param material  Material to offset the statistic with
+     * @param material Material to offset the statistic with
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if material is null
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void incrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException;
 
@@ -681,11 +511,11 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * <code>decrementStatistic(Statistic, Material, 1)</code>
      *
      * @param statistic Statistic to decrement
-     * @param material  Material to offset the statistic with
+     * @param material Material to offset the statistic with
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if material is null
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void decrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException;
 
@@ -693,12 +523,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Gets the value of the given statistic for this player.
      *
      * @param statistic Statistic to check
-     * @param material  Material offset of the statistic
+     * @param material Material offset of the statistic
      * @return the value of the given statistic
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if material is null
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public int getStatistic(Statistic statistic, Material material) throws IllegalArgumentException;
 
@@ -706,13 +536,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Increments the given statistic for this player for the given material.
      *
      * @param statistic Statistic to increment
-     * @param material  Material to offset the statistic with
-     * @param amount    Amount to increment this statistic by
+     * @param material Material to offset the statistic with
+     * @param amount Amount to increment this statistic by
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if material is null
      * @throws IllegalArgumentException if amount is negative
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void incrementStatistic(Statistic statistic, Material material, int amount) throws IllegalArgumentException;
 
@@ -720,13 +550,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Decrements the given statistic for this player for the given material.
      *
      * @param statistic Statistic to decrement
-     * @param material  Material to offset the statistic with
-     * @param amount    Amount to decrement this statistic by
+     * @param material Material to offset the statistic with
+     * @param amount Amount to decrement this statistic by
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if material is null
      * @throws IllegalArgumentException if amount is negative
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void decrementStatistic(Statistic statistic, Material material, int amount) throws IllegalArgumentException;
 
@@ -734,13 +564,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Sets the given statistic for this player for the given material.
      *
      * @param statistic Statistic to set
-     * @param material  Material to offset the statistic with
-     * @param newValue  The value to set this statistic to
+     * @param material Material to offset the statistic with
+     * @param newValue The value to set this statistic to
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if material is null
      * @throws IllegalArgumentException if newValue is negative
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void setStatistic(Statistic statistic, Material material, int newValue) throws IllegalArgumentException;
 
@@ -750,12 +580,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * This is equivalent to the following code:
      * <code>incrementStatistic(Statistic, EntityType, 1)</code>
      *
-     * @param statistic  Statistic to increment
+     * @param statistic Statistic to increment
      * @param entityType EntityType to offset the statistic with
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if entityType is null
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void incrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException;
 
@@ -765,67 +595,67 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * This is equivalent to the following code:
      * <code>decrementStatistic(Statistic, EntityType, 1)</code>
      *
-     * @param statistic  Statistic to decrement
+     * @param statistic Statistic to decrement
      * @param entityType EntityType to offset the statistic with
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if entityType is null
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void decrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException;
 
     /**
      * Gets the value of the given statistic for this player.
      *
-     * @param statistic  Statistic to check
+     * @param statistic Statistic to check
      * @param entityType EntityType offset of the statistic
      * @return the value of the given statistic
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if entityType is null
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public int getStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException;
 
     /**
      * Increments the given statistic for this player for the given entity.
      *
-     * @param statistic  Statistic to increment
+     * @param statistic Statistic to increment
      * @param entityType EntityType to offset the statistic with
-     * @param amount     Amount to increment this statistic by
+     * @param amount Amount to increment this statistic by
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if entityType is null
      * @throws IllegalArgumentException if amount is negative
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void incrementStatistic(Statistic statistic, EntityType entityType, int amount) throws IllegalArgumentException;
 
     /**
      * Decrements the given statistic for this player for the given entity.
      *
-     * @param statistic  Statistic to decrement
+     * @param statistic Statistic to decrement
      * @param entityType EntityType to offset the statistic with
-     * @param amount     Amount to decrement this statistic by
+     * @param amount Amount to decrement this statistic by
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if entityType is null
      * @throws IllegalArgumentException if amount is negative
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void decrementStatistic(Statistic statistic, EntityType entityType, int amount);
 
     /**
      * Sets the given statistic for this player for the given entity.
      *
-     * @param statistic  Statistic to set
+     * @param statistic Statistic to set
      * @param entityType EntityType to offset the statistic with
-     * @param newValue   The value to set this statistic to
+     * @param newValue The value to set this statistic to
      * @throws IllegalArgumentException if statistic is null
      * @throws IllegalArgumentException if entityType is null
      * @throws IllegalArgumentException if newValue is negative
      * @throws IllegalArgumentException if the given parameter is not valid
-     *                                  for the statistic
+     *     for the statistic
      */
     public void setStatistic(Statistic statistic, EntityType entityType, int newValue);
 
@@ -839,10 +669,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * the player's time. To restore player time to normal use
      * resetPlayerTime().
      *
-     * @param time     The current player's perceived time or the player's time
-     *                 offset from the server time.
+     * @param time The current player's perceived time or the player's time
+     *     offset from the server time.
      * @param relative When true the player time is kept relative to its world
-     *                 time.
+     *     time.
      */
     public void setPlayerTime(long time, boolean relative);
 
@@ -879,6 +709,14 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     public void resetPlayerTime();
 
     /**
+     * Returns the type of weather the player is currently experiencing.
+     *
+     * @return The WeatherType that the player is currently experiencing or
+     *     null if player is seeing server weather.
+     */
+    public WeatherType getPlayerWeather();
+
+    /**
      * Sets the type of weather the player will see.  When used, the weather
      * status of the player is locked until {@link #resetPlayerWeather()} is
      * used.
@@ -886,14 +724,6 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * @param type The WeatherType enum type the player should experience
      */
     public void setPlayerWeather(WeatherType type);
-
-    /**
-     * Returns the type of weather the player is currently experiencing.
-     *
-     * @return The WeatherType that the player is currently experiencing or
-     * null if player is seeing server weather.
-     */
-    public WeatherType getPlayerWeather();
 
     /**
      * Restores the normal condition where the player's weather is controlled
@@ -906,9 +736,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param amount Exp amount to give
      */
-    public void giveExp(int amount, boolean applyMending);
-
-    public Integer applyMending(int amount);
+    public void giveExp(int amount);
 
     /**
      * Gives the player the amount of experience levels specified. Levels can
@@ -1038,8 +866,8 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * Sets the Location where the player will spawn at their bed.
      *
      * @param location where to set the respawn location
-     * @param force    whether to forcefully set the respawn location even if a
-     *                 valid bed is not present
+     * @param force whether to forcefully set the respawn location even if a
+     *     valid bed is not present
      */
     public void setBedSpawnLocation(Location location, boolean force);
 
@@ -1100,7 +928,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param player Player to check
      * @return True if the provided player is not being hidden from this
-     * player
+     *     player
      */
     public boolean canSee(Player player);
 
@@ -1119,26 +947,6 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     public void setFlying(boolean value);
 
     /**
-     * Sets the speed at which a client will fly. Negative values indicate
-     * reverse directions.
-     *
-     * @param value The new speed, from -1 to 1.
-     * @throws IllegalArgumentException If new speed is less than -1 or
-     *                                  greater than 1
-     */
-    public void setFlySpeed(float value) throws IllegalArgumentException;
-
-    /**
-     * Sets the speed at which a client will walk. Negative values indicate
-     * reverse directions.
-     *
-     * @param value The new speed, from -1 to 1.
-     * @throws IllegalArgumentException If new speed is less than -1 or
-     *                                  greater than 1
-     */
-    public void setWalkSpeed(float value) throws IllegalArgumentException;
-
-    /**
      * Gets the current allowed speed that a client can fly.
      *
      * @return The current allowed speed, from -1 to 1
@@ -1146,11 +954,31 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     public float getFlySpeed();
 
     /**
+     * Sets the speed at which a client will fly. Negative values indicate
+     * reverse directions.
+     *
+     * @param value The new speed, from -1 to 1.
+     * @throws IllegalArgumentException If new speed is less than -1 or
+     *     greater than 1
+     */
+    public void setFlySpeed(float value) throws IllegalArgumentException;
+
+    /**
      * Gets the current allowed speed that a client can walk.
      *
      * @return The current allowed speed, from -1 to 1
      */
     public float getWalkSpeed();
+
+    /**
+     * Sets the speed at which a client will walk. Negative values indicate
+     * reverse directions.
+     *
+     * @param value The new speed, from -1 to 1.
+     * @throws IllegalArgumentException If new speed is less than -1 or
+     *     greater than 1
+     */
+    public void setWalkSpeed(float value) throws IllegalArgumentException;
 
     /**
      * Request that the player's client download and switch texture packs.
@@ -1178,12 +1006,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * </ul>
      *
      * @param url The URL from which the client will download the texture
-     *            pack. The string must contain only US-ASCII characters and should
-     *            be encoded as per RFC 1738.
+     *     pack. The string must contain only US-ASCII characters and should
+     *     be encoded as per RFC 1738.
      * @throws IllegalArgumentException Thrown if the URL is null.
      * @throws IllegalArgumentException Thrown if the URL is too long.
      * @deprecated Minecraft no longer uses textures packs. Instead you
-     * should use {@link #setResourcePack(String)}.
+     *     should use {@link #setResourcePack(String)}.
      */
     @Deprecated
     public void setTexturePack(String url);
@@ -1214,14 +1042,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * </ul>
      *
      * @param url The URL from which the client will download the resource
-     *            pack. The string must contain only US-ASCII characters and should
-     *            be encoded as per RFC 1738.
+     *     pack. The string must contain only US-ASCII characters and should
+     *     be encoded as per RFC 1738.
      * @throws IllegalArgumentException Thrown if the URL is null.
      * @throws IllegalArgumentException Thrown if the URL is too long. The
-     *                                  length restriction is an implementation specific arbitrary value.
-     * @deprecated use {@link #setResourcePack(String, String)}
+     *     length restriction is an implementation specific arbitrary value.
      */
-    @Deprecated
     public void setResourcePack(String url);
 
     /**
@@ -1246,18 +1072,18 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *     have to send an empty pack.
      * </ul>
      *
-     * @param url  The URL from which the client will download the resource
-     *             pack. The string must contain only US-ASCII characters and should
-     *             be encoded as per RFC 1738.
+     * @param url The URL from which the client will download the resource
+     *     pack. The string must contain only US-ASCII characters and should
+     *     be encoded as per RFC 1738.
      * @param hash The sha1 hash sum of the resource pack file which is used
-     *             to apply a cached version of the pack directly without downloading
-     *             if it is available. Hast to be 20 bytes long!
+     *     to apply a cached version of the pack directly without downloading
+     *     if it is available. Hast to be 20 bytes long!
      * @throws IllegalArgumentException Thrown if the URL is null.
      * @throws IllegalArgumentException Thrown if the URL is too long. The
-     *                                  length restriction is an implementation specific arbitrary value.
+     *     length restriction is an implementation specific arbitrary value.
      * @throws IllegalArgumentException Thrown if the hash is null.
      * @throws IllegalArgumentException Thrown if the hash is not 20 bytes
-     *                                  long.
+     *     long.
      */
     public void setResourcePack(String url, byte[] hash);
 
@@ -1274,9 +1100,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * @param scoreboard New Scoreboard for the player
      * @throws IllegalArgumentException if scoreboard is null
      * @throws IllegalArgumentException if scoreboard was not created by the
-     *                                  {@link org.bukkit.scoreboard.ScoreboardManager scoreboard manager}
-     * @throws IllegalStateException    if this is a player that is not logged
-     *                                  yet or has logged out
+     *     {@link org.bukkit.scoreboard.ScoreboardManager scoreboard manager}
+     * @throws IllegalStateException if this is a player that is not logged
+     *     yet or has logged out
      */
     public void setScoreboard(Scoreboard scoreboard) throws IllegalArgumentException, IllegalStateException;
 
@@ -1301,6 +1127,16 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     public void setHealthScaled(boolean scale);
 
     /**
+     * Gets the number that health is scaled to for the client.
+     *
+     * @return the number that health would be scaled to for the client if
+     *     HealthScaling is set to true
+     * @see Player#setHealthScale(double)
+     * @see Player#setHealthScaled(boolean)
+     */
+    public double getHealthScale();
+
+    /**
      * Sets the number to scale health to for the client; this will also
      * {@link #setHealthScaled(boolean) setHealthScaled(true)}.
      * <p>
@@ -1313,16 +1149,6 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * @throws IllegalArgumentException if scale is too high
      */
     public void setHealthScale(double scale) throws IllegalArgumentException;
-
-    /**
-     * Gets the number that health is scaled to for the client.
-     *
-     * @return the number that health would be scaled to for the client if
-     * HealthScaling is set to true
-     * @see Player#setHealthScale(double)
-     * @see Player#setHealthScaled(boolean)
-     */
-    public double getHealthScale();
 
     /**
      * Gets the entity which is followed by the camera when in
@@ -1339,7 +1165,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param entity the entity to follow or null to reset
      * @throws IllegalStateException if the player is not in
-     *                               {@link GameMode#SPECTATOR}
+     * {@link GameMode#SPECTATOR}
      */
     public void setSpectatorTarget(Entity entity);
 
@@ -1350,7 +1176,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * such. If the strings contain a new line, only the first line will be
      * sent. The titles will be displayed with the client's default timings.
      *
-     * @param title    Title text
+     * @param title Title text
      * @param subtitle Subtitle text
      * @deprecated API behavior subject to change
      */
@@ -1366,11 +1192,11 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * will use the last value sent (or the defaults if no title has been
      * displayed).
      *
-     * @param title    Title text
+     * @param title Title text
      * @param subtitle Subtitle text
-     * @param fadeIn   time in ticks for titles to fade in. Defaults to 10.
-     * @param stay     time in ticks for titles to stay. Defaults to 70.
-     * @param fadeOut  time in ticks for titles to fade out. Defaults to 20.
+     * @param fadeIn time in ticks for titles to fade in. Defaults to 10.
+     * @param stay time in ticks for titles to stay. Defaults to 70.
+     * @param fadeOut time in ticks for titles to fade out. Defaults to 20.
      */
     public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut);
 
@@ -1386,7 +1212,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count    the number of particles
+     * @param count the number of particles
      */
     public void spawnParticle(Particle particle, Location location, int count);
 
@@ -1395,10 +1221,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * at the target location.
      *
      * @param particle the particle to spawn
-     * @param x        the position on the x axis to spawn at
-     * @param y        the position on the y axis to spawn at
-     * @param z        the position on the z axis to spawn at
-     * @param count    the number of particles
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
      */
     public void spawnParticle(Particle particle, double x, double y, double z, int count);
 
@@ -1408,9 +1234,9 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count    the number of particles
-     * @param data     the data to use for the particle or null,
-     *                 the type of this depends on {@link Particle#getDataType()}
+     * @param count the number of particles
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, T data);
 
@@ -1420,12 +1246,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * at the target location.
      *
      * @param particle the particle to spawn
-     * @param x        the position on the x axis to spawn at
-     * @param y        the position on the y axis to spawn at
-     * @param z        the position on the z axis to spawn at
-     * @param count    the number of particles
-     * @param data     the data to use for the particle or null,
-     *                 the type of this depends on {@link Particle#getDataType()}
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, T data);
 
@@ -1437,10 +1263,10 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
      */
     public void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ);
 
@@ -1451,13 +1277,13 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x        the position on the x axis to spawn at
-     * @param y        the position on the y axis to spawn at
-     * @param z        the position on the z axis to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
      */
     public void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ);
 
@@ -1469,12 +1295,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
-     * @param data     the data to use for the particle or null,
-     *                 the type of this depends on {@link Particle#getDataType()}
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, T data);
 
@@ -1485,15 +1311,15 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x        the position on the x axis to spawn at
-     * @param y        the position on the y axis to spawn at
-     * @param z        the position on the z axis to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
-     * @param data     the data to use for the particle or null,
-     *                 the type of this depends on {@link Particle#getDataType()}
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, T data);
 
@@ -1505,12 +1331,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
-     * @param extra    the extra data for this particle, depends on the
-     *                 particle used (normally speed)
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
      */
     public void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra);
 
@@ -1521,15 +1347,15 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x        the position on the x axis to spawn at
-     * @param y        the position on the y axis to spawn at
-     * @param z        the position on the z axis to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
-     * @param extra    the extra data for this particle, depends on the
-     *                 particle used (normally speed)
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
      */
     public void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra);
 
@@ -1541,14 +1367,14 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @param particle the particle to spawn
      * @param location the location to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
-     * @param extra    the extra data for this particle, depends on the
-     *                 particle used (normally speed)
-     * @param data     the data to use for the particle or null,
-     *                 the type of this depends on {@link Particle#getDataType()}
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, Location location, int count, double offsetX, double offsetY, double offsetZ, double extra, T data);
 
@@ -1559,17 +1385,17 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      * on each axis.
      *
      * @param particle the particle to spawn
-     * @param x        the position on the x axis to spawn at
-     * @param y        the position on the y axis to spawn at
-     * @param z        the position on the z axis to spawn at
-     * @param count    the number of particles
-     * @param offsetX  the maximum random offset on the X axis
-     * @param offsetY  the maximum random offset on the Y axis
-     * @param offsetZ  the maximum random offset on the Z axis
-     * @param extra    the extra data for this particle, depends on the
-     *                 particle used (normally speed)
-     * @param data     the data to use for the particle or null,
-     *                 the type of this depends on {@link Particle#getDataType()}
+     * @param x the position on the x axis to spawn at
+     * @param y the position on the y axis to spawn at
+     * @param z the position on the z axis to spawn at
+     * @param count the number of particles
+     * @param offsetX the maximum random offset on the X axis
+     * @param offsetY the maximum random offset on the Y axis
+     * @param offsetZ the maximum random offset on the Z axis
+     * @param extra the extra data for this particle, depends on the
+     *              particle used (normally speed)
+     * @param data the data to use for the particle or null,
+     *             the type of this depends on {@link Particle#getDataType()}
      */
     public <T> void spawnParticle(Particle particle, double x, double y, double z, int count, double offsetX, double offsetY, double offsetZ, double extra, T data);
 
@@ -1583,7 +1409,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
 
     /**
      * Gets the player's current locale.
-     * <p>
+     *
      * The value of the locale String is not defined properly.
      * <br>
      * The vanilla Minecraft client will use lowercase language / country pairs
@@ -1594,13 +1420,29 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      */
     public String getLocale();
 
+    @Override
+    Spigot spigot();
+
+    /**
+     * Gets the view distance for this player
+     * @return the player's view distance
+     */
+    public int getViewDistance();
+    // Spigot end
+
+    // Paper start
+
+    /**
+     * Sets the view distance for this player
+     * @param viewDistance the player's view distance
+     */
+    public void setViewDistance(int viewDistance);
+
     // Spigot start
     public class Spigot extends Entity.Spigot {
-
         /**
-         * Gets the connection address of this player, regardless of whether it
-         * has been spoofed or not.
-         *
+         *  Gets the connection address of this player, regardless of whether it
+         *  has been spoofed or not.
          * @return the player's connection address
          */
         public InetSocketAddress getRawAddress() {
@@ -1627,7 +1469,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
          * Sets whether the player collides with entities
          *
          * @param collides whether the player should collide with entities or
-         *                 not.
+         * not.
          * @deprecated {@link LivingEntity#setCollidable(boolean)}
          */
         @Deprecated
@@ -1675,7 +1517,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
         /**
          * Sends the component to the specified screen position of this player
          *
-         * @param position  the screen position
+         * @param position the screen position
          * @param component the components to send
          */
         public void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent component) {
@@ -1685,239 +1527,11 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
         /**
          * Sends an array of components as a single message to the specified screen position of this player
          *
-         * @param position   the screen position
+         * @param position the screen position
          * @param components the components to send
          */
         public void sendMessage(net.md_5.bungee.api.ChatMessageType position, net.md_5.bungee.api.chat.BaseComponent... components) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
-
-    @Override
-    Spigot spigot();
-    // Spigot end
-
-    // Paper start
-
-    /**
-     * Get whether the player can affect mob spawning
-     *
-     * @return if the player can affect mob spawning
-     */
-    public boolean getAffectsSpawning();
-
-    /**
-     * Set whether the player can affect mob spawning
-     *
-     * @param affects Whether the player can affect mob spawning
-     */
-    public void setAffectsSpawning(boolean affects);
-
-    /**
-     * Gets the view distance for this player
-     *
-     * @return the player's view distance
-     */
-    public int getViewDistance();
-
-    /**
-     * Sets the view distance for this player
-     *
-     * @param viewDistance the player's view distance
-     */
-    public void setViewDistance(int viewDistance);
-
-    /**
-     * Request that the player's client download and switch resource packs.
-     * <p>
-     * The player's client will download the new resource pack asynchronously
-     * in the background, and will automatically switch to it once the
-     * download is complete. If the client has downloaded and cached the same
-     * resource pack in the past, it will perform a quick timestamp check
-     * over the network to determine if the resource pack has changed and
-     * needs to be downloaded again. When this request is sent for the very
-     * first time from a given server, the client will first display a
-     * confirmation GUI to the player before proceeding with the download.
-     * <p>
-     * Notes:
-     * <ul>
-     * <li>Players can disable server resources on their client, in which
-     *     case this method will have no affect on them.
-     * <li>There is no concept of resetting resource packs back to default
-     *     within Minecraft, so players will have to relog to do so.
-     * </ul>
-     *
-     * @param url  The URL from which the client will download the resource
-     *             pack. The string must contain only US-ASCII characters and should
-     *             be encoded as per RFC 1738.
-     * @param hash A 40 character hexadecimal and lowercase SHA-1 digest of
-     *             the resource pack file.
-     * @throws IllegalArgumentException Thrown if the URL is null.
-     * @throws IllegalArgumentException Thrown if the URL is too long. The
-     *                                  length restriction is an implementation specific arbitrary value.
-     */
-    void setResourcePack(String url, String hash);
-
-    /**
-     * @return the most recent resource pack status received from the player,
-     * or null if no status has ever been received from this player.
-     */
-    org.bukkit.event.player.PlayerResourcePackStatusEvent.Status getResourcePackStatus();
-
-    /**
-     * @return the most recent resource pack hash received from the player,
-     * or null if no hash has ever been received from this player.
-     */
-    String getResourcePackHash();
-
-    /**
-     * @return true if the last resource pack status received from this player
-     * was {@link org.bukkit.event.player.PlayerResourcePackStatusEvent.Status#SUCCESSFULLY_LOADED}
-     */
-    boolean hasResourcePack();
-
-    PlayerProfile getPlayerProfile();
-
-    void setPlayerProfile(PlayerProfile profile);
-
-    /**
-     * Permanently Bans the Profile and IP address currently used by the player.
-     *
-     * @param reason Reason for ban
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerFull(String reason) {
-        return banPlayerFull(reason, null, null);
-    }
-
-    /**
-     * Permanently Bans the Profile and IP address currently used by the player.
-     *
-     * @param reason Reason for ban
-     * @param source Source of ban, or null for default
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerFull(String reason, String source) {
-        return banPlayerFull(reason, null, source);
-    }
-
-    /**
-     * Bans the Profile and IP address currently used by the player.
-     *
-     * @param reason  Reason for Ban
-     * @param expires When to expire the ban
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerFull(String reason, Date expires) {
-        return banPlayerFull(reason, expires, null);
-    }
-
-    /**
-     * Bans the Profile and IP address currently used by the player.
-     *
-     * @param reason  Reason for Ban
-     * @param expires When to expire the ban
-     * @param source  Source of the ban, or null for default
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerFull(String reason, Date expires, String source) {
-        banPlayer(reason, expires, source);
-        return banPlayerIP(reason, expires, source, true);
-    }
-
-    /**
-     * Permanently Bans the IP address currently used by the player.
-     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
-     *
-     * @param reason     Reason for ban
-     * @param kickPlayer Whether or not to kick the player afterwards
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerIP(String reason, boolean kickPlayer) {
-        return banPlayerIP(reason, null, null, kickPlayer);
-    }
-
-    /**
-     * Permanently Bans the IP address currently used by the player.
-     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
-     *
-     * @param reason     Reason for ban
-     * @param source     Source of ban, or null for default
-     * @param kickPlayer Whether or not to kick the player afterwards
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerIP(String reason, String source, boolean kickPlayer) {
-        return banPlayerIP(reason, null, source, kickPlayer);
-    }
-
-    /**
-     * Bans the IP address currently used by the player.
-     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
-     *
-     * @param reason     Reason for Ban
-     * @param expires    When to expire the ban
-     * @param kickPlayer Whether or not to kick the player afterwards
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerIP(String reason, Date expires, boolean kickPlayer) {
-        return banPlayerIP(reason, expires, null, kickPlayer);
-    }
-
-    /**
-     * Permanently Bans the IP address currently used by the player.
-     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
-     *
-     * @param reason Reason for ban
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerIP(String reason) {
-        return banPlayerIP(reason, null, null);
-    }
-
-    /**
-     * Permanently Bans the IP address currently used by the player.
-     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
-     *
-     * @param reason Reason for ban
-     * @param source Source of ban, or null for default
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerIP(String reason, String source) {
-        return banPlayerIP(reason, null, source);
-    }
-
-    /**
-     * Bans the IP address currently used by the player.
-     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
-     *
-     * @param reason  Reason for Ban
-     * @param expires When to expire the ban
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerIP(String reason, Date expires) {
-        return banPlayerIP(reason, expires, null);
-    }
-
-    /**
-     * Bans the IP address currently used by the player.
-     * Does not ban the Profile, use {@link #banPlayerFull(String, Date, String)}
-     *
-     * @param reason  Reason for Ban
-     * @param expires When to expire the ban
-     * @param source  Source of the banm or null for default
-     * @return Ban Entry
-     */
-    public default BanEntry banPlayerIP(String reason, Date expires, String source) {
-        return banPlayerIP(reason, expires, source, true);
-    }
-
-    public default BanEntry banPlayerIP(String reason, Date expires, String source, boolean kickPlayer) {
-        BanEntry banEntry = Bukkit.getServer().getBanList(BanList.Type.IP).addBan(getAddress().getAddress().getHostAddress(), reason, expires, source);
-        if (kickPlayer && isOnline()) {
-            getPlayer().kickPlayer(reason);
-        }
-
-        return banEntry;
-    }
-    // Paper end
 }

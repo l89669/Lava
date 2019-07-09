@@ -6,8 +6,6 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nullable;
-
 /**
  * This event will fire when a player is finishing consuming an item (food,
  * potion, milk bucket).
@@ -22,17 +20,19 @@ public class PlayerItemConsumeEvent extends PlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private boolean isCancelled = false;
     private ItemStack item;
-    @Nullable
-    private ItemStack replacement; // Paper
 
     /**
      * @param player the player consuming
-     * @param item   the ItemStack being consumed
+     * @param item the ItemStack being consumed
      */
     public PlayerItemConsumeEvent(final Player player, final ItemStack item) {
         super(player);
 
         this.item = item;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     /**
@@ -59,30 +59,6 @@ public class PlayerItemConsumeEvent extends PlayerEvent implements Cancellable {
         }
     }
 
-    // Paper start
-
-    /**
-     * Return the custom item stack that will replace the consumed item, or null if no
-     * custom replacement has been set (which means the default replacement will be used).
-     *
-     * @return The custom item stack that will replace the consumed item or null
-     */
-    @Nullable
-    public ItemStack getReplacement() {
-        return this.replacement;
-    }
-
-    /**
-     * Set a custom item stack to replace the consumed item. Pass null to clear any custom
-     * stack that has been set and use the default replacement.
-     *
-     * @param replacement Replacement item to set, null to clear any custom stack and use default
-     */
-    public void setReplacement(@Nullable ItemStack replacement) {
-        this.replacement = replacement;
-    }
-    // Paper end
-
     public boolean isCancelled() {
         return this.isCancelled;
     }
@@ -93,10 +69,6 @@ public class PlayerItemConsumeEvent extends PlayerEvent implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

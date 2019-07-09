@@ -42,8 +42,8 @@ public class SimplexNoiseGenerator extends PerlinNoiseGenerator {
             {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0},
             {2, 0, 1, 3}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 0, 1, 2}, {3, 0, 2, 1}, {0, 0, 0, 0}, {3, 1, 2, 0},
             {2, 1, 0, 3}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 1, 0, 2}, {0, 0, 0, 0}, {3, 2, 0, 1}, {3, 2, 1, 0}};
-    protected double offsetW;
     private static final SimplexNoiseGenerator instance = new SimplexNoiseGenerator();
+    protected double offsetW;
 
     protected SimplexNoiseGenerator() {
         super();
@@ -137,6 +137,15 @@ public class SimplexNoiseGenerator extends PerlinNoiseGenerator {
      */
     public static double getNoise(double x, double y, double z, double w) {
         return instance.noise(x, y, z, w);
+    }
+
+    /**
+     * Gets the singleton unseeded instance of this generator
+     *
+     * @return Singleton
+     */
+    public static SimplexNoiseGenerator getInstance() {
+        return instance;
     }
 
     @Override
@@ -508,14 +517,5 @@ public class SimplexNoiseGenerator extends PerlinNoiseGenerator {
 
         // Sum up and scale the result to cover the range [-1,1]
         return 27.0 * (n0 + n1 + n2 + n3 + n4);
-    }
-
-    /**
-     * Gets the singleton unseeded instance of this generator
-     *
-     * @return Singleton
-     */
-    public static SimplexNoiseGenerator getInstance() {
-        return instance;
     }
 }

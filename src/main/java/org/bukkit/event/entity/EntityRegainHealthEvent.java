@@ -9,35 +9,19 @@ import org.bukkit.event.HandlerList;
  */
 public class EntityRegainHealthEvent extends EntityEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
+    private final RegainReason regainReason;
     private boolean cancelled;
     private double amount;
-    private final RegainReason regainReason;
-    private final boolean isFastRegen; // Paper
 
     public EntityRegainHealthEvent(final Entity entity, final double amount, final RegainReason regainReason) {
-        // Paper start - Forward
-        this(entity, amount, regainReason, false);
-    }
-
-    public EntityRegainHealthEvent(final Entity entity, final double amount, final RegainReason regainReason, boolean isFastRegen) {
-        // Paper end
         super(entity);
         this.amount = amount;
         this.regainReason = regainReason;
-        this.isFastRegen = isFastRegen;
     }
 
-    // Paper start - Add getter for isFastRegen
-
-    /**
-     * Is this event a result of the fast regeneration mechanic
-     *
-     * @return Whether the event is the result of a fast regeneration mechanic
-     */
-    public boolean isFastRegen() {
-        return isFastRegen;
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
-    // Paper end
 
     /**
      * Gets the amount of regained health
@@ -71,7 +55,7 @@ public class EntityRegainHealthEvent extends EntityEvent implements Cancellable 
      * Gets the reason for why the entity is regaining health
      *
      * @return A RegainReason detailing the reason for the entity regaining
-     * health
+     *     health
      */
     public RegainReason getRegainReason() {
         return regainReason;
@@ -79,10 +63,6 @@ public class EntityRegainHealthEvent extends EntityEvent implements Cancellable 
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

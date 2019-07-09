@@ -3,7 +3,7 @@ package org.bukkit.event.entity;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -23,10 +23,9 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
     private final Map<DamageModifier, Double> modifiers;
     private final Map<DamageModifier, ? extends Function<? super Double, Double>> modifierFunctions;
     private final Map<DamageModifier, Double> originals;
-    private boolean cancelled;
     private final DamageCause cause;
+    private boolean cancelled;
 
-    @Deprecated
     public EntityDamageEvent(final Entity damagee, final DamageCause cause, final double damage) {
         this(damagee, cause, new EnumMap<DamageModifier, Double>(ImmutableMap.of(DamageModifier.BASE, damage)), new EnumMap<DamageModifier, Function<? super Double, Double>>(ImmutableMap.of(DamageModifier.BASE, ZERO)));
     }
@@ -42,6 +41,10 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
         this.cause = cause;
         this.modifiers = modifiers;
         this.modifierFunctions = modifierFunctions;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public boolean isCancelled() {
@@ -74,13 +77,13 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
     /**
      * Sets the damage for the specified modifier.
      *
-     * @param type   the damage modifier
+     * @param type the damage modifier
      * @param damage the scalar value of the damage's modifier
-     * @throws IllegalArgumentException      if type is null
-     * @throws UnsupportedOperationException if the caller does not support
-     *                                       the particular DamageModifier, or to rephrase, when {@link
-     *                                       #isApplicable(DamageModifier)} returns false
      * @see #getFinalDamage()
+     * @throws IllegalArgumentException if type is null
+     * @throws UnsupportedOperationException if the caller does not support
+     *     the particular DamageModifier, or to rephrase, when {@link
+     *     #isApplicable(DamageModifier)} returns false
      */
     public void setDamage(DamageModifier type, double damage) throws IllegalArgumentException, UnsupportedOperationException {
         if (!modifiers.containsKey(type)) {
@@ -130,20 +133,6 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
     }
 
     /**
-     * Gets the amount of damage caused by the event after all damage
-     * reduction is applied.
-     *
-     * @return the amount of damage caused by the event
-     */
-    public final double getFinalDamage() {
-        double damage = 0;
-        for (DamageModifier modifier : MODIFIERS) {
-            damage += getDamage(modifier);
-        }
-        return damage;
-    }
-
-    /**
      * Sets the raw amount of damage caused by the event.
      * <p>
      * For compatibility this also recalculates the modifiers and scales
@@ -181,6 +170,20 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
     }
 
     /**
+     * Gets the amount of damage caused by the event after all damage
+     * reduction is applied.
+     *
+     * @return the amount of damage caused by the event
+     */
+    public final double getFinalDamage() {
+        double damage = 0;
+        for (DamageModifier modifier : MODIFIERS) {
+            damage += getDamage(modifier);
+        }
+        return damage;
+    }
+
+    /**
      * Gets the cause of the damage.
      *
      * @return A DamageCause value detailing the cause of the damage.
@@ -194,10 +197,6 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
         return handlers;
     }
 
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
-
     /**
      * An enum to specify the types of modifier
      *
@@ -206,7 +205,6 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
      * removed very soon in a subsequent release. Please see
      * https://www.spigotmc.org/threads/194446/ for more information.
      */
-    @Deprecated
     public enum DamageModifier {
         /**
          * This represents the amount of damage being done, also known as the
@@ -246,8 +244,7 @@ public class EntityDamageEvent extends EntityEvent implements Cancellable {
          * This represents the damage reduction caused by the absorption potion
          * effect.
          */
-        ABSORPTION,
-        ;
+        ABSORPTION,;
     }
 
     /**

@@ -3,8 +3,6 @@ package org.bukkit.command;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FormattedCommandAlias extends Command {
     private final String[] formatStrings;
@@ -14,13 +12,17 @@ public class FormattedCommandAlias extends Command {
         this.formatStrings = formatStrings;
     }
 
+    private static boolean inRange(int i, int j, int k) {
+        return i >= j && i <= k;
+    }
+
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         boolean result = false;
-        ArrayList<String> commands = new ArrayList<>();
+        ArrayList<String> commands = new ArrayList<String>();
         for (String formatString : formatStrings) {
             try {
-                commands.add(buildCommand(sender, formatString, args)); // Paper
+                commands.add(buildCommand(formatString, args));
             } catch (Throwable throwable) {
                 if (throwable instanceof IllegalArgumentException) {
                     sender.sendMessage(throwable.getMessage());
@@ -38,10 +40,7 @@ public class FormattedCommandAlias extends Command {
         return result;
     }
 
-    private String buildCommand(CommandSender sender, String formatString, String[] args) { // Paper
-        if (formatString.contains("$sender")) {
-            formatString = formatString.replaceAll(Pattern.quote("$sender"), Matcher.quoteReplacement(sender.getName())); // Paper
-        }
+    private String buildCommand(String formatString, String[] args) {
         int index = formatString.indexOf('$');
         while (index != -1) {
             int start = index;
@@ -116,9 +115,5 @@ public class FormattedCommandAlias extends Command {
         }
 
         return formatString;
-    }
-
-    private static boolean inRange(int i, int j, int k) {
-        return i >= j && i <= k;
     }
 }

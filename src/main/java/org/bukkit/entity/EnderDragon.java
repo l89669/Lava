@@ -6,6 +6,20 @@ package org.bukkit.entity;
 public interface EnderDragon extends ComplexLivingEntity {
 
     /**
+     * Gets the current phase that the dragon is performing.
+     *
+     * @return the current phase
+     */
+    Phase getPhase();
+
+    /**
+     * Sets the next phase for the dragon to perform.
+     *
+     * @param phase the next phase
+     */
+    void setPhase(Phase phase);
+
+    /**
      * Represents a phase or action that an Ender Dragon can perform.
      */
     enum Phase {
@@ -61,18 +75,4 @@ public interface EnderDragon extends ComplexLivingEntity {
          */
         HOVER
     }
-
-    /**
-     * Gets the current phase that the dragon is performing.
-     *
-     * @return the current phase
-     */
-    Phase getPhase();
-
-    /**
-     * Sets the next phase for the dragon to perform.
-     *
-     * @param phase the next phase
-     */
-    void setPhase(Phase phase);
 }

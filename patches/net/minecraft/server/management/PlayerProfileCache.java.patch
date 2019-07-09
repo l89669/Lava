@@ -1,0 +1,15 @@
+--- ../src-base/minecraft/net/minecraft/server/management/PlayerProfileCache.java
++++ ../src-work/minecraft/net/minecraft/server/management/PlayerProfileCache.java
+@@ -188,6 +188,12 @@
+     }
+ 
+     @Nullable
++    public GameProfile getProfileIfCached(String name) {
++        ProfileEntry entry = this.usernameToProfileEntryMap.get(name.toLowerCase(Locale.ROOT));
++        return entry == null ? null : entry.getGameProfile();
++    }
++
++    @Nullable
+     public GameProfile getProfileByUUID(UUID uuid)
+     {
+         PlayerProfileCache.ProfileEntry playerprofilecache$profileentry = this.uuidToProfileEntryMap.get(uuid);

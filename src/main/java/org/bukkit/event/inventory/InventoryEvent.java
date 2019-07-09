@@ -19,6 +19,10 @@ public class InventoryEvent extends Event {
         this.transaction = transaction;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Gets the primary Inventory involved in this transaction
      *
@@ -49,10 +53,6 @@ public class InventoryEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

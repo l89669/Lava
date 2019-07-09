@@ -20,13 +20,16 @@ public class BlockPistonRetractEvent extends BlockPistonEvent {
         this.blocks = blocks;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Gets the location where the possible moving block might be if the
      * retracting piston is sticky.
      *
      * @return The possible location of the possibly moving block.
      */
-    @Deprecated
     public Location getRetractLocation() {
         return getBlock().getRelative(getDirection(), 2).getLocation();
     }
@@ -43,10 +46,6 @@ public class BlockPistonRetractEvent extends BlockPistonEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

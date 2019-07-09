@@ -10,11 +10,13 @@ import java.util.regex.Pattern;
 /**
  * Represents a String based key which consists of two components - a namespace
  * and a key.
+ *
  * Namespaces may only contain lowercase alphanumeric characters, periods,
  * underscores, and hyphens.
  * <p>
  * Keys may only contain lowercase alphanumeric characters, periods,
  * underscores, hyphens, and forward slashes.
+ *
  */
 public final class NamespacedKey {
 
@@ -41,7 +43,7 @@ public final class NamespacedKey {
      * @param key
      * @deprecated should never be used by plugins, for internal use only!!
      */
-    @Deprecated
+
     public NamespacedKey(String namespace, String key) {
         Preconditions.checkArgument(namespace != null && VALID_NAMESPACE.matcher(namespace).matches(), "namespace");
         Preconditions.checkArgument(key != null && VALID_KEY.matcher(key).matches(), "key");
@@ -57,7 +59,7 @@ public final class NamespacedKey {
      * Create a key in the plugin's namespace.
      *
      * @param plugin the plugin to use for the namespace
-     * @param key    the key to create
+     * @param key the key to create
      */
     public NamespacedKey(Plugin plugin, String key) {
         Preconditions.checkArgument(plugin != null, "plugin");
@@ -72,6 +74,27 @@ public final class NamespacedKey {
 
         String string = toString();
         Preconditions.checkArgument(string.length() < 256, "NamespacedKey must be less than 256 characters (%s)", string);
+    }
+
+    /**
+     * Return a new random key in the {@link #BUKKIT} namespace.
+     *
+     * @return new key
+     * @deprecated should never be used by plugins, for internal use only!!
+     */
+
+    public static NamespacedKey randomKey() {
+        return new NamespacedKey(BUKKIT, UUID.randomUUID().toString());
+    }
+
+    /**
+     * Get a key in the Minecraft namespace.
+     *
+     * @param key the key to use
+     * @return new key in the Minecraft namespace
+     */
+    public static NamespacedKey minecraft(String key) {
+        return new NamespacedKey(MINECRAFT, key);
     }
 
     public String getNamespace() {
@@ -105,26 +128,5 @@ public final class NamespacedKey {
     @Override
     public String toString() {
         return this.namespace + ":" + this.key;
-    }
-
-    /**
-     * Return a new random key in the {@link #BUKKIT} namespace.
-     *
-     * @return new key
-     * @deprecated should never be used by plugins, for internal use only!!
-     */
-    @Deprecated
-    public static NamespacedKey randomKey() {
-        return new NamespacedKey(BUKKIT, UUID.randomUUID().toString());
-    }
-
-    /**
-     * Get a key in the Minecraft namespace.
-     *
-     * @param key the key to use
-     * @return new key in the Minecraft namespace
-     */
-    public static NamespacedKey minecraft(String key) {
-        return new NamespacedKey(MINECRAFT, key);
     }
 }

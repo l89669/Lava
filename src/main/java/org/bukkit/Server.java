@@ -133,7 +133,7 @@ public interface Server extends PluginMessageRecipient {
      * specified.
      *
      * @return the IP string that this server is bound to, otherwise empty
-     * string
+     *     string
      */
     public String getIp();
 
@@ -217,27 +217,6 @@ public interface Server extends PluginMessageRecipient {
      */
     public int broadcastMessage(String message);
 
-    // Paper start
-
-    /**
-     * Sends the component to all online players.
-     *
-     * @param component the component to send
-     */
-    public default void broadcast(net.md_5.bungee.api.chat.BaseComponent component) {
-        spigot().broadcast(component);
-    }
-
-    /**
-     * Sends an array of components as a single message to all online players.
-     *
-     * @param components the components to send
-     */
-    public default void broadcast(net.md_5.bungee.api.chat.BaseComponent... components) {
-        spigot().broadcast(components);
-    }
-    // Paper end
-
     /**
      * Gets the name of the update folder. The update folder is used to safely
      * update plugins at the right moment on a plugin load.
@@ -310,17 +289,23 @@ public interface Server extends PluginMessageRecipient {
      * <p>
      * This method may not return objects for offline players.
      *
+     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
+     *     guaranteed to be unique
      * @param name the name to look up
      * @return a player if one was found, null otherwise
      */
+
     public Player getPlayer(String name);
 
     /**
      * Gets the player with the exact given name, case insensitive.
      *
+     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
+     *     guaranteed to be unique
      * @param name Exact name of the player to retrieve
      * @return a player object if one was found, null otherwise
      */
+
     public Player getPlayerExact(String name);
 
     /**
@@ -330,9 +315,12 @@ public interface Server extends PluginMessageRecipient {
      * This list is not sorted in any particular order. If an exact match is
      * found, the returned list will only contain a single result.
      *
+     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
+     *     guaranteed to be unique
      * @param name the (partial) name to match
      * @return list of all possible players
      */
+
     public List<Player> matchPlayer(String name);
 
     /**
@@ -342,9 +330,6 @@ public interface Server extends PluginMessageRecipient {
      * @return a player object if one was found, null otherwise
      */
     public Player getPlayer(UUID id);
-
-    @Nullable
-    public UUID getPlayerUniqueId(String playerName);
 
     /**
      * Gets the plugin manager for interfacing with plugins.
@@ -399,7 +384,7 @@ public interface Server extends PluginMessageRecipient {
      * Unloads the given world.
      *
      * @param world the world to unload
-     * @param save  whether to save the chunks before unloading
+     * @param save whether to save the chunks before unloading
      * @return true if successful, false otherwise
      */
     public boolean unloadWorld(World world, boolean save);
@@ -427,7 +412,7 @@ public interface Server extends PluginMessageRecipient {
      * @return a map view if it exists, or null otherwise
      * @deprecated Magic value
      */
-    @Deprecated
+
     public MapView getMap(short id);
 
     /**
@@ -472,12 +457,12 @@ public interface Server extends PluginMessageRecipient {
     /**
      * Dispatches a command on this server, and executes it if found.
      *
-     * @param sender      the apparent sender of the command
-     * @param commandLine the command + arguments. Example: <code>test abc
-     *                    123</code>
+     * @param sender the apparent sender of the command
+     * @param commandLine the command arguments. Example: <code>test abc
+     *     123</code>
      * @return returns false if no target is found
      * @throws CommandException thrown when the executor for the given command
-     *                          fails with an unhandled exception
+     *     fails with an unhandled exception
      */
     public boolean dispatchCommand(CommandSender sender, String commandLine) throws CommandException;
 
@@ -486,7 +471,7 @@ public interface Server extends PluginMessageRecipient {
      *
      * @param recipe the recipe to add
      * @return true if the recipe was added, false if it wasn't for some
-     * reason
+     *     reason
      */
     public boolean addRecipe(Recipe recipe);
 
@@ -567,9 +552,9 @@ public interface Server extends PluginMessageRecipient {
      * Broadcasts the specified message to every user with the given
      * permission name.
      *
-     * @param message    message to broadcast
+     * @param message message to broadcast
      * @param permission the required permission {@link Permissible
-     *                   permissibles} must have to receive the broadcast
+     *     permissibles} must have to receive the broadcast
      * @return number of message recipients
      */
     public int broadcast(String message, String permission);
@@ -584,13 +569,13 @@ public interface Server extends PluginMessageRecipient {
      * This will return an object even if the player does not exist. To this
      * method, all players will exist.
      *
+     * @deprecated Persistent storage of users should be by UUID as names are no longer
+     *             unique past a single session.
      * @param name the name the player to retrieve
      * @return an offline player
      * @see #getOfflinePlayer(UUID)
-     * @deprecated Persistent storage of users should be by UUID as names are no longer
-     * unique past a single session.
      */
-    @Deprecated
+
     public OfflinePlayer getOfflinePlayer(String name);
 
     /**
@@ -707,7 +692,7 @@ public interface Server extends PluginMessageRecipient {
      * new inventory has the normal size for its type.
      *
      * @param owner the holder of the inventory, or null to indicate no holder
-     * @param type  the type of inventory to create
+     * @param type the type of inventory to create
      * @return a new inventory
      */
     Inventory createInventory(InventoryHolder owner, InventoryType type);
@@ -720,7 +705,7 @@ public interface Server extends PluginMessageRecipient {
      * may not render with said titles on the Minecraft client.
      *
      * @param owner The holder of the inventory; can be null if there's no holder.
-     * @param type  The type of inventory to create.
+     * @param type The type of inventory to create.
      * @param title The title of the inventory, to be displayed when it is viewed.
      * @return The new inventory.
      */
@@ -731,7 +716,7 @@ public interface Server extends PluginMessageRecipient {
      * specified size.
      *
      * @param owner the holder of the inventory, or null to indicate no holder
-     * @param size  a multiple of 9 as the size of inventory to create
+     * @param size a multiple of 9 as the size of inventory to create
      * @return a new inventory
      * @throws IllegalArgumentException if the size is not a multiple of 9
      */
@@ -742,9 +727,9 @@ public interface Server extends PluginMessageRecipient {
      * specified size and title.
      *
      * @param owner the holder of the inventory, or null to indicate no holder
-     * @param size  a multiple of 9 as the size of inventory to create
+     * @param size a multiple of 9 as the size of inventory to create
      * @param title the title of the inventory, displayed when inventory is
-     *              viewed
+     *     viewed
      * @return a new inventory
      * @throws IllegalArgumentException if the size is not a multiple of 9
      */
@@ -754,7 +739,7 @@ public interface Server extends PluginMessageRecipient {
      * Creates an empty merchant.
      *
      * @param title the title of the corresponding merchant inventory, displayed
-     *              when the merchant inventory is viewed
+     * when the merchant inventory is viewed
      * @return a new merchant
      */
     Merchant createMerchant(String title);
@@ -801,7 +786,7 @@ public interface Server extends PluginMessageRecipient {
      * preclude</b> the same assumption.
      *
      * @return true if the current thread matches the expected primary thread,
-     * false otherwise
+     *     false otherwise
      */
     boolean isPrimaryThread();
 
@@ -847,8 +832,8 @@ public interface Server extends PluginMessageRecipient {
      * Gets an instance of the server's default server-icon.
      *
      * @return the default server-icon; null values may be used by the
-     * implementation to indicate no defined icon, but this behavior is
-     * not guaranteed
+     *     implementation to indicate no defined icon, but this behavior is
+     *     not guaranteed
      */
     CachedServerIcon getServerIcon();
 
@@ -860,11 +845,11 @@ public interface Server extends PluginMessageRecipient {
      * guaranteed to throw an implementation-defined {@link Exception}.
      *
      * @param file the file to load the from
-     * @return a cached server-icon that can be used for a {@link
-     * ServerListPingEvent#setServerIcon(CachedServerIcon)}
      * @throws IllegalArgumentException if image is null
-     * @throws Exception                if the image does not meet current server server-icon
-     *                                  specifications
+     * @throws Exception if the image does not meet current server server-icon
+     *     specifications
+     * @return a cached server-icon that can be used for a {@link
+     *     ServerListPingEvent#setServerIcon(CachedServerIcon)}
      */
     CachedServerIcon loadServerIcon(File file) throws IllegalArgumentException, Exception;
 
@@ -875,13 +860,20 @@ public interface Server extends PluginMessageRecipient {
      * guaranteed to throw an implementation-defined {@link Exception}.
      *
      * @param image the image to use
-     * @return a cached server-icon that can be used for a {@link
-     * ServerListPingEvent#setServerIcon(CachedServerIcon)}
      * @throws IllegalArgumentException if image is null
-     * @throws Exception                if the image does not meet current server
-     *                                  server-icon specifications
+     * @throws Exception if the image does not meet current server
+     *     server-icon specifications
+     * @return a cached server-icon that can be used for a {@link
+     *     ServerListPingEvent#setServerIcon(CachedServerIcon)}
      */
     CachedServerIcon loadServerIcon(BufferedImage image) throws IllegalArgumentException, Exception;
+
+    /**
+     * Gets the idle kick timeout.
+     *
+     * @return the idle timeout in minutes
+     */
+    public int getIdleTimeout();
 
     /**
      * Set the idle kick timeout. Any players idle for the specified amount of
@@ -894,19 +886,13 @@ public interface Server extends PluginMessageRecipient {
     public void setIdleTimeout(int threshold);
 
     /**
-     * Gets the idle kick timeout.
-     *
-     * @return the idle timeout in minutes
-     */
-    public int getIdleTimeout();
-
-    /**
      * Create a ChunkData for use in a generator.
-     * <p>
-     * See {@link ChunkGenerator#generateChunkData(World, java.util.Random, int, int, ChunkGenerator.BiomeGrid)}
+     *
+     * See {@link ChunkGenerator#generateChunkData(World, Random, int, int, ChunkGenerator.BiomeGrid)}
      *
      * @param world the world to create the ChunkData for
      * @return a new ChunkData for the world
+     *
      */
     public ChunkGenerator.ChunkData createChunkData(World world);
 
@@ -964,11 +950,49 @@ public interface Server extends PluginMessageRecipient {
     Iterator<Advancement> advancementIterator();
 
     /**
-     * @return the unsafe values instance
      * @see UnsafeValues
+     * @return the unsafe values instance
      */
-    @Deprecated
+
     UnsafeValues getUnsafe();
+
+    Spigot spigot();
+
+    /**
+     * Checks if player names should be suggested when a command returns {@code null} as
+     * their tab completion result.
+     *
+     * @return true if player names should be suggested
+     */
+    boolean suggestPlayerNamesWhenNullTabCompletions();
+    // Spigot end
+
+    // Paper start - allow preventing player name suggestions by default
+
+    /**
+     * Creates a PlayerProfile for the specified uuid, with name as null
+     * @param uuid UUID to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid);
+
+    /**
+     * Creates a PlayerProfile for the specified name, with UUID as null
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name);
+
+    /**
+     * Creates a PlayerProfile for the specified name/uuid
+     *
+     * Both UUID and Name can not be null at same time. One must be supplied.
+     *
+     * @param uuid UUID to create profile for
+     * @param name Name to create profile for
+     * @return A PlayerProfile object
+     */
+    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name);
 
     // Spigot start
     public class Spigot {
@@ -1002,45 +1026,5 @@ public interface Server extends PluginMessageRecipient {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
-
-    Spigot spigot();
-    // Spigot end
-
-    // Paper start - allow preventing player name suggestions by default
-
-    /**
-     * Checks if player names should be suggested when a command returns {@code null} as
-     * their tab completion result.
-     *
-     * @return true if player names should be suggested
-     */
-    boolean suggestPlayerNamesWhenNullTabCompletions();
-
-    /**
-     * Creates a PlayerProfile for the specified uuid, with name as null
-     *
-     * @param uuid UUID to create profile for
-     * @return A PlayerProfile object
-     */
-    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull UUID uuid);
-
-    /**
-     * Creates a PlayerProfile for the specified name, with UUID as null
-     *
-     * @param name Name to create profile for
-     * @return A PlayerProfile object
-     */
-    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nonnull String name);
-
-    /**
-     * Creates a PlayerProfile for the specified name/uuid
-     * <p>
-     * Both UUID and Name can not be null at same time. One must be supplied.
-     *
-     * @param uuid UUID to create profile for
-     * @param name Name to create profile for
-     * @return A PlayerProfile object
-     */
-    com.destroystokyo.paper.profile.PlayerProfile createProfile(@Nullable UUID uuid, @Nullable String name);
     // Paper end
 }

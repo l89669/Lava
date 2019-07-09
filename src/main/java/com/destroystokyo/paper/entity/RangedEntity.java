@@ -18,12 +18,4 @@ public interface RangedEntity extends SentientNPC {
      * @param raiseHands Whether the entities hands are raised to charge attack
      */
     void setChargingAttack(boolean raiseHands);
-
-    /**
-     * Alias to {@link LivingEntity#isHandRaised()}, if the entity is charging an attack
-     * @return If entities hands are raised
-     */
-    default boolean isChargingAttack() {
-        return isHandRaised();
-    }
 }

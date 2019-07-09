@@ -52,9 +52,9 @@
 -        this.motionY = (double)((float)(Math.random() * 0.2D) * 2.0F);
 -        this.motionZ = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
 +        this.rotationYaw = (float) (Math.random() * 360.0D);
-+        this.motionX = (double) ((float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
-+        this.motionY = (double) ((float) (Math.random() * 0.2D) * 2.0F);
-+        this.motionZ = (double) ((float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
++        this.motionX = ((float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
++        this.motionY = ((float) (Math.random() * 0.2D) * 2.0F);
++        this.motionZ = ((float) (Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
          this.xpValue = expValue;
      }
  

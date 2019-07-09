@@ -1,6 +1,6 @@
 package org.bukkit.event.entity;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -35,6 +35,10 @@ public class EntityBreedEvent extends EntityEvent implements Cancellable {
         this.bredWith = bredWith;
 
         setExperience(experience);
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     @Override
@@ -110,10 +114,6 @@ public class EntityBreedEvent extends EntityEvent implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

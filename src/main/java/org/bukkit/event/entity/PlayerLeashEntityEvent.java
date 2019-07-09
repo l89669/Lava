@@ -13,13 +13,17 @@ public class PlayerLeashEntityEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private final Entity leashHolder;
     private final Entity entity;
-    private boolean cancelled = false;
     private final Player player;
+    private boolean cancelled = false;
 
     public PlayerLeashEntityEvent(Entity what, Entity leashHolder, Player leasher) {
         this.leashHolder = leashHolder;
         this.entity = what;
         this.player = leasher;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     /**
@@ -51,10 +55,6 @@ public class PlayerLeashEntityEvent extends Event implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

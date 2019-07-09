@@ -8,4 +8,11 @@ public class CraftIconCache implements CachedServerIcon {
     public CraftIconCache(final String value) {
         this.value = value;
     }
+
+    // Paper start
+    @Override
+    public String getData() {
+        return value;
+    }
+    // Paper end
 }

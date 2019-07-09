@@ -1,6 +1,6 @@
 package org.bukkit.event.player;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
@@ -27,6 +27,10 @@ public class PlayerChatTabCompleteEvent extends PlayerEvent {
             this.lastToken = message.substring(i + 1);
         }
         this.completions = completions;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     /**
@@ -61,10 +65,6 @@ public class PlayerChatTabCompleteEvent extends PlayerEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

@@ -26,7 +26,7 @@ public class Pumpkin extends MaterialData implements Directional {
      * @param type the raw type id
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Pumpkin(final int type) {
         super(type);
     }
@@ -40,7 +40,7 @@ public class Pumpkin extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Pumpkin(final int type, final byte data) {
         super(type, data);
     }
@@ -50,7 +50,7 @@ public class Pumpkin extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-    @Deprecated
+
     public Pumpkin(final Material type, final byte data) {
         super(type, data);
     }

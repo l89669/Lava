@@ -12,11 +12,30 @@ public enum PermissionDefault {
     OP("op", "isop", "operator", "isoperator", "admin", "isadmin"),
     NOT_OP("!op", "notop", "!operator", "notoperator", "!admin", "notadmin");
 
-    private final String[] names;
     private final static Map<String, PermissionDefault> lookup = new HashMap<String, PermissionDefault>();
+
+    static {
+        for (PermissionDefault value : values()) {
+            for (String name : value.names) {
+                lookup.put(name, value);
+            }
+        }
+    }
+
+    private final String[] names;
 
     private PermissionDefault(String... names) {
         this.names = names;
+    }
+
+    /**
+     * Looks up a PermissionDefault by name
+     *
+     * @param name Name of the default
+     * @return Specified value, or null if not found
+     */
+    public static PermissionDefault getByName(String name) {
+        return lookup.get(name.toLowerCase(java.util.Locale.ENGLISH).replaceAll("[^a-z!]", ""));
     }
 
     /**
@@ -41,26 +60,8 @@ public enum PermissionDefault {
         }
     }
 
-    /**
-     * Looks up a PermissionDefault by name
-     *
-     * @param name Name of the default
-     * @return Specified value, or null if not found
-     */
-    public static PermissionDefault getByName(String name) {
-        return lookup.get(name.toLowerCase(java.util.Locale.ENGLISH).replaceAll("[^a-z!]", ""));
-    }
-
     @Override
     public String toString() {
         return names[0];
-    }
-
-    static {
-        for (PermissionDefault value : values()) {
-            for (String name : value.names) {
-                lookup.put(name, value);
-            }
-        }
     }
 }

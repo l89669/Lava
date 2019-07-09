@@ -24,6 +24,10 @@ public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
         this.slot = slot;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Returns the item held by the player. If this Item is null and the armor stand Item is also null,
      * there will be no transaction between the player and the armor stand.
@@ -31,7 +35,6 @@ public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
      * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
      * If both items are not null, the items will be swapped.
      * In the case that the event is cancelled the original items will remain the same.
-     *
      * @return the item held by the player.
      */
     public ItemStack getPlayerItem() {
@@ -45,7 +48,6 @@ public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
      * In the case that the Player's item is not null, but the armor stand item is null, the players item will be placed on the armor stand.
      * If both items are not null, the items will be swapped.
      * In the case that the event is cancelled the original items will remain the same.
-     *
      * @return the item held by the armor stand.
      */
     public ItemStack getArmorStandItem() {
@@ -68,10 +70,6 @@ public class PlayerArmorStandManipulateEvent extends PlayerInteractEntityEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

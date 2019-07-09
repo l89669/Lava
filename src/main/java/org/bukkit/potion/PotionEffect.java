@@ -1,7 +1,7 @@
 package org.bukkit.potion;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -32,14 +32,13 @@ public class PotionEffect implements ConfigurationSerializable {
 
     /**
      * Creates a potion effect.
-     *
-     * @param type      effect type
-     * @param duration  measured in ticks, see {@link
-     *                  PotionEffect#getDuration()}
+     * @param type effect type
+     * @param duration measured in ticks, see {@link
+     *     PotionEffect#getDuration()}
      * @param amplifier the amplifier, see {@link PotionEffect#getAmplifier()}
-     * @param ambient   the ambient status, see {@link PotionEffect#isAmbient()}
+     * @param ambient the ambient status, see {@link PotionEffect#isAmbient()}
      * @param particles the particle status, see {@link PotionEffect#hasParticles()}
-     * @param color     the particle color, see {@link PotionEffect#getColor()}
+     * @param color the particle color, see {@link PotionEffect#getColor()}
      */
     public PotionEffect(PotionEffectType type, int duration, int amplifier, boolean ambient, boolean particles, Color color) {
         Validate.notNull(type, "effect type cannot be null");
@@ -54,11 +53,11 @@ public class PotionEffect implements ConfigurationSerializable {
     /**
      * Creates a potion effect with no defined color.
      *
-     * @param type      effect type
-     * @param duration  measured in ticks, see {@link
-     *                  PotionEffect#getDuration()}
+     * @param type effect type
+     * @param duration measured in ticks, see {@link
+     *     PotionEffect#getDuration()}
      * @param amplifier the amplifier, see {@link PotionEffect#getAmplifier()}
-     * @param ambient   the ambient status, see {@link PotionEffect#isAmbient()}
+     * @param ambient the ambient status, see {@link PotionEffect#isAmbient()}
      * @param particles the particle status, see {@link PotionEffect#hasParticles()}
      */
     public PotionEffect(PotionEffectType type, int duration, int amplifier, boolean ambient, boolean particles) {
@@ -68,11 +67,11 @@ public class PotionEffect implements ConfigurationSerializable {
     /**
      * Creates a potion effect. Assumes that particles are visible
      *
-     * @param type      effect type
-     * @param duration  measured in ticks, see {@link
-     *                  PotionEffect#getDuration()}
+     * @param type effect type
+     * @param duration measured in ticks, see {@link
+     *     PotionEffect#getDuration()}
      * @param amplifier the amplifier, see {@link PotionEffect#getAmplifier()}
-     * @param ambient   the ambient status, see {@link PotionEffect#isAmbient()}
+     * @param ambient the ambient status, see {@link PotionEffect#isAmbient()}
      */
     public PotionEffect(PotionEffectType type, int duration, int amplifier, boolean ambient) {
         this(type, duration, amplifier, ambient, true);
@@ -81,8 +80,8 @@ public class PotionEffect implements ConfigurationSerializable {
     /**
      * Creates a potion effect. Assumes ambient is true.
      *
-     * @param type      Effect type
-     * @param duration  measured in ticks
+     * @param type Effect type
+     * @param duration measured in ticks
      * @param amplifier the amplifier for the effect
      * @see PotionEffect#PotionEffect(PotionEffectType, int, int, boolean)
      */
@@ -98,36 +97,6 @@ public class PotionEffect implements ConfigurationSerializable {
     public PotionEffect(Map<String, Object> map) {
         this(getEffectType(map), getInt(map, DURATION), getInt(map, AMPLIFIER), getBool(map, AMBIENT, false), getBool(map, PARTICLES, true));
     }
-
-    // Paper start
-    public PotionEffect withType(PotionEffectType type) {
-        return new PotionEffect(type, duration, amplifier, ambient, particles, color);
-    }
-
-    public PotionEffect withDuration(int duration) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, color);
-    }
-
-    public PotionEffect withAmplifier(int amplifier) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, color);
-    }
-
-    public PotionEffect withAmbient(boolean ambient) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, color);
-    }
-
-    public PotionEffect withParticles(boolean particles) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, color);
-    }
-
-    public PotionEffect withParticles(boolean particles, Color color) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, color);
-    }
-
-    public PotionEffect withColor(Color color) {
-        return new PotionEffect(this.type, duration, amplifier, ambient, particles, color);
-    }
-    // Paper end
 
     private static PotionEffectType getEffectType(Map<?, ?> map) {
         int type = getInt(map, TYPE);
@@ -168,9 +137,9 @@ public class PotionEffect implements ConfigurationSerializable {
      * Attempts to add the effect represented by this object to the given
      * {@link LivingEntity}.
      *
+     * @see LivingEntity#addPotionEffect(PotionEffect)
      * @param entity The entity to add this effect to
      * @return Whether the effect could be added
-     * @see LivingEntity#addPotionEffect(PotionEffect)
      */
     public boolean apply(LivingEntity entity) {
         return entity.addPotionEffect(this);

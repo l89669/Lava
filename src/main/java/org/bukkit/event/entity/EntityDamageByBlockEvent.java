@@ -12,7 +12,6 @@ import java.util.Map;
 public class EntityDamageByBlockEvent extends EntityDamageEvent {
     private final Block damager;
 
-    @Deprecated
     public EntityDamageByBlockEvent(final Block damager, final Entity damagee, final DamageCause cause, final double damage) {
         super(damagee, cause, damage);
         this.damager = damager;
