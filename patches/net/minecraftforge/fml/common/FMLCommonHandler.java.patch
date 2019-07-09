@@ -32,7 +32,15 @@
  import net.minecraft.crash.CrashReport;
  import net.minecraft.crash.CrashReportCategory;
  import net.minecraft.entity.item.EntityItem;
-@@ -73,34 +60,33 @@
+@@ -58,6 +45,7 @@
+ import net.minecraft.world.storage.SaveHandler;
+ import net.minecraft.world.storage.WorldInfo;
+ import net.minecraftforge.client.model.animation.Animation;
++import net.minecraftforge.common.DimensionManager;
+ import net.minecraftforge.common.ForgeVersion;
+ import net.minecraftforge.common.MinecraftForge;
+ import net.minecraftforge.common.util.CompoundDataFixer;
+@@ -73,34 +61,33 @@
  import net.minecraftforge.fml.relauncher.CoreModManager;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.server.FMLServerHandler;
@@ -79,7 +87,7 @@
      /**
       * The singleton
       */
-@@ -114,90 +100,79 @@
+@@ -114,90 +101,79 @@
      private List<String> brandings;
      private List<String> brandingsNoMC;
      private List<ICrashCallable> crashCallables = Lists.newArrayList(Loader.instance().getCallableCrashInformation());
@@ -191,7 +199,7 @@
          return sidedDelegate.getSide();
      }
  
-@@ -206,105 +181,89 @@
+@@ -206,105 +182,89 @@
       * on thread analysis to try and determine whether the code is running in the
       * server or not. Use at your own risk
       */
@@ -319,7 +327,7 @@
          Loader.instance().serverStopping();
      }
  
-@@ -312,86 +271,68 @@
+@@ -312,86 +272,71 @@
          return sidedDelegate.getSavesDirectory();
      }
  
@@ -418,6 +426,9 @@
 -                if (wac != null)
 -                {
 +    public void handleWorldDataSave(SaveHandler handler, WorldInfo worldInfo, NBTTagCompound tagCompound) {
++        if (worldInfo.getDimension() != 0) {
++            return;
++        }
 +        for (ModContainer mc : Loader.instance().getModList()) {
 +            if (mc instanceof InjectedModContainer) {
 +                WorldAccessContainer wac = ((InjectedModContainer) mc).getWrappedWorldAccessContainer();
@@ -425,7 +436,7 @@
                      NBTTagCompound dataForWriting = wac.getDataForWriting(handler, worldInfo);
                      tagCompound.setTag(mc.getModId(), dataForWriting);
                  }
-@@ -399,35 +340,28 @@
+@@ -399,35 +344,28 @@
          }
      }
  
@@ -439,7 +450,7 @@
          }
 -        if (handlerSet.contains(handler))
 -        {
-+        if (handlerSet.contains(handler)) {
++        if (handlerSet.contains(handler) || DimensionManager.getWorld(0) != null) {
              return;
          }
          handlerSet.add(handler);
@@ -470,7 +481,7 @@
          if (handlerToCheck == null || handlerToCheck.get() != handler) {
              // only run if the save has been initially loaded
              handlerToCheck = null;
-@@ -443,15 +377,12 @@
+@@ -443,15 +381,12 @@
          if (!confirmed) StartupQuery.abort();
      }
  
@@ -489,7 +500,7 @@
              return false;
          }
          return sidedDelegate.shouldServerShouldBeKilledQuietly();
-@@ -459,41 +390,32 @@
+@@ -459,41 +394,32 @@
  
      /**
       * Make handleExit() wait for handleServerStopped().
@@ -540,7 +551,7 @@
                  FMLLog.log.warn("Interrupted wait, exiting.");
              }
          }
-@@ -501,122 +423,101 @@
+@@ -501,122 +427,94 @@
          System.exit(retVal);
      }
  
@@ -570,18 +581,17 @@
 -    {
 +    public String getModName() {
          List<String> modNames = Lists.newArrayListWithExpectedSize(3);
-         modNames.add("fml");
+-        modNames.add("fml");
 -        if (!noForge)
 -        {
-+        if (!noForge) {
-             modNames.add(ForgeVersion.MOD_ID);
-         }
- 
+-            modNames.add(ForgeVersion.MOD_ID);
+-        }
+-
 -        if (Loader.instance().getFMLBrandingProperties().containsKey("snooperbranding"))
 -        {
-+        if (Loader.instance().getFMLBrandingProperties().containsKey("snooperbranding")) {
-             modNames.add(Loader.instance().getFMLBrandingProperties().get("snooperbranding"));
-         }
+-            modNames.add(Loader.instance().getFMLBrandingProperties().get("snooperbranding"));
+-        }
++        modNames.add("Lava");
          return Joiner.on(',').join(modNames);
      }
  
@@ -687,7 +697,7 @@
          bus().post(new FMLNetworkEvent.ServerConnectionFromClientEvent(manager));
      }
  
-@@ -624,14 +525,12 @@
+@@ -624,14 +522,12 @@
       * Process initial Handshake packet, kicks players from the server if they are connecting while we are starting up.
       * Also verifies the client has the FML marker.
       *
@@ -705,7 +715,7 @@
              TextComponentString text = new TextComponentString("Server is still starting! Please wait before reconnecting.");
              FMLLog.log.info("Disconnecting Player: {}", text.getUnformattedText());
              manager.sendPacket(new SPacketDisconnect(text));
-@@ -639,8 +538,7 @@
+@@ -639,8 +535,7 @@
              return false;
          }
  
@@ -715,7 +725,7 @@
              manager.setConnectionState(EnumConnectionState.LOGIN);
              TextComponentString text = new TextComponentString("This server has mods that require FML/Forge to be installed on the client. Contact your server admin for more details.");
              Collection<String> modNames = NetworkRegistry.INSTANCE.getRequiredMods(Side.CLIENT);
-@@ -654,8 +552,7 @@
+@@ -654,8 +549,7 @@
          return true;
      }
  
@@ -725,7 +735,7 @@
          if (sidedDelegate == null) return;
          sidedDelegate.processWindowMessages();
      }
-@@ -667,44 +564,33 @@
+@@ -667,44 +561,33 @@
       * @param exitCode The exit code
       * @param hardExit Perform a halt instead of an exit (only use when the world is unsavable) - read the warnings at {@link Runtime#halt(int)}
       */
@@ -779,7 +789,7 @@
              FMLLog.log.fatal("Exception caught executing FutureTask: {}", e.toString(), e);
          }
      }
-@@ -715,23 +601,19 @@
+@@ -715,23 +598,19 @@
       * The Marker is 'PARSE_ESCAPES' by itself on a line starting with '#' as such:
       * #PARSE_ESCAPES
       *
@@ -808,7 +818,7 @@
                      isEnhanced = true;
                      break;
                  }
-@@ -743,15 +625,14 @@
+@@ -743,15 +622,14 @@
  
          Properties props = new Properties();
          props.load(new InputStreamReader(new ByteArrayInputStream(data), StandardCharsets.UTF_8));
@@ -828,7 +838,7 @@
          return sidedDelegate != null ? sidedDelegate.stripSpecialChars(message) : message;
      }
  
-@@ -759,17 +640,18 @@
+@@ -759,17 +637,18 @@
          sidedDelegate.reloadRenderers();
      }
  
@@ -853,7 +863,7 @@
      public void resetClientRecipeBook() {
          this.sidedDelegate.resetClientRecipeBook();
      }
-@@ -778,8 +660,7 @@
+@@ -778,8 +657,7 @@
          this.sidedDelegate.reloadSearchTrees();
      }
  
