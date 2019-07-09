@@ -1,65 +1,61 @@
 --- ../src-base/minecraft/net/minecraft/server/network/NetHandlerHandshakeTCP.java
 +++ ../src-work/minecraft/net/minecraft/server/network/NetHandlerHandshakeTCP.java
-@@ -7,13 +7,21 @@
- import net.minecraft.network.login.server.SPacketDisconnect;
+@@ -1,5 +1,8 @@
+ package net.minecraft.server.network;
+ 
++import com.destroystokyo.paper.event.player.PlayerHandshakeEvent;
++import com.mojang.authlib.properties.Property;
++import com.mojang.util.UUIDTypeAdapter;
+ import net.minecraft.network.EnumConnectionState;
+ import net.minecraft.network.NetworkManager;
+ import net.minecraft.network.handshake.INetHandlerHandshakeServer;
+@@ -8,42 +11,123 @@
  import net.minecraft.server.MinecraftServer;
  import net.minecraft.util.text.ITextComponent;
-+import net.minecraft.util.text.TextComponentString;
  import net.minecraft.util.text.TextComponentTranslation;
++import org.spigotmc.SpigotConfig;
  
+-public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer
+-{
 +import java.net.InetAddress;
++import java.net.InetSocketAddress;
 +import java.util.HashMap;
 +
- public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer
- {
++public class NetHandlerHandshakeTCP implements INetHandlerHandshakeServer {
      private final MinecraftServer server;
      private final NetworkManager networkManager;
  
-+    private static final HashMap<InetAddress, Long> throttleTracker = new HashMap<InetAddress, Long>();
+-    public NetHandlerHandshakeTCP(MinecraftServer serverIn, NetworkManager netManager)
+-    {
++    private static final HashMap<InetAddress, Long> throttleTracker = new HashMap<>();
 +    private static final com.google.gson.Gson gson = new com.google.gson.Gson(); // Spigot
 +    private static int throttleCounter = 0;
 +
-     public NetHandlerHandshakeTCP(MinecraftServer serverIn, NetworkManager netManager)
-     {
++    public NetHandlerHandshakeTCP(MinecraftServer serverIn, NetworkManager netManager) {
          this.server = serverIn;
-@@ -24,11 +32,71 @@
-     {
-         if (!net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerHandshake(packetIn, this.networkManager)) return;
+         this.networkManager = netManager;
+     }
  
-+        // Sponge Start
-+        if (org.spigotmc.SpigotConfig.bungee && packetIn.getRequestedState() == EnumConnectionState.LOGIN) {
-+            String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
-+
-+            if ( split.length == 3 || split.length == 4 ) {
-+                packetIn.ip = split[0];
-+                networkManager.socketAddress = new java.net.InetSocketAddress(split[1], ((java.net.InetSocketAddress) networkManager.getRemoteAddress()).getPort());
-+                networkManager.spoofedUUID = com.mojang.util.UUIDTypeAdapter.fromString( split[2] );
-+
-+                if ( split.length == 4 )
-+                {
-+                    networkManager.spoofedProfile = gson.fromJson(split[3], com.mojang.authlib.properties.Property[].class);
-+                }
-+            }
-+            else
-+            {
-+                ITextComponent chatmessage = new TextComponentString("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-+                this.networkManager.sendPacket(new SPacketDisconnect(chatmessage));
-+                this.networkManager.closeChannel(chatmessage);
-+                return;
-+            }
-+        }
-+        // Sponge End
-+
-+
-         switch (packetIn.getRequestedState())
-         {
+-    public void processHandshake(C00Handshake packetIn)
+-    {
+-        if (!net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerHandshake(packetIn, this.networkManager)) return;
++    public void processHandshake(C00Handshake packetIn) {
++        if (!net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerHandshake(packetIn, this.networkManager))
++            return;
+ 
+-        switch (packetIn.getRequestedState())
+-        {
++        switch (packetIn.getRequestedState()) {
              case LOGIN:
                  this.networkManager.setConnectionState(EnumConnectionState.LOGIN);
  
+-                if (packetIn.getProtocolVersion() > 340)
+-                {
+-                    ITextComponent itextcomponent = new TextComponentTranslation("multiplayer.disconnect.outdated_server", new Object[] {"1.12.2"});
 +                // CraftBukkit start - Connection throttle
 +                try {
 +                    long currentTime = System.currentTimeMillis();
-+                    long connectionThrottle = MinecraftServer.getServerCB().server.getConnectionThrottle();
++                    long connectionThrottle = MinecraftServer.getServerInstance().server.getConnectionThrottle();
 +                    InetAddress address = ((java.net.InetSocketAddress) this.networkManager.getRemoteAddress()).getAddress();
 +
 +                    synchronized (throttleTracker) {
@@ -91,14 +87,77 @@
 +                }
 +                // CraftBukkit end
 +
-                 if (packetIn.getProtocolVersion() > 340)
-                 {
-                     ITextComponent itextcomponent = new TextComponentTranslation("multiplayer.disconnect.outdated_server", new Object[] {"1.12.2"});
-@@ -44,6 +112,7 @@
-                 else
-                 {
++                if (packetIn.getProtocolVersion() > 340) {
++                    ITextComponent itextcomponent = new TextComponentTranslation("multiplayer.disconnect.outdated_server", new Object[]{"1.12.2"});
+                     this.networkManager.sendPacket(new SPacketDisconnect(itextcomponent));
+                     this.networkManager.closeChannel(itextcomponent);
+-                }
+-                else if (packetIn.getProtocolVersion() < 340)
+-                {
+-                    ITextComponent itextcomponent1 = new TextComponentTranslation("multiplayer.disconnect.outdated_client", new Object[] {"1.12.2"});
++                } else if (packetIn.getProtocolVersion() < 340) {
++                    ITextComponent itextcomponent1 = new TextComponentTranslation("multiplayer.disconnect.outdated_client", new Object[]{"1.12.2"});
+                     this.networkManager.sendPacket(new SPacketDisconnect(itextcomponent1));
+                     this.networkManager.closeChannel(itextcomponent1);
+-                }
+-                else
+-                {
++                } else {
                      this.networkManager.setNetHandler(new NetHandlerLoginServer(this.server, this.networkManager));
-+                    ((NetHandlerLoginServer) this.networkManager.getNetHandler()).hostname = packetIn.ip + ":" + packetIn.port; // CraftBukkit - set hostname
++                    // Paper start - handshake event
++                    boolean proxyLogicEnabled = SpigotConfig.bungee;
++                    boolean handledByEvent = false;
++                    // Try and handle the handshake through the event
++                    if (PlayerHandshakeEvent.getHandlerList().getRegisteredListeners().length != 0) { // Hello? Can you hear me?
++                        PlayerHandshakeEvent event = new PlayerHandshakeEvent(packetIn.ip, !proxyLogicEnabled);
++                        if (event.callEvent()) {
++                            // If we've failed somehow, let the client know so and go no further.
++                            if (event.isFailed()) {
++                                ITextComponent iTextComponent1 = new TextComponentTranslation(event.getFailMessage());
++                                this.networkManager.sendPacket(new SPacketDisconnect(iTextComponent1));
++                                this.networkManager.closeChannel(iTextComponent1);
++                                return;
++                            }
++
++                            packetIn.ip = event.getServerHostname();
++                            this.networkManager.socketAddress = new InetSocketAddress(event.getSocketAddressHostname(), ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort());
++                            this.networkManager.spoofedUUID = event.getUniqueId();
++                            this.networkManager.spoofedProfile = gson.fromJson(event.getPropertiesJson(), Property[].class);
++                            handledByEvent = true; // Hooray, we did it!
++                        }
++                    }
++                    // Don't try to handle default logic if it's been handled by the event.
++                    if (!handledByEvent && proxyLogicEnabled) {
++                    // Paper end
++                    // Spigot start
++                    // if (SpigotConfig.bungee) { // Paper - comment out, we check above!
++
++                        String[] split = packetIn.ip.split("\00");
++                        if (split.length == 3 || split.length == 4) {
++                            packetIn.ip = split[0];
++                            networkManager.socketAddress = new InetSocketAddress(split[1], ((InetSocketAddress) networkManager.getRemoteAddress()).getPort());
++                            networkManager.spoofedUUID = UUIDTypeAdapter.fromString(split[2]);
++                        } else {
++                            ITextComponent iTextComponent1 = new TextComponentTranslation("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
++                            this.networkManager.sendPacket(new SPacketDisconnect(iTextComponent1));
++                            this.networkManager.closeChannel(iTextComponent1);
++                            return;
++                        }
++                        if (split.length == 4) {
++                            networkManager.spoofedProfile = gson.fromJson(split[3], Property[].class);
++                        }
++                    }
++                    // Spigot end
++                    ((NetHandlerLoginServer) this.networkManager.getNetHandler()).hostname = packetIn.ip + ":" + packetIn.port; // CraftBukkit
                  }
  
                  break;
+@@ -56,7 +140,6 @@
+         }
+     }
+ 
+-    public void onDisconnect(ITextComponent reason)
+-    {
++    public void onDisconnect(ITextComponent reason) {
+     }
+ }
