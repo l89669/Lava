@@ -71,7 +71,7 @@ public final class Bukkit {
         }
 
         Bukkit.server = server;
-        Lava.LOGGER.info("This server is running " + getName() + " version " + getVersion() + " (Implementing API version " + getBukkitVersion() + ")");
+        server.getLogger().info("This server is running " + getName() + " version " + getVersion() + " (Implementing API version " + getBukkitVersion() + ")");
     }
 
     /**
