@@ -21,16 +21,20 @@ import static java.util.Objects.requireNonNull;
  */
 public class PaperServerListPingEvent extends ServerListPingEvent implements Cancellable {
 
-    @Nonnull private final StatusClient client;
+    @Nonnull
+    private final StatusClient client;
 
     private int numPlayers;
     private boolean hidePlayers;
-    @Nonnull private final List<PlayerProfile> playerSample = new ArrayList<>();
+    @Nonnull
+    private final List<PlayerProfile> playerSample = new ArrayList<>();
 
-    @Nonnull private String version;
+    @Nonnull
+    private String version;
     private int protocolVersion;
 
-    @Nullable private CachedServerIcon favicon;
+    @Nullable
+    private CachedServerIcon favicon;
 
     private boolean cancelled;
 
@@ -287,7 +291,7 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
                 throw new NoSuchElementException();
             }
 
-            this.current = this.next;
+            this.current = this.next++;
             return this.player = getBukkitPlayer(players[this.current]);
         }
 
@@ -314,7 +318,6 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
     }
 
     // TODO: Remove in 1.13
-
     @Override
     @Deprecated
     public List<String> getSampleText() {
@@ -333,4 +336,5 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
             getPlayerSample().add(Bukkit.createProfile(name));
         }
     }
+
 }
