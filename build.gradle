@@ -34,6 +34,7 @@ repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://libraries.minecraft.net/' }
     maven { url 'https://mvnrepository.com/artifact/' }
+    maven { url 'https://repo.spongepowered.org/maven/' }
 }
 
 configurations.all {
@@ -92,6 +93,7 @@ dependencies {
     compile 'org.xerial:sqlite-jdbc:3.21.0.1'
     compile 'mysql:mysql-connector-java:5.1.45'
     compile 'net.md-5:bungeecord-chat:1.12-SNAPSHOT'
+    compile 'org.spongepowered:mixin:0.7.11-SNAPSHOT'
     // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     // implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
