@@ -6,6 +6,7 @@ import org.bukkit.Server;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.command.defaults.HelpCommand;
 import org.bukkit.command.defaults.PluginsCommand;
+import org.bukkit.command.defaults.VersionCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 import org.lavapowered.lava.internal.Lava;
@@ -25,6 +26,7 @@ public class SimpleCommandMap implements CommandMap {
 
     private void setDefaultCommands() {
         register("bukkit", new PluginsCommand("plugins"));
+        register("bukkit", new VersionCommand("version"));
     }
 
     public void setFallbackCommands() {
