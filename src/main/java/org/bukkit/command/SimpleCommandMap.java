@@ -220,7 +220,7 @@ public class SimpleCommandMap implements CommandMap {
         for (Map.Entry<String, String[]> entry : values.entrySet()) {
             String alias = entry.getKey();
             if (alias.contains(" ")) {
-                Lava.LOGGER.warn("Could not register alias " + alias + " because it contains illegal characters");
+                server.getLogger().warn("Could not register alias " + alias + " because it contains illegal characters");
                 continue;
             }
 
