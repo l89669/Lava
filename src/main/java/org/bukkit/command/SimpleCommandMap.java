@@ -243,7 +243,7 @@ public class SimpleCommandMap implements CommandMap {
             }
 
             if (bad.length() > 0) {
-                Lava.LOGGER.warn("Could not register alias " + alias + " because it contains commands that do not exist: " + bad);
+                server.getLogger().warn("Could not register alias " + alias + " because it contains commands that do not exist: " + bad);
                 continue;
             }
 
