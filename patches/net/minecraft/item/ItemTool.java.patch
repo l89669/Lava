@@ -1,0 +1,11 @@
+--- ../src-base/minecraft/net/minecraft/item/ItemTool.java
++++ ../src-work/minecraft/net/minecraft/item/ItemTool.java
+@@ -16,7 +16,7 @@
+ 
+ public class ItemTool extends Item
+ {
+-    private final Set<Block> effectiveBlocks;
++    public final Set<Block> effectiveBlocks;
+     protected float efficiency;
+     protected float attackDamage;
+     protected float attackSpeed;
