@@ -9,7 +9,7 @@ import org.bukkit.command.defaults.PluginsCommand;
 import org.bukkit.command.defaults.VersionCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
-import org.lavapowered.lava.internal.Lava;
+import org.lavapowered.lava.commands.ModsCommand;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -27,6 +27,7 @@ public class SimpleCommandMap implements CommandMap {
     private void setDefaultCommands() {
         register("bukkit", new PluginsCommand("plugins"));
         register("bukkit", new VersionCommand("version"));
+        register("lava", new ModsCommand("mods"));
     }
 
     public void setFallbackCommands() {
