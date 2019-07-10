@@ -10,7 +10,7 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.entity.player.InventoryPlayer;
-@@ -18,96 +15,122 @@
+@@ -18,96 +15,124 @@
  import net.minecraft.world.World;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
@@ -56,6 +56,8 @@
 +    public InventoryView getBukkitView() {
 +        return bukkitView; // Nullable here
 +    }
++
++    public void setBukkitView(InventoryView view) {this.bukkitView = view;}
 +
 +    public void transferTo(Container other, org.bukkit.craftbukkit.entity.CraftHumanEntity player) {
 +        InventoryView source = this.getBukkitView(), destination = other.getBukkitView();
@@ -180,7 +182,7 @@
                  return slot;
              }
          }
-@@ -115,230 +138,211 @@
+@@ -115,230 +140,211 @@
          return null;
      }
  
@@ -506,7 +508,7 @@
                                      slot6.putStack(ItemStack.EMPTY);
                                  }
  
-@@ -348,117 +352,95 @@
+@@ -348,117 +354,95 @@
                      }
  
                      slot6.onSlotChanged();
@@ -656,7 +658,7 @@
                                      slot1.putStack(ItemStack.EMPTY);
                                  }
  
-@@ -475,133 +457,101 @@
+@@ -475,133 +459,101 @@
          return itemstack;
      }
  
@@ -818,7 +820,7 @@
                          stack.shrink(maxSize - itemstack.getCount());
                          itemstack.setCount(maxSize);
                          slot.onSlotChanged();
-@@ -609,53 +559,37 @@
+@@ -609,53 +561,37 @@
                      }
                  }
  
@@ -884,7 +886,7 @@
                          slot1.putStack(stack.splitStack(stack.getCount()));
                      }
  
-@@ -664,12 +598,9 @@
+@@ -664,12 +600,9 @@
                      break;
                  }
  
@@ -899,7 +901,7 @@
                      ++i;
                  }
              }
-@@ -678,64 +609,48 @@
+@@ -678,64 +611,48 @@
          return flag;
      }
  
@@ -978,7 +980,7 @@
                  break;
              case 1:
                  stack.setCount(1);
-@@ -747,57 +662,49 @@
+@@ -747,57 +664,49 @@
          stack.grow(slotStackSize);
      }
  
