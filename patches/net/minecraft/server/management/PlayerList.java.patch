@@ -61,7 +61,7 @@
  import net.minecraft.world.DimensionType;
  import net.minecraft.world.GameType;
  import net.minecraft.world.World;
-@@ -62,13 +42,38 @@
+@@ -62,13 +42,41 @@
  import net.minecraft.world.chunk.storage.AnvilChunkLoader;
  import net.minecraft.world.storage.IPlayerFileData;
  import net.minecraft.world.storage.WorldInfo;
@@ -96,13 +96,16 @@
 +import java.io.File;
 +import java.net.SocketAddress;
 +import java.text.SimpleDateFormat;
-+import java.util.*;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++import java.util.UUID;
 +
 +public abstract class PlayerList {
      public static final File FILE_PLAYERBANS = new File("banned-players.json");
      public static final File FILE_IPBANS = new File("banned-ips.json");
      public static final File FILE_OPS = new File("ops.json");
-@@ -76,38 +81,40 @@
+@@ -76,38 +84,40 @@
      private static final Logger LOGGER = LogManager.getLogger();
      private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
      private final MinecraftServer mcServer;
@@ -153,7 +156,7 @@
          GameProfile gameprofile = playerIn.getGameProfile();
          PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
          GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
-@@ -117,30 +124,55 @@
+@@ -117,98 +127,113 @@
          playerIn.setWorld(this.mcServer.getWorld(playerIn.dimension));
  
          World playerWorld = this.mcServer.getWorld(playerIn.dimension);
@@ -216,7 +219,8 @@
          nethandlerplayserver.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this.getServerInstance().getServerModName())));
          nethandlerplayserver.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
          nethandlerplayserver.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
-@@ -148,67 +180,56 @@
+         nethandlerplayserver.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
++        nethandlerplayserver.sendPacket(new SPacketEntityStatus(playerIn, (byte) (worldserver.getGameRules().getBoolean("reducedDebugInfo") ? 22 : 23))); // Paper - fix this rule not being initialized on the client
          this.updatePermissionLevel(playerIn);
          playerIn.getStatFile().markAllDirty();
          playerIn.getRecipeBook().init(playerIn);
@@ -307,7 +311,7 @@
                          worldserver.removeEntityDangerously(entity2);
                      }
                  }
-@@ -217,25 +238,22 @@
+@@ -217,25 +242,22 @@
  
          playerIn.addSelfToInternalCraftingInventory();
          net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedIn(playerIn);
@@ -340,7 +344,7 @@
                      playerIn.connection.sendPacket(packet);
                  }
  
-@@ -244,164 +262,205 @@
+@@ -244,164 +266,205 @@
          }
      }
  
@@ -620,7 +624,7 @@
                      worldserver.removeEntityDangerously(entity1);
                  }
  
-@@ -417,113 +476,187 @@
+@@ -417,113 +480,171 @@
          UUID uuid = playerIn.getUniqueID();
          EntityPlayerMP entityplayermp = this.uuidToPlayerMap.get(uuid);
  
@@ -703,37 +707,30 @@
 +    @Nullable
 +    public EntityPlayerMP allowUserToConnect(NetHandlerLoginServer loginServer, GameProfile profile, String hostname) {
          UUID uuid = EntityPlayer.getUUID(profile);
-+        ArrayList arraylist = Lists.newArrayList();
-+
-+        EntityPlayerMP entityplayer;
-+
-+        for (int i = 0; i < this.playerEntityList.size(); ++i) {
-+            entityplayer = (EntityPlayerMP) this.playerEntityList.get(i);
-+            if (entityplayer.getUniqueID().equals(uuid)) {
-+                arraylist.add(entityplayer);
+-        List<EntityPlayerMP> list = Lists.<EntityPlayerMP>newArrayList();
++        for (EntityPlayerMP onlinePlayer : this.playerEntityList) {
++            if (onlinePlayer.getUniqueID().equals(uuid)) {
++                cserver.getPlayer(uuid).kickPlayer(new TextComponentTranslation("multiplayer.disconnect.duplicate_login").toString());
 +            }
 +        }
-+
-+        Iterator iterator = arraylist.iterator();
-+
-+        while (iterator.hasNext()) {
-+            entityplayer = (EntityPlayerMP) iterator.next();
-+            writePlayerData(entityplayer); // CraftBukkit - Force the player's inventory to be saved
-+            entityplayer.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.duplicate_login", new Object[0]));
-+        }
-+
+ 
+-        for (int i = 0; i < this.playerEntityList.size(); ++i)
+-        {
+-            EntityPlayerMP entityplayermp = this.playerEntityList.get(i);
 +        // Instead of kicking then returning, we need to store the kick reason
 +        // in the event, check with plugins to see if it's ok, and THEN kick
 +        // depending on the outcome.
 +        SocketAddress socketaddress = loginServer.networkManager.getRemoteAddress();
-+
+ 
+-            if (entityplayermp.getUniqueID().equals(uuid))
+-            {
 +        EntityPlayerMP entity = new EntityPlayerMP(mcServer, mcServer.getWorldServer(0), profile, new PlayerInteractionManager(mcServer.getWorldServer(0)));
 +        Player player = entity.getBukkitEntity();
 +        //Spigot Start
 +        PlayerLoginEvent event = new PlayerLoginEvent(player, hostname, ((java.net.InetSocketAddress) socketaddress).getAddress(), ((java.net.InetSocketAddress) loginServer.networkManager.getRawAddress()).getAddress());
 +        //Spigot End
 +        if (getBannedPlayers().isBanned(profile) && !getBannedPlayers().getEntry(profile).hasBanExpired()) {
-+            UserListBansEntry userlistbansentry = this.bannedPlayers.getEntry(profile);
++            UserListBansEntry userlistbansentry = (UserListBansEntry) this.bannedPlayers.getEntry(profile);
 +            String s1 = "You are banned from this server!\nReason: " + userlistbansentry.getBanReason();
 +
 +            if (userlistbansentry.getBanEndDate() != null) {
@@ -744,7 +741,7 @@
 +            event.disallow(PlayerLoginEvent.Result.KICK_BANNED, s1);
 +        } else if (!this.canJoin(profile)) {
 +            // return "You are not white-listed on this server!";
-+            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, "You are not white-listed on this server!");
++            event.disallow(PlayerLoginEvent.Result.KICK_WHITELIST, "You are not white-listed on this server!"); // Spigot
 +        } else if (getBannedIPs().isBanned(socketaddress) && !getBannedIPs().getBanEntry(socketaddress).hasBanExpired()) {
 +            UserListIPBansEntry userlistipbansentry = this.bannedIPs.getBanEntry(socketaddress);
 +            String s = "Your IP address is banned from this server!\nReason: " + userlistipbansentry.getBanReason();
@@ -756,9 +753,8 @@
 +            // return s;
 +            if (!userlistipbansentry.hasBanExpired()) event.disallow(PlayerLoginEvent.Result.KICK_BANNED, s);
 +        } else {
-+            // return this.playerEntityList.size() >= this.maxPlayers && !this.bypassesPlayerLimit(profile) ? "The server is full!" : null;
 +            if (this.playerEntityList.size() >= this.maxPlayers && !this.bypassesPlayerLimit(profile)) {
-+                event.disallow(PlayerLoginEvent.Result.KICK_FULL, "The server is full");
++                event.disallow(PlayerLoginEvent.Result.KICK_FULL, "The server is full"); // Spigot
 +            }
 +        }
 +
@@ -772,15 +768,9 @@
 +
 +    public EntityPlayerMP createPlayerForUser(GameProfile profile) {
 +        UUID uuid = EntityPlayer.getUUID(profile);
-         List<EntityPlayerMP> list = Lists.<EntityPlayerMP>newArrayList();
- 
--        for (int i = 0; i < this.playerEntityList.size(); ++i)
--        {
-+        for (int i = 0; i < this.playerEntityList.size(); ++i) {
-             EntityPlayerMP entityplayermp = this.playerEntityList.get(i);
- 
--            if (entityplayermp.getUniqueID().equals(uuid))
--            {
++        List<EntityPlayerMP> list = Lists.newArrayList();
++
++        for (EntityPlayerMP entityplayermp : this.playerEntityList) {
 +            if (entityplayermp.getUniqueID().equals(uuid)) {
                  list.add(entityplayermp);
              }
@@ -796,8 +786,9 @@
  
 -        for (EntityPlayerMP entityplayermp1 : list)
 -        {
+-            entityplayermp1.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.duplicate_login", new Object[0]));
 +        for (EntityPlayerMP entityplayermp1 : list) {
-             entityplayermp1.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.duplicate_login", new Object[0]));
++            entityplayermp1.connection.disconnect(new TextComponentTranslation("multiplayer.disconnect.duplicate_login"));
          }
  
          PlayerInteractionManager playerinteractionmanager;
@@ -855,7 +846,7 @@
          playerIn.dimension = dimension;
          PlayerInteractionManager playerinteractionmanager;
  
-@@ -537,6 +670,11 @@
+@@ -537,6 +658,11 @@
          }
  
          EntityPlayerMP entityplayermp = new EntityPlayerMP(this.mcServer, this.mcServer.getWorld(playerIn.dimension), playerIn.getGameProfile(), playerinteractionmanager);
@@ -867,7 +858,7 @@
          entityplayermp.connection = playerIn.connection;
          entityplayermp.copyFrom(playerIn, conqueredEnd);
          entityplayermp.dimension = dimension;
-@@ -544,55 +682,181 @@
+@@ -544,55 +670,181 @@
          entityplayermp.setCommandStats(playerIn);
          entityplayermp.setPrimaryHand(playerIn.getPrimaryHand());
  
@@ -1076,7 +1067,7 @@
          GameProfile gameprofile = player.getGameProfile();
          int i = this.canSendCommands(gameprofile) ? this.ops.getPermissionLevel(gameprofile) : 0;
          i = this.mcServer.isSinglePlayer() && this.mcServer.worlds[0].getWorldInfo().areCommandsAllowed() ? 4 : i;
-@@ -600,19 +864,16 @@
+@@ -600,19 +852,16 @@
          this.sendPlayerPermissionLevel(player, i);
      }
  
@@ -1099,7 +1090,7 @@
          int i = player.dimension;
          WorldServer worldserver = this.mcServer.getWorld(player.dimension);
          player.dimension = dimensionIn;
-@@ -629,30 +890,29 @@
+@@ -629,30 +878,29 @@
          this.updateTimeAndWeatherForPlayer(player, worldserver1);
          this.syncPlayerInventory(player);
  
@@ -1139,7 +1130,7 @@
          double moveFactor = oldWorldIn.provider.getMovementFactor() / toWorldIn.provider.getMovementFactor();
          double d0 = MathHelper.clamp(entityIn.posX * moveFactor, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
          double d1 = MathHelper.clamp(entityIn.posZ * moveFactor, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
-@@ -660,62 +920,50 @@
+@@ -660,62 +908,50 @@
          float f = entityIn.rotationYaw;
          oldWorldIn.profiler.startSection("moving");
  
@@ -1217,7 +1208,7 @@
                  entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
                  oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
                  teleporter.placeEntity(toWorldIn, entityIn, f);
-@@ -729,186 +977,346 @@
+@@ -729,186 +965,346 @@
          entityIn.setWorld(toWorldIn);
      }
  
@@ -1649,7 +1640,7 @@
                  return entityplayermp;
              }
          }
-@@ -916,119 +1324,107 @@
+@@ -916,119 +1312,107 @@
          return null;
      }
  
@@ -1807,7 +1798,7 @@
                  list.add(entityplayermp);
              }
          }
-@@ -1036,35 +1432,27 @@
+@@ -1036,35 +1420,27 @@
          return list;
      }
  
@@ -1850,7 +1841,7 @@
              target.interactionManager.setGameType(this.gameType);
          }
  
-@@ -1072,86 +1460,90 @@
+@@ -1072,86 +1448,90 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -1977,7 +1968,7 @@
                      worldserver.getPlayerChunkMap().setPlayerViewRadius(distance);
                      worldserver.getEntityTracker().setViewDistance(distance);
                  }
-@@ -1159,32 +1551,27 @@
+@@ -1159,32 +1539,27 @@
          }
      }
  
