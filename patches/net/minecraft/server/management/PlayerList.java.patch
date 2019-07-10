@@ -61,7 +61,7 @@
  import net.minecraft.world.DimensionType;
  import net.minecraft.world.GameType;
  import net.minecraft.world.World;
-@@ -62,13 +42,41 @@
+@@ -62,13 +42,42 @@
  import net.minecraft.world.chunk.storage.AnvilChunkLoader;
  import net.minecraft.world.storage.IPlayerFileData;
  import net.minecraft.world.storage.WorldInfo;
@@ -78,6 +78,7 @@
  import org.apache.logging.log4j.Logger;
 +import org.bukkit.Bukkit;
 +import org.bukkit.Location;
++import org.bukkit.Server;
 +import org.bukkit.TravelAgent;
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.CraftWorld;
@@ -105,7 +106,7 @@
      public static final File FILE_PLAYERBANS = new File("banned-players.json");
      public static final File FILE_IPBANS = new File("banned-ips.json");
      public static final File FILE_OPS = new File("ops.json");
-@@ -76,38 +84,40 @@
+@@ -76,38 +85,40 @@
      private static final Logger LOGGER = LogManager.getLogger();
      private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
      private final MinecraftServer mcServer;
@@ -156,7 +157,7 @@
          GameProfile gameprofile = playerIn.getGameProfile();
          PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
          GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
-@@ -117,98 +127,113 @@
+@@ -117,98 +128,115 @@
          playerIn.setWorld(this.mcServer.getWorld(playerIn.dimension));
  
          World playerWorld = this.mcServer.getWorld(playerIn.dimension);
@@ -225,7 +226,9 @@
          playerIn.getStatFile().markAllDirty();
          playerIn.getRecipeBook().init(playerIn);
 -        this.sendScoreboard((ServerScoreboard)worldserver.getScoreboard(), playerIn);
-+        this.sendScoreboard((ServerScoreboard) worldserver.getScoreboard(), playerIn);
++        if (world.getScoreboard() instanceof ServerScoreboard) {
++            this.sendScoreboard((ServerScoreboard) worldserver.getScoreboard(), playerIn);
++        }
          this.mcServer.refreshStatusNextTick();
 -        TextComponentTranslation textcomponenttranslation;
 -
@@ -311,7 +314,7 @@
                          worldserver.removeEntityDangerously(entity2);
                      }
                  }
-@@ -217,25 +242,22 @@
+@@ -217,25 +245,22 @@
  
          playerIn.addSelfToInternalCraftingInventory();
          net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerLoggedIn(playerIn);
@@ -344,7 +347,7 @@
                      playerIn.connection.sendPacket(packet);
                  }
  
-@@ -244,164 +266,205 @@
+@@ -244,164 +269,205 @@
          }
      }
  
@@ -624,7 +627,7 @@
                      worldserver.removeEntityDangerously(entity1);
                  }
  
-@@ -417,113 +480,171 @@
+@@ -417,113 +483,171 @@
          UUID uuid = playerIn.getUniqueID();
          EntityPlayerMP entityplayermp = this.uuidToPlayerMap.get(uuid);
  
@@ -846,7 +849,7 @@
          playerIn.dimension = dimension;
          PlayerInteractionManager playerinteractionmanager;
  
-@@ -537,6 +658,11 @@
+@@ -537,6 +661,11 @@
          }
  
          EntityPlayerMP entityplayermp = new EntityPlayerMP(this.mcServer, this.mcServer.getWorld(playerIn.dimension), playerIn.getGameProfile(), playerinteractionmanager);
@@ -858,7 +861,7 @@
          entityplayermp.connection = playerIn.connection;
          entityplayermp.copyFrom(playerIn, conqueredEnd);
          entityplayermp.dimension = dimension;
-@@ -544,55 +670,181 @@
+@@ -544,55 +673,181 @@
          entityplayermp.setCommandStats(playerIn);
          entityplayermp.setPrimaryHand(playerIn.getPrimaryHand());
  
@@ -1067,7 +1070,7 @@
          GameProfile gameprofile = player.getGameProfile();
          int i = this.canSendCommands(gameprofile) ? this.ops.getPermissionLevel(gameprofile) : 0;
          i = this.mcServer.isSinglePlayer() && this.mcServer.worlds[0].getWorldInfo().areCommandsAllowed() ? 4 : i;
-@@ -600,19 +852,16 @@
+@@ -600,19 +855,16 @@
          this.sendPlayerPermissionLevel(player, i);
      }
  
@@ -1090,7 +1093,7 @@
          int i = player.dimension;
          WorldServer worldserver = this.mcServer.getWorld(player.dimension);
          player.dimension = dimensionIn;
-@@ -629,30 +878,29 @@
+@@ -629,30 +881,29 @@
          this.updateTimeAndWeatherForPlayer(player, worldserver1);
          this.syncPlayerInventory(player);
  
@@ -1130,7 +1133,7 @@
          double moveFactor = oldWorldIn.provider.getMovementFactor() / toWorldIn.provider.getMovementFactor();
          double d0 = MathHelper.clamp(entityIn.posX * moveFactor, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
          double d1 = MathHelper.clamp(entityIn.posZ * moveFactor, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
-@@ -660,62 +908,50 @@
+@@ -660,62 +911,50 @@
          float f = entityIn.rotationYaw;
          oldWorldIn.profiler.startSection("moving");
  
@@ -1208,7 +1211,7 @@
                  entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
                  oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
                  teleporter.placeEntity(toWorldIn, entityIn, f);
-@@ -729,186 +965,346 @@
+@@ -729,186 +968,346 @@
          entityIn.setWorld(toWorldIn);
      }
  
@@ -1640,7 +1643,7 @@
                  return entityplayermp;
              }
          }
-@@ -916,119 +1312,107 @@
+@@ -916,119 +1315,107 @@
          return null;
      }
  
@@ -1798,7 +1801,7 @@
                  list.add(entityplayermp);
              }
          }
-@@ -1036,35 +1420,27 @@
+@@ -1036,35 +1423,27 @@
          return list;
      }
  
@@ -1841,7 +1844,7 @@
              target.interactionManager.setGameType(this.gameType);
          }
  
-@@ -1072,86 +1448,90 @@
+@@ -1072,86 +1451,90 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -1968,7 +1971,7 @@
                      worldserver.getPlayerChunkMap().setPlayerViewRadius(distance);
                      worldserver.getEntityTracker().setViewDistance(distance);
                  }
-@@ -1159,32 +1539,27 @@
+@@ -1159,32 +1542,27 @@
          }
      }
  
