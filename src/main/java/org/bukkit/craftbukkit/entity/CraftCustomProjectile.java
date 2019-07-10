@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.entity;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.Entity;
+import net.minecraftforge.cauldron.entity.CraftCustomEntity;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Projectile;
 import org.bukkit.projectiles.ProjectileSource;

@@ -1,0 +1,13 @@
+--- ../src-base/minecraft/net/minecraftforge/items/ItemStackHandler.java
++++ ../src-work/minecraft/net/minecraftforge/items/ItemStackHandler.java
+@@ -32,6 +32,10 @@
+ {
+     protected NonNullList<ItemStack> stacks;
+ 
++    public NonNullList<ItemStack> getStacks() {
++        return stacks;
++    }
++
+     public ItemStackHandler()
+     {
+         this(1);

@@ -2,7 +2,7 @@ package org.bukkit.entity;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.entity.CraftCustomEntity;
+import net.minecraftforge.cauldron.entity.CraftCustomEntity;
 import org.bukkit.entity.minecart.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;

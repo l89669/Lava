@@ -106,7 +106,7 @@
 +import org.bukkit.World.Environment;
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.Main;
-+import org.bukkit.craftbukkit.entity.CraftCustomEntity;
++import net.minecraftforge.cauldron.entity.CraftCustomEntity;
 +import org.bukkit.entity.EntityType;
 +import org.bukkit.potion.PotionEffectType;
  

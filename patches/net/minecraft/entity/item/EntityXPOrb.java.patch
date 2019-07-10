@@ -25,7 +25,7 @@
      public int xpColor;
      public int xpOrbAge;
      public int delayBeforeCanPickup;
-@@ -25,58 +31,62 @@
+@@ -25,58 +31,66 @@
      public int xpValue;
      private EntityPlayer closestPlayer;
      private int xpTargetColor;
@@ -36,6 +36,10 @@
  
 -    public EntityXPOrb(World worldIn, double x, double y, double z, int expValue)
 -    {
++    public EntityXPOrb(World worldIn, double x, double y, double z, int expValue) {
++        this(worldIn, x, y, z, expValue, ExperienceOrb.SpawnReason.CUSTOM, null);
++    }
++
 +    public EntityXPOrb(World worldIn, double x, double y, double z, int expValue, ExperienceOrb.SpawnReason reason, Entity triggerId) {
 +        this(worldIn, x, y, z, expValue, reason, triggerId, null);
 +    }
@@ -109,7 +113,7 @@
              --this.delayBeforeCanPickup;
          }
  
-@@ -84,106 +94,101 @@
+@@ -84,106 +98,101 @@
          this.prevPosY = this.posY;
          this.prevPosZ = this.posZ;
  
@@ -259,7 +263,7 @@
                  this.setDead();
              }
  
-@@ -191,42 +196,41 @@
+@@ -191,42 +200,41 @@
          }
      }
  
@@ -324,7 +328,7 @@
                  }
  
                  this.setDead();
-@@ -234,118 +238,86 @@
+@@ -234,118 +242,86 @@
          }
      }
  

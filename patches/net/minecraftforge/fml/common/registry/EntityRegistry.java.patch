@@ -430,7 +430,7 @@
              entityTracker.track(entity, er.getTrackingRange(), er.getUpdateFrequency(), er.sendsVelocityUpdates());
              return true;
          }
-@@ -374,15 +342,35 @@
+@@ -374,15 +342,41 @@
  
      //Helper function
      @Nullable
@@ -469,4 +469,10 @@
 +            entityClassMap.put(entityName, entityClass);
 +        }
 +    }
++
++    // used by CraftCustomEntity
++    public static String getCustomEntityTypeName(Class<? extends Entity> entityClass) {
++        return entityTypeMap.get(entityClass);
++    }
++    // Cauldron end
  }

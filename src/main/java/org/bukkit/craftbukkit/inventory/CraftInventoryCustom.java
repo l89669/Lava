@@ -34,13 +34,17 @@ public class CraftInventoryCustom extends CraftInventory {
         super(new MinecraftInventory(owner, size, title));
     }
 
+    public CraftInventoryCustom(InventoryHolder owner, NonNullList<ItemStack> items) {
+        super(new MinecraftInventory(owner, items));
+    }
+
     static class MinecraftInventory implements IInventory {
         private final NonNullList<ItemStack> items;
-        private int maxStack = MAX_STACK;
         private final List<HumanEntity> viewers;
         private final String title;
-        private InventoryType type;
         private final InventoryHolder owner;
+        private int maxStack = MAX_STACK;
+        private InventoryType type;
 
         public MinecraftInventory(InventoryHolder owner, InventoryType type) {
             this(owner, type.getDefaultSize(), type.getDefaultTitle());
@@ -60,7 +64,15 @@ public class CraftInventoryCustom extends CraftInventory {
             Validate.notNull(title, "Title cannot be null");
             this.items = NonNullList.withSize(size, ItemStack.EMPTY);
             this.title = title;
-            this.viewers = new ArrayList<HumanEntity>();
+            this.viewers = new ArrayList<>();
+            this.owner = owner;
+            this.type = InventoryType.CHEST;
+        }
+
+        public MinecraftInventory(InventoryHolder owner, NonNullList<ItemStack> items) {
+            this.items = items;
+            this.title = "Chest";
+            this.viewers = new ArrayList<>();
             this.owner = owner;
             this.type = InventoryType.CHEST;
         }
@@ -79,7 +91,9 @@ public class CraftInventoryCustom extends CraftInventory {
         public ItemStack decrStackSize(int i, int j) {
             ItemStack stack = this.getStackInSlot(i);
             ItemStack result;
-            if (stack == ItemStack.EMPTY) return stack;
+            if (stack == ItemStack.EMPTY) {
+                return stack;
+            }
             if (stack.getCount() <= j) {
                 this.setInventorySlotContents(i, ItemStack.EMPTY);
                 result = stack;
@@ -95,7 +109,9 @@ public class CraftInventoryCustom extends CraftInventory {
         public ItemStack removeStackFromSlot(int i) {
             ItemStack stack = this.getStackInSlot(i);
             ItemStack result;
-            if (stack == ItemStack.EMPTY) return stack;
+            if (stack == ItemStack.EMPTY) {
+                return stack;
+            }
             if (stack.getCount() <= 1) {
                 this.setInventorySlotContents(i, null);
                 result = stack;
@@ -133,31 +149,18 @@ public class CraftInventoryCustom extends CraftInventory {
         }
 
         @Override
-        public void openInventory(EntityPlayer player) {
-
-        }
-
-        @Override
-        public void closeInventory(EntityPlayer player) {
-
-        }
-
-        @Override
         public List<ItemStack> getContents() {
             return items;
         }
 
-        @Override
         public void onOpen(CraftHumanEntity who) {
             viewers.add(who);
         }
 
-        @Override
         public void onClose(CraftHumanEntity who) {
             viewers.remove(who);
         }
 
-        @Override
         public List<HumanEntity> getViewers() {
             return viewers;
         }
@@ -174,6 +177,16 @@ public class CraftInventoryCustom extends CraftInventory {
         @Override
         public boolean isItemValidForSlot(int i, ItemStack itemstack) {
             return true;
+        }
+
+        @Override
+        public void openInventory(EntityPlayer entityHuman) {
+
+        }
+
+        @Override
+        public void closeInventory(EntityPlayer entityHuman) {
+
         }
 
         @Override

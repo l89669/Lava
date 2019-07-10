@@ -1,25 +1,28 @@
-package org.bukkit.craftbukkit.entity;
+package net.minecraftforge.cauldron.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
 
 public class CraftCustomEntity extends CraftEntity {
-    public Class<? extends Entity> entityClass;
-    private String entityName;
 
-    public CraftCustomEntity(CraftServer server, Entity entity) {
+    public Class<? extends Entity> entityClass;
+    public String entityName;
+
+    public CraftCustomEntity(CraftServer server, net.minecraft.entity.Entity entity) {
         super(server, entity);
         this.entityClass = entity.getClass();
-        this.entityName = EntityRegistry.entityTypeMap.get(entityClass);
-        if (entityName == null)
-            entityName = entity.getCommandSenderEntity().getName();
+        this.entityName = EntityRegistry.getCustomEntityTypeName(entityClass);
+        if (entityName == null) {
+            entityName = entity.getName();
+        }
     }
 
     @Override
-    public Entity getHandle() {
-        return (Entity) entity;
+    public net.minecraft.entity.Entity getHandle() {
+        return entity;
     }
 
     @Override
@@ -27,10 +30,13 @@ public class CraftCustomEntity extends CraftEntity {
         return this.entityName;
     }
 
+    @Override
     public EntityType getType() {
         EntityType type = EntityType.fromName(this.entityName);
-        if (type != null)
+        if (type != null) {
             return type;
-        else return EntityType.UNKNOWN;
+        } else {
+            return EntityType.UNKNOWN;
+        }
     }
 }
