@@ -1566,7 +1566,7 @@ public final class CraftServer implements Server {
 
     @Override
     public CraftScoreboardManager getScoreboardManager() {
-        return scoreboardManager;
+        return scoreboardManager == null ? new CraftScoreboardManager(getServer(), getServer().getWorld(0).worldScoreboard) : scoreboardManager;
     }
 
     public void checkSaveState() {
