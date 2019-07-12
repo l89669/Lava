@@ -7,7 +7,7 @@
  import net.minecraft.network.EnumConnectionState;
  import net.minecraft.network.Packet;
  import net.minecraft.network.PacketBuffer;
-@@ -8,68 +7,65 @@
+@@ -8,68 +7,66 @@
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
  
@@ -54,7 +54,7 @@
 +        this.ip = buf.readString(Short.MAX_VALUE); // Spigot
          this.port = buf.readUnsignedShort();
          this.requestedState = EnumConnectionState.getById(buf.readVarInt());
--        this.hasFMLMarker = this.ip.contains("\0FML\0");
+         this.hasFMLMarker = this.ip.contains("\0FML\0");
 -        this.ip = this.ip.split("\0")[0];
 +        if (this.hasFMLMarker) {
 +            this.ip = this.ip.replace("\0FML\0", "");
