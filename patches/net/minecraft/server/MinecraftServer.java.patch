@@ -1,14 +1,16 @@
 --- ../src-base/minecraft/net/minecraft/server/MinecraftServer.java
 +++ ../src-work/minecraft/net/minecraft/server/MinecraftServer.java
-@@ -2,6 +2,7 @@
+@@ -1,7 +1,9 @@
+ package net.minecraft.server;
  
++import com.destroystokyo.paper.utils.CachedSizeConcurrentLinkedQueue;
  import com.google.common.collect.Lists;
  import com.google.common.collect.Queues;
 +import com.google.common.collect.Sets;
  import com.google.common.util.concurrent.Futures;
  import com.google.common.util.concurrent.ListenableFuture;
  import com.google.common.util.concurrent.ListenableFutureTask;
-@@ -13,95 +14,102 @@
+@@ -13,95 +15,109 @@
  import io.netty.buffer.ByteBufOutputStream;
  import io.netty.buffer.Unpooled;
  import io.netty.handler.codec.base64.Base64;
@@ -94,8 +96,11 @@
 +import net.minecraftforge.cauldron.entity.CraftCustomEntity;
 +import net.minecraftforge.common.DimensionManager;
 +import net.minecraftforge.common.util.EnumHelper;
++import net.minecraftforge.fml.common.FMLCommonHandler;
++import net.minecraftforge.fml.common.StartupQuery;
 +import net.minecraftforge.fml.common.registry.EntityRegistry;
 +import net.minecraftforge.fml.common.registry.ForgeRegistries;
++import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 +import net.minecraftforge.fml.relauncher.ReflectionHelper;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
@@ -106,6 +111,8 @@
 +import org.bukkit.Bukkit;
 +import org.bukkit.Material;
 +import org.bukkit.World.Environment;
++import org.bukkit.command.ConsoleCommandSender;
++import org.bukkit.command.RemoteConsoleCommandSender;
 +import org.bukkit.craftbukkit.CraftServer;
 +import org.bukkit.craftbukkit.Main;
 +import org.bukkit.craftbukkit.util.ServerShutdownThread;
@@ -132,12 +139,14 @@
 +import java.util.Queue;
 +import java.util.*;
 +import java.util.concurrent.Callable;
++import java.util.concurrent.ConcurrentLinkedQueue;
 +import java.util.concurrent.Executors;
 +import java.util.concurrent.FutureTask;
 +
-+//import jline.console.ConsoleReader;
++import jline.console.ConsoleReader;
 +
 +public abstract class MinecraftServer implements ICommandSender, Runnable, IThreadListener, ISnooperInfo {
++    private static MinecraftServer SERVER;
 +    public static final Logger LOGGER = LogManager.getLogger();
      public static final File USER_CACHE_FILE = new File("usercache.json");
 -    private final ISaveFormat anvilConverterForAnvilFile;
@@ -156,7 +165,12 @@
      @SideOnly(Side.SERVER)
      private String hostname;
      private int serverPort = -1;
-@@ -128,7 +136,6 @@
+@@ -124,11 +140,10 @@
+     private int maxPlayerIdleMinutes;
+     public final long[] tickTimeArray = new long[100];
+     //public long[][] timeOfLastDimensionTick;
+-    public java.util.Hashtable<Integer, long[]> worldTickTimes = new java.util.Hashtable<Integer, long[]>();
++    public Hashtable<Integer, long[]> worldTickTimes = new Hashtable<>();
      private KeyPair serverKeyPair;
      private String serverOwner;
      private String folderName;
@@ -164,26 +178,27 @@
      private String worldName;
      private boolean isDemo;
      private boolean enableBonusChest;
-@@ -144,178 +151,256 @@
+@@ -144,178 +159,197 @@
      private final GameProfileRepository profileRepo;
      private final PlayerProfileCache profileCache;
      private long nanoTimeSinceStatusRefresh;
 -    public final Queue < FutureTask<? >> futureTaskQueue = Queues. < FutureTask<? >> newArrayDeque();
-+    public final Queue<FutureTask<?>> futureTaskQueue = Queues.<FutureTask<?>>newArrayDeque();
++    public final Queue<FutureTask<?>> futureTaskQueue = new CachedSizeConcurrentLinkedQueue<>(); // Paper - Make size() constant-time
      private Thread serverThread;
-     protected long currentTime = getCurrentTimeMillis();
+-    protected long currentTime = getCurrentTimeMillis();
++    private long currentTime = getCurrentTimeMillis();
      @SideOnly(Side.CLIENT)
      private boolean worldIconSet;
 +    // CraftBukkit start
 +    public List<WorldServer> worldServerList = new ArrayList<>();
-+    public org.bukkit.craftbukkit.CraftServer server;
++    public CraftServer server;
 +    public OptionSet options;
-+    public org.bukkit.command.ConsoleCommandSender console;
-+    public org.bukkit.command.RemoteConsoleCommandSender remoteConsole;
++    public ConsoleCommandSender console;
++    public RemoteConsoleCommandSender remoteConsole;
 +    public ConsoleReader reader;
 +    public static int currentTick = (int) (System.currentTimeMillis() / 50);
 +    public Thread primaryThread;
-+    public Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
++    public Queue<Runnable> processQueue = new ConcurrentLinkedQueue<>();
 +    public int autosavePeriod;
 +    // CraftBukkit end
  
@@ -214,22 +229,21 @@
 +            Main.useJline = false;
 +        }
 +        try {
-+            (this.reader = new ConsoleReader(System.in, (OutputStream) System.out)).setExpandEvents(false);
++            (this.reader = new ConsoleReader(System.in, System.out)).setExpandEvents(false);
 +        } catch (Throwable e) {
 +            try {
 +                System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
 +                System.setProperty("user.language", "en");
 +                Main.useJline = false;
-+                (this.reader = new ConsoleReader(System.in, (OutputStream) System.out)).setExpandEvents(false);
++                (this.reader = new ConsoleReader(System.in, System.out)).setExpandEvents(false);
 +            } catch (IOException ex) {
-+                MinecraftServer.LOGGER.warn((String) null, (Throwable) ex);
++                MinecraftServer.LOGGER.warn((String) null, ex);
 +            }
 +        }
 +
 +
 +        Runtime.getRuntime().addShutdownHook(new ServerShutdownThread(this));
-+        this.serverThread = primaryThread = new Thread(net.minecraftforge.fml.common.thread.SidedThreadGroups.SERVER,
-+                this, "Server thread"); // Moved from main
++        this.serverThread = primaryThread = new Thread(SidedThreadGroups.SERVER, this, "Server thread"); // Moved from main
      }
  
 -    public ServerCommandManager createCommandManager()
@@ -318,34 +332,32 @@
 -        this.setResourcePackFromWorld(this.getFolderName(), isavehandler);
 -        WorldInfo worldinfo = isavehandler.loadWorldInfo();
 -        WorldSettings worldsettings;
-+        this.worlds = new WorldServer[3];
++        WorldSettings worldsettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
++        worldsettings.setGeneratorOptions(generatorOptions);
++        WorldServer world;
  
 -        if (worldinfo == null)
 -        {
 -            if (this.isDemo())
 -            {
 -                worldsettings = WorldServerDemo.DEMO_WORLD_SETTINGS;
--            }
--            else
--            {
--                worldsettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
--                worldsettings.setGeneratorOptions(generatorOptions);
-+        WorldSettings worldsettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-+        worldsettings.setGeneratorOptions(generatorOptions);
-+        WorldServer world;
- 
--                if (this.enableBonusChest)
--                {
--                    worldsettings.enableBonusChest();
 +        // WorldServer overWorld = (WorldServer)(isDemo() ? new WorldServerDemo(this, new AnvilSaveHandler(server.getWorldContainer(), worldNameIn , true, this.dataFixer), worldinfo, 0, profiler).init() : new WorldServer(this, new AnvilSaveHandler(server.getWorldContainer(), worldNameIn , true, this.dataFixer), worldinfo, 0, profiler).init());
-+        Integer[] dimIds = net.minecraftforge.common.DimensionManager.getStaticDimensionIDs();
++        Integer[] dimIds = DimensionManager.getStaticDimensionIDs();
 +        Arrays.sort(dimIds, (o1, o2) -> {
 +            // Zero-dimension must always be the first in array!
 +            if (o1 == 0) {
 +                return -1;
 +            } else {
 +                return Math.max(o1, o2);
-+            }
+             }
+-            else
+-            {
+-                worldsettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
+-                worldsettings.setGeneratorOptions(generatorOptions);
+-
+-                if (this.enableBonusChest)
+-                {
+-                    worldsettings.enableBonusChest();
 +        });
 +        for (int dim : dimIds) {
 +            // World validation
@@ -362,8 +374,17 @@
 -            worldinfo.setWorldName(worldNameIn);
 -            worldsettings = new WorldSettings(worldinfo);
 -        }
+-
+-        if (false) { //Forge Dead code, reimplemented below
+-        for (int i = 0; i < this.worlds.length; ++i)
+-        {
+-            int j = 0;
+-
+-            if (i == 1)
+-            {
+-                j = -1;
 +            String worldType;
-+            org.bukkit.World.Environment worldEnvironment = org.bukkit.World.Environment.getEnvironment(dim);
++            Environment worldEnvironment = Environment.getEnvironment(dim);
 +            if (worldEnvironment == null) {
 +                WorldProvider provider = DimensionManager.createProviderFor(dim);
 +                worldType = provider.getClass().getSimpleName().toLowerCase();
@@ -372,114 +393,41 @@
 +                worldEnvironment = Environment.getEnvironment(DimensionManager.getProviderType(dim).getId());
 +            } else {
 +                worldType = worldEnvironment.toString().toLowerCase();
-+            }
+             }
 +            String name = (dim == 0) ? saveName : "DIM" + dim;
 +            org.bukkit.generator.ChunkGenerator gen = null;
- 
--        if (false) { //Forge Dead code, reimplemented below
--        for (int i = 0; i < this.worlds.length; ++i)
--        {
--            int j = 0;
-+            if (dim == 0) {
-+                ISaveHandler idatamanager = new AnvilSaveHandler(server.getWorldContainer(), worldNameIn, true, this.dataFixer);
-+                WorldInfo worlddata = idatamanager.loadWorldInfo();
-+                // Lava start
-+                for (Map.Entry<ResourceLocation, Item> entry : ForgeRegistries.ITEMS.getEntries()) {
-+                    ResourceLocation key = entry.getKey();
-+                    Item item = entry.getValue();
-+                    if (!key.getResourceDomain().equals("minecraft")) {
-+                        String materialName = key.toString().toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", "");
-+                        Material material = Material.addMaterial(EnumHelper.addEnum(Material.class, materialName, new Class[]{Integer.TYPE, Integer.TYPE}, new Object[]{Item.getIdFromItem(item), item.getItemStackLimit()}));
-+                        if (material != null) {
-+                            MinecraftServer.LOGGER.info(String.format("Injected new Forge item material %s with ID %d.", material.name(), material.getId()));
-+                        } else {
-+                            MinecraftServer.LOGGER.info(String.format("Inject item failure %s with ID %d.", materialName, Item.getIdFromItem(item)));
-+                        }
-+                    }
-+                }
-+                for (Material material : Material.values()) {
-+                    if (material.getId() < 256)
-+                        Material.addBlockMaterial(material);
-+                }
-+                for (Map.Entry<ResourceLocation, Block> entry : ForgeRegistries.BLOCKS.getEntries()) {
-+                    ResourceLocation key = entry.getKey();
-+                    Block block = entry.getValue();
-+                    if (!key.getResourceDomain().equals("minecraft")) {
-+                        String materialName = key.toString().toUpperCase().replaceAll("(:|\\s)", "_").replaceAll("\\W", "");
-+                        Material material = Material.addBlockMaterial(EnumHelper.addEnum(Material.class, materialName, new Class[]{Integer.TYPE}, new Object[]{Block.getIdFromBlock(block)}));
-+                        if (material != null) {
-+                            MinecraftServer.LOGGER.info(String.format("Injected new Forge block material %s with ID %d.", material.name(), material.getId()));
-+                        } else {
-+                            MinecraftServer.LOGGER.info(String.format("Inject block failure %s with ID %d.", materialName, Block.getIdFromBlock(block)));
-+                        }
-+                    }
-+                }
-+                Map<String, EntityType> NAME_MAP = ReflectionHelper.getPrivateValue(EntityType.class, null, "NAME_MAP");
-+                Map<Short, EntityType> ID_MAP = ReflectionHelper.getPrivateValue(EntityType.class, null, "ID_MAP");
- 
--            if (i == 1)
--            {
--                j = -1;
--            }
-+                for (Map.Entry<String, Class<? extends Entity>> entity : EntityRegistry.entityClassMap.entrySet()) {
-+                    String entityname = entity.getKey();
-+                    String entityType = entityname.replace("-", "_").toUpperCase();
  
 -            if (i == 2)
 -            {
 -                j = 1;
 -            }
-+                    int typeId = GameData.getEntityRegistry().getID(EntityRegistry.getEntry(entity.getValue()));
-+                    EntityType bukkitType = EnumHelper.addEnum(EntityType.class, entityType, new Class[]{String.class, Class.class, Integer.TYPE, Boolean.TYPE}, new Object[]{entityname, CraftCustomEntity.class, typeId, false});
- 
+-
 -            if (i == 0)
 -            {
 -                if (this.isDemo())
 -                {
 -                    this.worlds[i] = (WorldServer)(new WorldServerDemo(this, isavehandler, worldinfo, j, this.profiler)).init();
-+                    NAME_MAP.put(entityname.toLowerCase(), bukkitType);
-+                    ID_MAP.put((short) typeId, bukkitType);
++            if (dim == 0) {
++                ISaveHandler idatamanager = new AnvilSaveHandler(server.getWorldContainer(), worldNameIn, true, this.dataFixer);
++                WorldInfo worlddata = idatamanager.loadWorldInfo();
++                if (worlddata == null) {
++                    worlddata = new WorldInfo(worldsettings, worldNameIn);
                  }
 -                else
 -                {
 -                    this.worlds[i] = (WorldServer)(new WorldServer(this, isavehandler, worldinfo, j, this.profiler)).init();
-+                for (Object enchantment : Enchantment.REGISTRY) {
-+                    org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.enchantments.CraftEnchantment((Enchantment) enchantment));
-                 }
-+                org.bukkit.enchantments.Enchantment.stopAcceptingRegistrations();
-+                for (Object effect : Potion.REGISTRY) {
-+                    PotionEffectType.registerPotionEffectType(new org.bukkit.craftbukkit.potion.CraftPotionEffectType((Potion) effect));
-+                }
-+                PotionEffectType.stopAcceptingRegistrations();
-+                //server.loadPlugins();
-+                //server.enablePlugins(org.bukkit.plugin.PluginLoadOrder.STARTUP);
-+                // Lava end
-+                if (worlddata == null) {
-+                    worlddata = new WorldInfo(worldsettings, worldNameIn);
-+                }
 +                worlddata.checkName(worldNameIn); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
 +                if (this.isDemo()) {
 +                    world = (WorldServer) (new WorldServerDemo(this, idatamanager, worlddata, dim, this.profiler)).init();
 +                } else {
 +                    world = (WorldServer) (new WorldServer(this, idatamanager, worlddata, dim, this.profiler, worldEnvironment, gen)).init();
-+                }
+                 }
  
 -                this.worlds[i].initialize(worldsettings);
--            }
--            else
--            {
--                this.worlds[i] = (WorldServer)(new WorldServerMulti(this, isavehandler, j, this.worlds[0], this.profiler)).init();
--            }
 +                world.initialize(worldsettings);
 +                this.server.scoreboardManager = new org.bukkit.craftbukkit.scoreboard.CraftScoreboardManager(this, world.getScoreboard());
 +            } else {
 +                gen = this.server.getGenerator(name);
- 
--            this.worlds[i].addEventListener(new ServerWorldEventHandler(this, this.worlds[i]));
--
--            if (!this.isSinglePlayer())
--            {
--                this.worlds[i].getWorldInfo().setGameType(this.getGameType());
 +                ISaveHandler idatamanager = new AnvilSaveHandler(server.getWorldContainer(), name, true, this.dataFixer);
 +                // world =, b0 to dimension, s1 to name, added Environment and gen
 +                WorldInfo worlddata = idatamanager.loadWorldInfo();
@@ -489,6 +437,17 @@
 +                worlddata.checkName(name); // CraftBukkit - Migration did not rewrite the level.dat; This forces 1.8 to take the last loaded world as respawn (in this case the end)
 +                world = (WorldServer) new WorldServerMulti(this, idatamanager, dim, this.worlds[0], this.profiler, worlddata, worldEnvironment, gen).init();
              }
+-            else
+-            {
+-                this.worlds[i] = (WorldServer)(new WorldServerMulti(this, isavehandler, j, this.worlds[0], this.profiler)).init();
+-            }
+-
+-            this.worlds[i].addEventListener(new ServerWorldEventHandler(this, this.worlds[i]));
+-
+-            if (!this.isSinglePlayer())
+-            {
+-                this.worlds[i].getWorldInfo().setGameType(this.getGameType());
+-            }
 -        }
 -        } //Forge: End dead code
 -
@@ -521,7 +480,7 @@
          int i = 16;
          int j = 4;
          int k = 192;
-@@ -323,45 +408,52 @@
+@@ -323,45 +357,49 @@
          int i1 = 0;
          this.setUserMessage("menu.generatingTerrain");
          int j1 = 0;
@@ -532,8 +491,7 @@
 +        // CraftBukkit start - fire WorldLoadEvent and handle whether or not to keep the spawn in memory
 +        for (int m = 0; m < worldServerList.size(); m++) {
 +            WorldServer worldserver = this.worldServerList.get(m);
-+            MinecraftServer.LOGGER
-+                    .info("Preparing start region for level " + m + " (Seed: " + worldserver.getSeed() + ")");
++            MinecraftServer.LOGGER.info("Preparing start region for level " + m + " (Seed: " + worldserver.getSeed() + ")");
  
 -        for (int l1 = -192; l1 <= 192 && this.isServerRunning(); l1 += 16)
 -        {
@@ -564,8 +522,7 @@
 +                        jk = j2;
 +                    }
 +                    ++i;
-+                    worldserver.getChunkProvider().provideChunk(blockposition.getX() + l1 >> 4,
-+                            blockposition.getZ() + i2 >> 4);
++                    worldserver.getChunkProvider().provideChunk(blockposition.getX() + l1 >> 4, blockposition.getZ() + i2 >> 4);
 +                }
              }
          }
@@ -586,11 +543,9 @@
 -        {
 -            try
 -            {
--                this.setResourcePack("level://" + URLEncoder.encode(worldNameIn, StandardCharsets.UTF_8.toString()) + "/" + "resources.zip", "");
 +        if (file1.isFile()) {
 +            try {
-+                this.setResourcePack("level://" + URLEncoder.encode(worldNameIn, StandardCharsets.UTF_8.toString())
-+                        + "/" + "resources.zip", "");
+                 this.setResourcePack("level://" + URLEncoder.encode(worldNameIn, StandardCharsets.UTF_8.toString()) + "/" + "resources.zip", "");
 +            } catch (UnsupportedEncodingException var5) {
 +                LOGGER.warn("Something went wrong url encoding {}", (Object) worldNameIn);
              }
@@ -601,7 +556,7 @@
          }
      }
  
-@@ -379,112 +471,155 @@
+@@ -379,233 +417,270 @@
  
      public abstract boolean shouldBroadcastConsoleToOps();
  
@@ -629,13 +584,11 @@
 -            {
 -                if (!isSilent)
 -                {
--                    LOGGER.info("Saving chunks for level '{}'/{}", worldserver.getWorldInfo().getWorldName(), worldserver.provider.getDimensionType().getName());
 +    public void saveAllWorlds(boolean isSilent) {
 +        for (WorldServer worldserver : this.worldServerList) {
 +            if (worldserver != null) {
 +                if (!isSilent) {
-+                    LOGGER.info("Saving chunks for level '{}'/{}", worldserver.getWorldInfo().getWorldName(),
-+                            worldserver.provider.getDimensionType().getName());
+                     LOGGER.info("Saving chunks for level '{}'/{}", worldserver.getWorldInfo().getWorldName(), worldserver.provider.getDimensionType().getName());
                  }
  
 -                try
@@ -645,7 +598,7 @@
 -                catch (MinecraftException minecraftexception)
 -                {
 +                try {
-+                    worldserver.saveAllChunks(true, (IProgressUpdate) null);
++                    worldserver.saveAllChunks(true, null);
 +                } catch (MinecraftException minecraftexception) {
                      LOGGER.warn(minecraftexception.getMessage());
                  }
@@ -655,12 +608,8 @@
  
 -    public void stopServer()
 -    {
--        LOGGER.info("Stopping server");
 +    private boolean hasStopped = false;
 +    private final Object stopLock = new Object();
- 
--        if (this.getNetworkSystem() != null)
--        {
 +    public void stopServer() throws MinecraftException {
 +        // CraftBukkit start - prevent double stopping on multiple threads
 +        synchronized (stopLock) {
@@ -669,7 +618,10 @@
 +            hasStopped = true;
 +        }
 +        // CraftBukkit end
-+        LOGGER.info("Stopping server");
+         LOGGER.info("Stopping server");
+-
+-        if (this.getNetworkSystem() != null)
+-        {
 +        if (this.server != null) {
 +            this.server.disablePlugins();
 +        }
@@ -734,6 +686,9 @@
          }
  
          CommandBase.setCommandListener(null); // Forge: fix MC-128561
++        if (org.spigotmc.SpigotConfig.saveUserCacheOnStopOnly) {
++            this.profileCache.save();
++        }
      }
  
 -    public boolean isServerRunning()
@@ -754,6 +709,7 @@
 -        {
 -            if (this.init())
 -            {
+-                net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
 +    private static final int TPS = 20;
 +    private static final long SEC_IN_NANO = 1000000000;
 +    public static final Long TICK_TIME = SEC_IN_NANO / TPS;
@@ -804,10 +760,10 @@
 +    public void run() {
 +        try {
 +            if (this.init()) {
-                 net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStarted();
++                FMLCommonHandler.instance().handleServerStarted();
                  this.currentTime = getCurrentTimeMillis();
                  long i = 0L;
-@@ -492,120 +627,113 @@
+                 this.statusResponse.setServerDescription(new TextComponentString(this.motd));
                  this.statusResponse.setVersion(new ServerStatusResponse.Version("1.12.2", 340));
                  this.applyServerIconToResponse(this.statusResponse);
  
@@ -893,17 +849,18 @@
 +            } else {
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
 -                this.finalTick((CrashReport)null);
-+                this.finalTick((CrashReport) null);
++                this.finalTick(null);
              }
 -        }
 -        catch (net.minecraftforge.fml.common.StartupQuery.AbortedException e)
 -        {
-+        } catch (net.minecraftforge.fml.common.StartupQuery.AbortedException e) {
++        } catch (StartupQuery.AbortedException e) {
              // ignore silently
-             net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
+-            net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
 -        }
 -        catch (Throwable throwable1)
 -        {
++            FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
 +        } catch (Throwable throwable1) {
              LOGGER.error("Encountered an unexpected exception", throwable1);
              CrashReport crashreport = null;
@@ -911,20 +868,16 @@
 -            if (throwable1 instanceof ReportedException)
 -            {
 -                crashreport = this.addServerInfoToCrashReport(((ReportedException)throwable1).getCrashReport());
+-            }
+-            else
+-            {
 +            if (throwable1 instanceof ReportedException) {
 +                crashreport = this.addServerInfoToCrashReport(((ReportedException) throwable1).getCrashReport());
 +            } else {
-+                crashreport = this
-+                        .addServerInfoToCrashReport(new CrashReport("Exception in server tick loop", throwable1));
+                 crashreport = this.addServerInfoToCrashReport(new CrashReport("Exception in server tick loop", throwable1));
              }
--            else
--            {
--                crashreport = this.addServerInfoToCrashReport(new CrashReport("Exception in server tick loop", throwable1));
--            }
  
--            File file1 = new File(new File(this.getDataDirectory(), "crash-reports"), "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.txt");
-+            File file1 = new File(new File(this.getDataDirectory(), "crash-reports"),
-+                    "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.txt");
+             File file1 = new File(new File(this.getDataDirectory(), "crash-reports"), "crash-" + (new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss")).format(new Date()) + "-server.txt");
  
 -            if (crashreport.saveToFile(file1))
 -            {
@@ -933,12 +886,13 @@
 -            else
 -            {
 +            if (crashreport.saveToFile(file1)) {
-+                LOGGER.error("This crash report has been saved to: {}", (Object) file1.getAbsolutePath());
++                LOGGER.error("This crash report has been saved to: {}", file1.getAbsolutePath());
 +            } else {
                  LOGGER.error("We were unable to save this crash report to disk.");
              }
  
-             net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
+-            net.minecraftforge.fml.common.FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
++            FMLCommonHandler.instance().expectServerStopped(); // has to come before finalTick to avoid race conditions
              this.finalTick(crashreport);
 -        }
 -        finally
@@ -956,17 +910,19 @@
 -            }
 -            finally
 -            {
++                FMLCommonHandler.instance().handleServerStopped();
++                this.serverStopped = true;
++                try {
++                    this.reader.getTerminal().restore();
++                } catch (Exception ignored) {}
++                this.systemExitNow();
 +            } finally {
                  net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerStopped();
                  this.serverStopped = true;
-+                /*
-+                // CraftBukkit start - Restore terminal to original settings
 +                try {
 +                    reader.getTerminal().restore();
 +                } catch (Exception ignored) {
 +                }
-+                // CraftBukkit end
-+                */
                  this.systemExitNow();
              }
          }
@@ -994,7 +950,7 @@
                  BufferedImage bufferedimage = ImageIO.read(file1);
                  Validate.validState(bufferedimage.getWidth() == 64, "Must be 64 pixels wide");
                  Validate.validState(bufferedimage.getHeight() == 64, "Must be 64 pixels high");
-@@ -613,52 +741,41 @@
+@@ -613,52 +688,41 @@
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  response.setFavicon("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
                  bytebuf1.release(); // Forge: fix MC-122085
@@ -1006,7 +962,7 @@
 -            finally
 -            {
 +            } catch (Exception exception) {
-+                LOGGER.error("Couldn't load server icon", (Throwable) exception);
++                LOGGER.error("Couldn't load server icon", exception);
 +            } finally {
                  bytebuf.release();
              }
@@ -1057,7 +1013,7 @@
              this.startProfiling = false;
              this.profiler.profilingEnabled = true;
              this.profiler.clearProfiling();
-@@ -667,16 +784,15 @@
+@@ -667,16 +731,15 @@
          this.profiler.startSection("root");
          this.updateTimeLightAndEntities();
  
@@ -1079,7 +1035,7 @@
              }
  
              Collections.shuffle(Arrays.asList(agameprofile));
-@@ -684,7 +800,7 @@
+@@ -684,7 +747,7 @@
              this.statusResponse.invalidateJson();
          }
  
@@ -1088,7 +1044,7 @@
          {
              this.profiler.startSection("save");
              this.playerList.saveAllPlayerData();
-@@ -697,13 +813,11 @@
+@@ -697,13 +760,11 @@
          this.profiler.endSection();
          this.profiler.startSection("snooper");
  
@@ -1104,7 +1060,7 @@
              this.usageSnooper.addMemoryStatsToSnooper();
          }
  
-@@ -712,76 +826,82 @@
+@@ -712,76 +773,82 @@
          net.minecraftforge.fml.common.FMLCommonHandler.instance().onPostServerTick();
      }
  
@@ -1240,7 +1196,7 @@
          }
  
          this.profiler.endStartSection("dim_unloading");
-@@ -794,94 +914,87 @@
+@@ -794,94 +861,87 @@
          this.getFunctionManager().update();
          this.profiler.endStartSection("tickables");
  
@@ -1369,7 +1325,7 @@
                  }
              });
          }
-@@ -889,145 +1002,110 @@
+@@ -889,145 +949,110 @@
          return report;
      }
  
@@ -1555,7 +1511,7 @@
                      worldserver1.getWorldInfo().setDifficulty(difficulty);
                      worldserver1.setAllowedSpawnTypes(this.allowSpawnMonsters(), this.canSpawnAnimals);
                  }
-@@ -1035,80 +1113,75 @@
+@@ -1035,80 +1060,75 @@
          }
      }
  
@@ -1665,7 +1621,7 @@
                      ++l;
                  }
              }
-@@ -1117,228 +1190,186 @@
+@@ -1117,228 +1137,186 @@
          playerSnooper.addClientStat("worlds", Integer.valueOf(l));
      }
  
@@ -1942,7 +1898,7 @@
                      return entity;
                  }
              }
-@@ -1347,130 +1378,120 @@
+@@ -1347,130 +1325,120 @@
          return null;
      }
  
@@ -2116,7 +2072,7 @@
              boolean flag = true;
              String s = null;
              String s1 = ".";
-@@ -1534,13 +1555,19 @@
+@@ -1534,13 +1502,19 @@
                      ++i1;
                  }
              }
@@ -2141,7 +2097,7 @@
              if (s != null)
              {
                  dedicatedserver.setServerOwner(s);
-@@ -1579,84 +1606,87 @@
+@@ -1579,84 +1553,87 @@
                      dedicatedserver.stopServer();
                  }
              });
