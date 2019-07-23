@@ -53,6 +53,7 @@ public class SpigotConfig {
 
         commands = new HashMap<>();
         commands.put("spigot", new SpigotCommand("spigot"));
+        commands.put("tps", new TicksPerSecondCommand("tps"));
 
         version = getInt("config-version", 11);
         set("config-version", 11);
@@ -61,7 +62,7 @@ public class SpigotConfig {
 
     public static void registerCommands() {
         for (Map.Entry<String, Command> entry : commands.entrySet()) {
-            MinecraftServer.getServerCB().server.getCommandMap().register(entry.getKey(), "Spigot", entry.getValue());
+            MinecraftServer.getServerInstance().server.getCommandMap().register(entry.getKey(), "Spigot", entry.getValue());
         }
     }
 
@@ -125,5 +126,21 @@ public class SpigotConfig {
             System.out.println("Oudated config, disabling BungeeCord support!");
         }
         bungee = getBoolean("settings.bungeecord", false);
+    }
+
+    public static int userCacheCap;
+    public static boolean saveUserCacheOnStopOnly;
+    public static int intCacheLimit;
+
+    private static void userCacheCap() {
+        userCacheCap = getInt("settings.user-cache-size", 1000);
+    }
+
+    private static void saveUserCacheOnStopOnly() {
+        saveUserCacheOnStopOnly = getBoolean("settings.save-user-cache-on-stop-only", false);
+    }
+
+    private static void intCacheLimit() {
+        intCacheLimit = getInt("settings.int-cache-limit", 1024);
     }
 }
