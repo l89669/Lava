@@ -71,6 +71,7 @@ import org.bukkit.event.vehicle.VehicleCreateEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.meta.BookMeta;
+import org.spigotmc.AsyncCatcher;
 
 import javax.annotation.Nullable;
 import java.net.InetAddress;
@@ -903,8 +904,13 @@ public class CraftEventFactory {
     }
 
     public static void handleInventoryCloseEvent(EntityPlayer human) {
+        if (AsyncCatcher.catchInv()) {
+            return;
+        }
         InventoryCloseEvent event = new InventoryCloseEvent(human.openContainer.getBukkitView());
-        human.world.getServer().getPluginManager().callEvent(event);
+        if (human.openContainer.getBukkitView() != null) {
+            human.world.getServer().getPluginManager().callEvent(event);
+        }
         human.openContainer.transferTo(human.inventoryContainer, human.getBukkitEntity());
     }
 
