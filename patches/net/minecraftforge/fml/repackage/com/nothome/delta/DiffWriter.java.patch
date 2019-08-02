@@ -16,3 +16,8 @@
      public void flush() throws IOException;
  
      /**
+@@ -55,4 +55,3 @@
+     @Override
+     public void close() throws IOException;
+ }
+-

@@ -88,24 +88,16 @@
          ImmutableSet.Builder<ResourceLocation> builder = ImmutableSet.builder();
  
          if (baseLocation != null)
-@@ -129,14 +122,12 @@
- 
-     @Override
-     public IBakedModel bake(IModelState state, VertexFormat format,
--                                    Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter)
--    {
-+                            Function<ResourceLocation, TextureAtlasSprite> bakedTextureGetter) {
+@@ -134,7 +127,7 @@
  
          ImmutableMap<TransformType, TRSRTransformation> transformMap = PerspectiveMapWrapper.getTransforms(state);
  
-         // if the fluid is lighter than air, will manipulate the initial state to be rotated 180° to turn it upside down
--        if (flipGas && fluid != null && fluid.isLighterThanAir())
--        {
-+        if (flipGas && fluid != null && fluid.isLighterThanAir()) {
+-        // if the fluid is lighter than air, will manipulate the initial state to be rotated 180° to turn it upside down
++        // if the fluid is lighter than air, will manipulate the initial state to be rotated 180� to turn it upside down
+         if (flipGas && fluid != null && fluid.isLighterThanAir())
+         {
              state = new ModelStateComposition(state, TRSRTransformation.blockCenterToCorner(new TRSRTransformation(null, new Quat4f(0, 0, 1, 0), null, null)));
-         }
- 
-@@ -145,33 +136,29 @@
+@@ -145,33 +138,29 @@
          TextureAtlasSprite particleSprite = null;
          ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
  
@@ -144,7 +136,7 @@
                  particleSprite = cover;
              }
          }
-@@ -188,16 +175,14 @@
+@@ -188,16 +177,14 @@
       * If the fluid can't be found, water is used.
       */
      @Override
@@ -163,7 +155,7 @@
              String flipStr = customData.get("flipGas");
              if (flipStr.equals("true")) flip = true;
              else if (flipStr.equals("false")) flip = false;
-@@ -206,14 +191,17 @@
+@@ -206,14 +193,17 @@
          }
  
          boolean tint = this.tint;
@@ -188,7 +180,7 @@
              }
          }
  
-@@ -231,8 +219,7 @@
+@@ -231,8 +221,7 @@
       * If no liquid is given a hardcoded variant for the bucket is used.
       */
      @Override
@@ -198,7 +190,7 @@
  
          ResourceLocation base = baseLocation;
          ResourceLocation liquid = liquidLocation;
-@@ -248,41 +235,34 @@
+@@ -248,41 +237,34 @@
          return new ModelDynBucket(base, liquid, cover, fluid, flipGas, tint);
      }
  
@@ -247,7 +239,7 @@
                  ResourceLocation bucketBase = new ResourceLocation(ForgeVersion.MOD_ID, "items/bucket_base");
                  BucketBaseSprite bucketBaseSprite = new BucketBaseSprite(bucketBase);
                  map.setTextureEntry(bucketBaseSprite);
-@@ -290,44 +270,35 @@
+@@ -290,44 +272,35 @@
          }
  
          @Nullable
@@ -300,7 +292,7 @@
              final TextureAtlasSprite sprite = textureGetter.apply(bucket);
              width = sprite.getIconWidth();
              height = sprite.getIconHeight();
-@@ -341,32 +312,27 @@
+@@ -341,32 +314,27 @@
      /**
       * Creates a bucket cover sprite from the vanilla resource.
       */
@@ -338,7 +330,7 @@
              final TextureAtlasSprite sprite = textureGetter.apply(bucket);
              final TextureAtlasSprite alphaMask = textureGetter.apply(bucketCoverMask);
              width = sprite.getIconWidth();
-@@ -375,18 +341,16 @@
+@@ -375,18 +343,16 @@
              pixels[0] = new int[width * height];
  
              try (
@@ -361,7 +353,7 @@
                          final int alphaMultiplier = alphaPixels[0][p] >>> 24;
                          final int oldPixel = oldPixels[0][p];
                          final int oldPixelAlpha = oldPixel >>> 24;
-@@ -394,9 +358,7 @@
+@@ -394,9 +360,7 @@
                          pixels[0][p] = (oldPixel & 0xFFFFFF) + (newAlpha << 24);
                      }
                  }
@@ -372,7 +364,7 @@
                  FMLLog.log.error("Failed to close resource", e);
              }
  
-@@ -406,33 +368,29 @@
+@@ -406,33 +370,29 @@
          }
      }
  
@@ -413,7 +405,7 @@
                  IModel parent = model.parent.process(ImmutableMap.of("fluid", name));
                  Function<ResourceLocation, TextureAtlasSprite> textureGetter;
                  textureGetter = location -> Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
-@@ -447,8 +405,7 @@
+@@ -447,8 +407,7 @@
      }
  
      // the dynamic bucket is based on the empty bucket
@@ -423,7 +415,7 @@
          private final ModelDynBucket parent;
          private final Map<String, IBakedModel> cache; // contains all the baked models since they'll never change
          private final VertexFormat format;
-@@ -459,8 +416,7 @@
+@@ -459,8 +418,7 @@
                         VertexFormat format,
                         ImmutableMap<TransformType, TRSRTransformation> transforms,
                         Map<String, IBakedModel> cache,

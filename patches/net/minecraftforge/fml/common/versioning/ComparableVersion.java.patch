@@ -16,38 +16,16 @@
  
  /**
   * Generic implementation of version comparison.
-@@ -57,26 +50,24 @@
-  * <li>a dash usually precedes a qualifier, and is always less important than something preceded with a dot.</li>
-  * </ul></p>
+@@ -59,7 +52,7 @@
   *
-- * @see <a href="https://cwiki.apache.org/confluence/display/MAVENOLD/Versioning">"Versioning" on Maven Wiki</a>
+  * @see <a href="https://cwiki.apache.org/confluence/display/MAVENOLD/Versioning">"Versioning" on Maven Wiki</a>
   * @author <a href="mailto:kenney@apache.org">Kenney Westerhof</a>
-  * @author <a href="mailto:hboutemy@apache.org">Hervé Boutemy</a>
-+ * @see <a href="https://cwiki.apache.org/confluence/display/MAVENOLD/Versioning">"Versioning" on Maven Wiki</a>
+- * @author <a href="mailto:hboutemy@apache.org">Hervé Boutemy</a>
++ * @author <a href="mailto:hboutemy@apache.org">Herv� Boutemy</a>
   */
  public class ComparableVersion
--    implements Comparable<ComparableVersion>
--{
-+        implements Comparable<ComparableVersion> {
-     private String value;
- 
-     private String canonical;
- 
-     private ListItem items;
- 
--    private interface Item
--    {
-+    private interface Item {
-         final int INTEGER_ITEM = 0;
-         final int STRING_ITEM = 1;
-         final int LIST_ITEM = 2;
- 
--        int compareTo( Item item );
-+        int compareTo(Item item);
- 
-         int getType();
- 
-@@ -87,48 +78,40 @@
+     implements Comparable<ComparableVersion>
+@@ -87,48 +80,40 @@
       * Represents a numeric item in the version item list.
       */
      private static class IntegerItem
@@ -109,7 +87,7 @@
  
                  case STRING_ITEM:
                      return 1; // 1.1 > 1-sp
-@@ -137,13 +120,12 @@
+@@ -137,13 +122,12 @@
                      return 1; // 1.1 > 1-1
  
                  default:
@@ -125,7 +103,7 @@
              return value.toString();
          }
      }
-@@ -152,35 +134,31 @@
+@@ -152,35 +136,31 @@
       * Represents a string in the version item list, usually a qualifier.
       */
      private static class StringItem
@@ -173,7 +151,7 @@
                      case 'a':
                          value = "alpha";
                          break;
-@@ -192,26 +170,24 @@
+@@ -192,26 +172,24 @@
                          break;
                  }
              }
@@ -206,7 +184,7 @@
           * just returning an Integer with the index here is faster, but requires a lot of if/then/else to check for -1
           * or QUALIFIERS.size and then resort to lexical ordering. Most comparisons are decided by the first character,
           * so this is still fast. If more characters are needed then it requires a lexical sort anyway.
-@@ -219,40 +195,35 @@
+@@ -219,40 +197,35 @@
           * @param qualifier
           * @return an equivalent value that can be used with lexical comparison
           */
@@ -257,7 +235,7 @@
              return value;
          }
      }
-@@ -262,53 +233,41 @@
+@@ -262,53 +235,41 @@
       * with '-(number)' in the version specification).
       */
      private static class ListItem
@@ -326,7 +304,7 @@
                  case INTEGER_ITEM:
                      return -1; // 1-1 < 1.0.x
  
-@@ -317,18 +276,16 @@
+@@ -317,18 +278,16 @@
  
                  case LIST_ITEM:
                      Iterator<Item> left = iterator();
@@ -349,7 +327,7 @@
                              return result;
                          }
                      }
-@@ -336,106 +293,83 @@
+@@ -336,106 +295,83 @@
                      return 0;
  
                  default:
@@ -491,7 +469,7 @@
                      startIndex = i;
                  }
  
-@@ -443,13 +377,11 @@
+@@ -443,13 +379,11 @@
              }
          }
  
@@ -508,7 +486,7 @@
              list = (ListItem) stack.pop();
              list.normalize();
          }
-@@ -457,32 +389,27 @@
+@@ -457,32 +391,27 @@
          canonical = items.toString();
      }
  

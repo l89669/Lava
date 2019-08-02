@@ -61,8 +61,9 @@
  
 -            if (icommand == null)
 -            {
+-                TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound", new Object[0]);
 +            if (icommand == null) {
-                 TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound", new Object[0]);
++                TextComponentTranslation textcomponenttranslation1 = new TextComponentTranslation("commands.generic.notFound");
                  textcomponenttranslation1.getStyle().setColor(TextFormatting.RED);
                  sender.sendMessage(textcomponenttranslation1);
 -            }
@@ -84,8 +85,9 @@
  
 -                if (j > -1)
 -                {
+-                    List<Entity> list = EntitySelector.<Entity>matchEntities(sender, astring[j], Entity.class);
 +                if (j > -1) {
-                     List<Entity> list = EntitySelector.<Entity>matchEntities(sender, astring[j], Entity.class);
++                    List<Entity> list = EntitySelector.matchEntities(sender, astring[j], Entity.class);
                      String s1 = astring[j];
                      sender.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, list.size());
  
@@ -93,7 +95,7 @@
 -                    {
 -                        throw new PlayerNotFoundException("commands.generic.selector.notFound", new Object[] {astring[j]});
 +                    if (list.isEmpty()) {
-+                        throw new PlayerNotFoundException("commands.generic.selector.notFound", new Object[]{astring[j]});
++                        throw new PlayerNotFoundException("commands.generic.selector.notFound", astring[j]);
                      }
  
 -                    for (Entity entity : list)
@@ -124,8 +126,9 @@
 -            }
 -            else
 -            {
+-                TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.permission", new Object[0]);
 +            } else {
-                 TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.permission", new Object[0]);
++                TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.permission");
                  textcomponenttranslation2.getStyle().setColor(TextFormatting.RED);
                  sender.sendMessage(textcomponenttranslation2);
              }
@@ -136,7 +139,7 @@
              TextComponentTranslation textcomponenttranslation = new TextComponentTranslation(commandexception.getMessage(), commandexception.getErrorObjects());
              textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
              sender.sendMessage(textcomponenttranslation);
-@@ -112,27 +96,19 @@
+@@ -112,28 +96,20 @@
          return i;
      }
  
@@ -153,7 +156,7 @@
 -        {
 -            TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.usage", new Object[] {new TextComponentTranslation(wrongusageexception.getMessage(), wrongusageexception.getErrorObjects())});
 +        } catch (WrongUsageException wrongusageexception) {
-+            TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.usage", new Object[]{new TextComponentTranslation(wrongusageexception.getMessage(), wrongusageexception.getErrorObjects())});
++            TextComponentTranslation textcomponenttranslation2 = new TextComponentTranslation("commands.generic.usage", new TextComponentTranslation(wrongusageexception.getMessage(), wrongusageexception.getErrorObjects()));
              textcomponenttranslation2.getStyle().setColor(TextFormatting.RED);
              sender.sendMessage(textcomponenttranslation2);
 -        }
@@ -166,40 +169,40 @@
 -        }
 -        catch (Throwable throwable)
 -        {
+-            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.generic.exception", new Object[0]);
 +        } catch (Throwable throwable) {
-             TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.generic.exception", new Object[0]);
++            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("commands.generic.exception");
              textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
              sender.sendMessage(textcomponenttranslation);
-@@ -144,9 +120,8 @@
+             LOGGER.warn("Couldn't process command: " + input, throwable);
+@@ -144,74 +120,75 @@
  
      protected abstract MinecraftServer getServer();
  
 -    public ICommand registerCommand(ICommand command)
 -    {
 -        this.commandMap.put(command.getName(), command);
+-        this.commandSet.add(command);
 +    public ICommand registerCommand(ICommand command) {
-+        /*this.commandMap.put(command.getName(), command);
-         this.commandSet.add(command);
- 
-         for (String s : command.getAliases())
-@@ -159,43 +134,62 @@
-             }
-         }
- 
-+        return command;*/
 +        // register commands with permission nodes, defaulting to class name
 +        return registerCommand(command, command.getClass().getName());
 +    }
-+
+ 
+-        for (String s : command.getAliases())
+-        {
+-            ICommand icommand = this.commandMap.get(s);
 +    private ICommand registerCommand(String permissionGroup, ICommand command) {
 +        return registerCommand(command, permissionGroup + "." + command.getName());
 +    }
-+
+ 
+-            if (icommand == null || !icommand.getName().equals(s))
+-            {
+-                this.commandMap.put(s, command);
 +    public ICommand registerCommand(ICommand command, String permissionNode) {
 +        this.commandMap.put(command.getName(), command);
 +        this.commandSet.add(command);
 +        // register vanilla commands with Bukkit to support permissions.
-+        CraftSimpleCommandMap commandMap = MinecraftServer.getServerCB().server.getCraftCommandMap();
++        CraftSimpleCommandMap commandMap = MinecraftServer.getServerInstance().server.getCraftCommandMap();
 +        ModCustomCommand customCommand = new ModCustomCommand(command.getName());
 +        customCommand.setPermission(permissionNode);
 +        List<String> list = command.getAliases();
@@ -208,12 +211,13 @@
 +        LogManager.getLogger().info("Registered command " + command.getName() + " with permission node " + permissionNode);
 +        if (list != null) {
 +            for (String s : list) {
-+                ICommand icommand = (ICommand) this.commandMap.get(s);
++                ICommand icommand = this.commandMap.get(s);
 +                if (icommand == null || !icommand.getName().equals(s)) {
 +                    this.commandMap.put(s, command);
 +                }
-+            }
-+        }
+             }
+         }
+-
          return command;
      }
  
@@ -222,7 +226,7 @@
 +    private static String[] dropFirstString(String[] input) {
          String[] astring = new String[input.length - 1];
 -        System.arraycopy((Object)input, 1, (Object)astring, 0, input.length - 1);
-+        System.arraycopy((Object) input, 1, (Object) astring, 0, input.length - 1);
++        System.arraycopy(input, 1, astring, 0, input.length - 1);
          return astring;
      }
  
@@ -242,7 +246,7 @@
 -                if (CommandBase.doesStringStartWith(s, entry.getKey()) && ((ICommand)entry.getValue()).checkPermission(this.getServer(), sender))
 -                {
 +            for (Entry<String, ICommand> entry : this.commandMap.entrySet()) {
-+                if (CommandBase.doesStringStartWith(s, entry.getKey()) && ((ICommand) entry.getValue()).checkPermission(this.getServer(), sender)) {
++                if (CommandBase.doesStringStartWith(s, entry.getKey()) && entry.getValue().checkPermission(this.getServer(), sender)) {
                      list.add(entry.getKey());
                  }
              }
@@ -263,14 +267,17 @@
                      return icommand.getTabCompletions(this.getServer(), sender, dropFirstString(astring), pos);
                  }
              }
-@@ -204,14 +198,11 @@
+ 
+-            return Collections.<String>emptyList();
++            return Collections.emptyList();
          }
      }
  
 -    public List<ICommand> getPossibleCommands(ICommandSender sender)
 -    {
+-        List<ICommand> list = Lists.<ICommand>newArrayList();
 +    public List<ICommand> getPossibleCommands(ICommandSender sender) {
-         List<ICommand> list = Lists.<ICommand>newArrayList();
++        List<ICommand> list = Lists.newArrayList();
  
 -        for (ICommand icommand : this.commandSet)
 -        {
@@ -281,7 +288,7 @@
                  list.add(icommand);
              }
          }
-@@ -219,23 +210,16 @@
+@@ -219,23 +196,16 @@
          return list;
      }
  

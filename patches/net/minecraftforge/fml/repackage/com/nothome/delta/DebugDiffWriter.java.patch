@@ -18,7 +18,7 @@
      private void writeBuf() {
          System.err.print("DATA: ");
          byte[] ba = os.toByteArray();
-@@ -70,6 +72,7 @@
+@@ -70,10 +72,10 @@
      public void flush() throws IOException {
          System.err.println("FLUSH");
      }
@@ -26,3 +26,7 @@
      @Override
      public void close() throws IOException {
          System.err.println("CLOSE");
+     }
+ 
+ }
+-

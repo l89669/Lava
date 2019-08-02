@@ -181,3 +181,8 @@
                  System.err.println("source or patch is too large, max length is " + Integer.MAX_VALUE);
                  System.err.println("aborting..");
                  return;
+@@ -245,4 +222,3 @@
+         }
+     }
+ }
+-
