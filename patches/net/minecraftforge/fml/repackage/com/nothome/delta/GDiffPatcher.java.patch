@@ -181,7 +181,13 @@
                  System.err.println("source or patch is too large, max length is " + Integer.MAX_VALUE);
                  System.err.println("aborting..");
                  return;
-@@ -245,4 +222,3 @@
+@@ -239,10 +216,8 @@
+             patcher.patch(sourceFile, patchFile, outputFile);
+ 
+             System.out.println("finished patching file");
+-
+         } catch (Exception ioe) {                                   //gls031504a
+             System.err.println("error while patching: " + ioe);
          }
      }
  }

@@ -31,8 +31,10 @@
 +
 +public abstract class CommandHandler implements ICommandManager {
      private static final Logger LOGGER = LogManager.getLogger();
-     private final Map<String, ICommand> commandMap = Maps.<String, ICommand>newHashMap();
-     private final Set<ICommand> commandSet = Sets.<ICommand>newHashSet();
+-    private final Map<String, ICommand> commandMap = Maps.<String, ICommand>newHashMap();
+-    private final Set<ICommand> commandSet = Sets.<ICommand>newHashSet();
++    private final Map<String, ICommand> commandMap = Maps.newHashMap();
++    private final Set<ICommand> commandSet = Sets.newHashSet();
  
 -    public int executeCommand(ICommandSender sender, String rawCommand)
 -    {
@@ -238,8 +240,9 @@
  
 -        if (astring.length == 1)
 -        {
+-            List<String> list = Lists.<String>newArrayList();
 +        if (astring.length == 1) {
-             List<String> list = Lists.<String>newArrayList();
++            List<String> list = Lists.newArrayList();
  
 -            for (Entry<String, ICommand> entry : this.commandMap.entrySet())
 -            {

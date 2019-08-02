@@ -143,8 +143,10 @@
      /**
       * Writes the final EOF byte, closes the underlying stream.
       */
-@@ -175,4 +174,3 @@
+@@ -173,6 +172,4 @@
+         output.write(EOF);
+         output.close();
      }
- 
+-
  }
 -
