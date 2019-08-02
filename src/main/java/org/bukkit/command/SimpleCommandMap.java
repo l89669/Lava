@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public class SimpleCommandMap implements CommandMap {
     private static final Pattern PATTERN_ON_SPACE = Pattern.compile(" ", Pattern.LITERAL);
-    protected final Map<String, Command> knownCommands = new HashMap<String, Command>();
+    protected final Map<String, Command> knownCommands = new HashMap<>();
     private final Server server;
 
     public SimpleCommandMap(final Server server) {
@@ -24,7 +24,6 @@ public class SimpleCommandMap implements CommandMap {
 
     private void setDefaultCommands() {
         register("bukkit", new PluginsCommand("plugins"));
-        register("bukkit", new TimingsCommand("timings"));
     }
 
     public void setFallbackCommands() {
@@ -129,15 +128,11 @@ public class SimpleCommandMap implements CommandMap {
         }
 
         try {
-            target.timings.startTiming(); // Spigot
             // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
             target.execute(sender, sentCommandLabel, Arrays.copyOfRange(args, 1, args.length));
-            target.timings.stopTiming(); // Spigot
         } catch (CommandException ex) {
-            target.timings.stopTiming(); // Spigot
             throw ex;
         } catch (Throwable ex) {
-            target.timings.stopTiming(); // Spigot
             throw new CommandException("Unhandled exception executing '" + commandLine + "' in " + target, ex);
         }
 
@@ -169,7 +164,7 @@ public class SimpleCommandMap implements CommandMap {
         int spaceIndex = cmdLine.indexOf(' ');
 
         if (spaceIndex == -1) {
-            ArrayList<String> completions = new ArrayList<String>();
+            ArrayList<String> completions = new ArrayList<>();
             Map<String, Command> knownCommands = this.knownCommands;
 
             final String prefix = (sender instanceof Player ? "/" : "");
