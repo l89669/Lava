@@ -11,8 +11,4 @@ public class AsyncCatcher {
             throw new IllegalStateException("Asynchronous " + reason + "!");
         }
     }
-
-    public static boolean catchInv() {
-        return enabled && Thread.currentThread() != MinecraftServer.getServerInstance().primaryThread;
-    }
 }

@@ -52,7 +52,7 @@ public enum CropState {
 
     private final byte data;
 
-    private CropState(final int data) {
+    CropState(final int data) {
         this.data = (byte) data;
     }
 
@@ -61,10 +61,10 @@ public enum CropState {
      *
      * @param data Data value to fetch
      * @return The {@link CropState} representing the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static CropState getByData(final byte data) {
         return BY_DATA.get(data);
     }
@@ -75,7 +75,7 @@ public enum CropState {
      * @return A byte containing the data value of this growth state
      * @deprecated Magic value
      */
-
+    @Deprecated
     public byte getData() {
         return data;
     }

@@ -25,12 +25,22 @@ import java.util.Iterator;
 import java.util.List;
 
 public final class VanillaCommandWrapper extends BukkitCommand {
+    public static CommandSender lastSender = null; // Nasty :(
     protected final CommandBase vanillaCommand;
 
     public VanillaCommandWrapper(CommandBase vanillaCommand, String usage) {
         super(vanillaCommand.getName(), "A Mojang provided command.", usage, vanillaCommand.getAliases());
         this.vanillaCommand = vanillaCommand;
         this.setPermission("minecraft.command." + vanillaCommand.getName());
+    }
+
+    public static String[] dropFirstArgument(String as[]) {
+        String[] as1 = new String[as.length - 1];
+        for (int i = 1; i < as.length; i++) {
+            as1[i - 1] = as[i];
+        }
+
+        return as1;
     }
 
     @Override
@@ -54,10 +64,8 @@ public final class VanillaCommandWrapper extends BukkitCommand {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-        return (List<String>) vanillaCommand.getTabCompletions(MinecraftServer.getServerCB(), getListener(sender), args, (location) == null ? null : new BlockPos(location.getX(), location.getY(), location.getZ()));
+        return vanillaCommand.getTabCompletions(MinecraftServer.getServerCB(), getListener(sender), args, (location) == null ? null : new BlockPos(location.getX(), location.getY(), location.getZ()));
     }
-
-    public static CommandSender lastSender = null; // Nasty :(
 
     public final int dispatchVanillaCommand(CommandSender bSender, ICommandSender icommandlistener, String[] as) throws CommandException {
         // Copied from net.minecraft.server.CommandHandler
@@ -69,7 +77,7 @@ public final class VanillaCommandWrapper extends BukkitCommand {
         try {
             if (vanillaCommand.checkPermission(server, icommandlistener)) {
                 if (i > -1) {
-                    List<Entity> list = ((List<Entity>) EntitySelector.matchEntitiesDefault(icommandlistener, as[i], Entity.class));
+                    List<Entity> list = EntitySelector.matchEntitiesDefault(icommandlistener, as[i], Entity.class);
                     String s2 = as[i];
 
                     icommandlistener.setCommandStat(CommandResultStats.Type.AFFECTED_ENTITIES, list.size());
@@ -85,7 +93,7 @@ public final class VanillaCommandWrapper extends BukkitCommand {
                             vanillaCommand.execute(server, icommandlistener, as);
                             j++;
                         } catch (WrongUsageException exceptionusage) {
-                            TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.usage", new Object[]{new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getErrorObjects())});
+                            TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.usage", new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getErrorObjects()));
                             chatmessage.getStyle().setColor(TextFormatting.RED);
                             icommandlistener.sendMessage(chatmessage);
                         } catch (CommandException commandexception) {
@@ -101,18 +109,18 @@ public final class VanillaCommandWrapper extends BukkitCommand {
                     j++;
                 }
             } else {
-                TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.permission", new Object[0]);
+                TextComponentTranslation chatmessage = new TextComponentTranslation("commands.generic.permission");
                 chatmessage.getStyle().setColor(TextFormatting.RED);
                 icommandlistener.sendMessage(chatmessage);
             }
         } catch (WrongUsageException exceptionusage) {
-            TextComponentTranslation chatmessage1 = new TextComponentTranslation("commands.generic.usage", new Object[]{new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getErrorObjects())});
+            TextComponentTranslation chatmessage1 = new TextComponentTranslation("commands.generic.usage", new TextComponentTranslation(exceptionusage.getMessage(), exceptionusage.getErrorObjects()));
             chatmessage1.getStyle().setColor(TextFormatting.RED);
             icommandlistener.sendMessage(chatmessage1);
         } catch (CommandException commandexception) {
             CommandBase.notifyCommandListener(icommandlistener, vanillaCommand, 0, commandexception.getMessage(), commandexception.getErrorObjects());
         } catch (Throwable throwable) {
-            TextComponentTranslation chatmessage3 = new TextComponentTranslation("commands.generic.exception", new Object[0]);
+            TextComponentTranslation chatmessage3 = new TextComponentTranslation("commands.generic.exception");
             chatmessage3.getStyle().setColor(TextFormatting.RED);
             icommandlistener.sendMessage(chatmessage3);
             if (icommandlistener.getCommandSenderEntity() instanceof EntityMinecartCommandBlock) {
@@ -137,7 +145,7 @@ public final class VanillaCommandWrapper extends BukkitCommand {
             return ((CraftBlockCommandSender) sender).getTileEntity();
         }
         if (sender instanceof CommandMinecart) {
-            return ((EntityMinecartCommandBlock) ((CraftMinecartCommand) sender).getHandle()).getCommandBlockLogic();
+            return ((CraftMinecartCommand) sender).getHandle().getCommandBlockLogic();
         }
         if (sender instanceof RemoteConsoleCommandSender) {
             return ((DedicatedServer) MinecraftServer.getServerCB()).rconConsoleSource;
@@ -161,14 +169,5 @@ public final class VanillaCommandWrapper extends BukkitCommand {
             }
         }
         return -1;
-    }
-
-    public static String[] dropFirstArgument(String as[]) {
-        String as1[] = new String[as.length - 1];
-        for (int i = 1; i < as.length; i++) {
-            as1[i - 1] = as[i];
-        }
-
-        return as1;
     }
 }

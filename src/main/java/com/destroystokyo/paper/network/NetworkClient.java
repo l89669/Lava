@@ -34,4 +34,5 @@ public interface NetworkClient {
      */
     @Nullable
     InetSocketAddress getVirtualHost();
+
 }

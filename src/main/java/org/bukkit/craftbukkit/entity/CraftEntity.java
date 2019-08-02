@@ -17,7 +17,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.cauldron.entity.CraftCustomEntity;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.util.FakePlayerFactory;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -41,6 +42,13 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
 
     protected final CraftServer server;
     protected Entity entity;
+    // Spigot start
+    private final Spigot spigot = new Spigot() {
+        @Override
+        public boolean isInvulnerable() {
+            return getHandle().isEntityInvulnerable(net.minecraft.util.DamageSource.GENERIC);
+        }
+    };
     private EntityDamageEvent lastDamageEvent;
 
     public CraftEntity(final CraftServer server, final Entity entity) {
@@ -58,8 +66,8 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                 if (entity instanceof EntityPlayerMP) {
                     return new CraftPlayer(server, (EntityPlayerMP) entity);
                 } else {
-                    return new CraftHumanEntity(server, (EntityPlayer) entity);
-                } // TODO add support fake player classes from mods( using FakePlayerFactory.class)
+                    return new CraftPlayer(server, FakePlayerFactory.get(DimensionManager.getWorld(entity.world.provider.getDimension()), ((EntityPlayer) entity).getGameProfile()));
+                }
             }
             // Water Animals
             else if (entity instanceof EntityWaterMob) {
@@ -88,7 +96,9 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
                             return new CraftOcelot(server, (EntityOcelot) entity);
                         } else if (entity instanceof EntityParrot) {
                             return new CraftParrot(server, (EntityParrot) entity);
-                        } else return new CraftTameableAnimal(server, (EntityTameable) entity);
+                        } else {
+                            return new CraftTameableAnimal(server, (EntityTameable) entity);
+                        }
                     } else if (entity instanceof EntitySheep) {
                         return new CraftSheep(server, (EntitySheep) entity);
                     } else if (entity instanceof AbstractHorse) {
@@ -342,6 +352,24 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         throw new AssertionError("Unknown entity " + (entity == null ? " is null" : entity.getClass() + ": " + entity));
     }
 
+    private static PermissibleBase getPermissibleBase() {
+        if (perm == null) {
+            perm = new PermissibleBase(new ServerOperator() {
+
+                @Override
+                public boolean isOp() {
+                    return false;
+                }
+
+                @Override
+                public void setOp(boolean value) {
+
+                }
+            });
+        }
+        return perm;
+    }
+
     public Location getLocation() {
         return new Location(getWorld(), entity.posX, entity.posY, entity.posZ, entity.getBukkitYaw(), entity.rotationPitch);
     }
@@ -426,7 +454,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     public List<org.bukkit.entity.Entity> getNearbyEntities(double x, double y, double z) {
-        List<Entity> notchEntityList = entity.world.getEntitiesWithinAABB(entity.getClass(), entity.getEntityBoundingBox().grow(x, y, z), null);
+        List<Entity> notchEntityList = entity.world.getEntitiesInAABBexcluding(entity, entity.getEntityBoundingBox().grow(x, y, z), null);
         List<org.bukkit.entity.Entity> bukkitEntityList = new java.util.ArrayList<org.bukkit.entity.Entity>(notchEntityList.size());
 
         for (Entity e : notchEntityList) {
@@ -443,12 +471,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         return entity.fire;
     }
 
-    public int getMaxFireTicks() {
-        return entity.getFireImmuneTicks();
-    }
-
     public void setFireTicks(int ticks) {
         entity.fire = ticks;
+    }
+
+    public int getMaxFireTicks() {
+        return entity.getFireImmuneTicks();
     }
 
     public void remove() {
@@ -535,12 +563,12 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         getHandle().fallDistance = distance;
     }
 
-    public void setLastDamageCause(EntityDamageEvent event) {
-        lastDamageEvent = event;
-    }
-
     public EntityDamageEvent getLastDamageCause() {
         return lastDamageEvent;
+    }
+
+    public void setLastDamageCause(EntityDamageEvent event) {
+        lastDamageEvent = event;
     }
 
     public UUID getUniqueId() {
@@ -562,6 +590,10 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         return entity;
     }
 
+    public void setHandle(final Entity entity) {
+        this.entity = entity;
+    }
+
     @Override
     public void playEffect(EntityEffect type) {
         Preconditions.checkArgument(type != null, "type");
@@ -569,10 +601,6 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         if (type.getApplicable().isInstance(this)) {
             this.getHandle().world.setEntityState(getHandle(), type.getData());
         }
-    }
-
-    public void setHandle(final Entity entity) {
-        this.entity = entity;
     }
 
     @Override
@@ -637,6 +665,20 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     @Override
+    public String getCustomName() {
+        String name = getHandle().getCustomNameTag();
+
+        if (name == null || name.length() == 0) {
+            if (getType().getEntityClass() == CraftCustomEntity.class && this instanceof CraftLivingEntity) {
+                return ((CraftLivingEntity) this).entity.getName();
+            }
+            return null;
+        }
+
+        return name;
+    }
+
+    @Override
     public void setCustomName(String name) {
         if (name == null) {
             name = "";
@@ -646,24 +688,13 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     @Override
-    public String getCustomName() {
-        String name = getHandle().getCustomNameTag();
-
-        if (name == null || name.length() == 0) {
-            return null;
-        }
-
-        return name;
+    public boolean isCustomNameVisible() {
+        return getHandle().getAlwaysRenderNameTag();
     }
 
     @Override
     public void setCustomNameVisible(boolean flag) {
         getHandle().setAlwaysRenderNameTag(flag);
-    }
-
-    @Override
-    public boolean isCustomNameVisible() {
-        return getHandle().getAlwaysRenderNameTag();
     }
 
     @Override
@@ -747,6 +778,11 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     @Override
+    public boolean isGlowing() {
+        return getHandle().glowing;
+    }
+
+    @Override
     public void setGlowing(boolean flag) {
         getHandle().glowing = flag;
         Entity e = getHandle();
@@ -756,18 +792,13 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
     }
 
     @Override
-    public boolean isGlowing() {
-        return getHandle().glowing;
+    public boolean isInvulnerable() {
+        return getHandle().isEntityInvulnerable(DamageSource.GENERIC);
     }
 
     @Override
     public void setInvulnerable(boolean flag) {
         getHandle().setEntityInvulnerable(flag);
-    }
-
-    @Override
-    public boolean isInvulnerable() {
-        return getHandle().isEntityInvulnerable(DamageSource.GENERIC);
     }
 
     @Override
@@ -829,40 +860,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
         return nbttagcompound;
     }
 
-    private static PermissibleBase getPermissibleBase() {
-        if (perm == null) {
-            perm = new PermissibleBase(new ServerOperator() {
-
-                @Override
-                public boolean isOp() {
-                    return false;
-                }
-
-                @Override
-                public void setOp(boolean value) {
-
-                }
-            });
-        }
-        return perm;
-    }
-
-    // Spigot start
-    private final Spigot spigot = new Spigot() {
-        @Override
-        public boolean isInvulnerable() {
-            return getHandle().isEntityInvulnerable(DamageSource.GENERIC);
-        }
-
-        @Override
-        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent component) {
-        }
-
-        @Override
-        public void sendMessage(net.md_5.bungee.api.chat.BaseComponent... components) {
-        }
-    };
-
+    @Override
     public Spigot spigot() {
         return spigot;
     }

@@ -106,6 +106,10 @@ public class CraftBlockState implements BlockState {
         return chunk;
     }
 
+    public MaterialData getData() {
+        return data;
+    }
+
     public void setData(final MaterialData data) {
         Material mat = getType();
 
@@ -121,14 +125,6 @@ public class CraftBlockState implements BlockState {
         }
     }
 
-    public MaterialData getData() {
-        return data;
-    }
-
-    public void setType(final Material type) {
-        setTypeId(type.getId());
-    }
-
     public boolean setTypeId(final int type) {
         if (this.type != type) {
             this.type = type;
@@ -142,12 +138,16 @@ public class CraftBlockState implements BlockState {
         return Material.getBlockMaterial(getTypeId());
     }
 
-    public void setFlag(int flag) {
-        this.flag = flag;
+    public void setType(final Material type) {
+        setTypeId(type.getId());
     }
 
     public int getFlag() {
         return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
     }
 
     public int getTypeId() {
@@ -220,6 +220,10 @@ public class CraftBlockState implements BlockState {
         return data.getData();
     }
 
+    public void setRawData(byte data) {
+        this.data.setData(data);
+    }
+
     public Location getLocation() {
         return new Location(world, x, y, z);
     }
@@ -235,10 +239,6 @@ public class CraftBlockState implements BlockState {
         }
 
         return loc;
-    }
-
-    public void setRawData(byte data) {
-        this.data.setData(data);
     }
 
     @Override
@@ -268,10 +268,7 @@ public class CraftBlockState implements BlockState {
         if (this.data != other.data && (this.data == null || !this.data.equals(other.data))) {
             return false;
         }
-        if (this.nbt != other.nbt && (this.nbt == null || !this.nbt.equals(other.nbt))) {
-            return false;
-        }
-        return true;
+        return this.nbt == other.nbt || (this.nbt != null && this.nbt.equals(other.nbt));
     }
 
     @Override

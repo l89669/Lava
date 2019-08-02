@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 public class ConsoleCommandCompleter implements Completer {
-
     private final CraftServer server;
 
     public ConsoleCommandCompleter(CraftServer server) {
@@ -24,10 +23,10 @@ public class ConsoleCommandCompleter implements Completer {
             protected List<String> evaluate() {
                 List<String> offers = server.getCommandMap().tabComplete(server.getConsoleSender(), buffer);
 
-                TabCompleteEvent tabEvent = new TabCompleteEvent(server.getConsoleSender(), buffer, (offers == null) ? Collections.emptyList() : offers);
+                TabCompleteEvent tabEvent = new TabCompleteEvent(server.getConsoleSender(), buffer, (offers == null) ? Collections.EMPTY_LIST : offers);
                 server.getPluginManager().callEvent(tabEvent);
 
-                return tabEvent.isCancelled() ? Collections.emptyList() : tabEvent.getCompletions();
+                return tabEvent.isCancelled() ? Collections.EMPTY_LIST : tabEvent.getCompletions();
             }
         };
         this.server.getServer().processQueue.add(waitable);
@@ -36,7 +35,6 @@ public class ConsoleCommandCompleter implements Completer {
             if (offers == null) {
                 return cursor;
             }
-
             candidates.addAll(offers);
 
             final int lastSpace = buffer.lastIndexOf(' ');
@@ -50,8 +48,6 @@ public class ConsoleCommandCompleter implements Completer {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-
         return cursor;
     }
-
 }

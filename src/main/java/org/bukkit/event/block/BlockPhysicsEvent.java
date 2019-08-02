@@ -14,11 +14,11 @@ public class BlockPhysicsEvent extends BlockEvent implements Cancellable {
     private boolean cancel = false;
 
     /**
-     *
-     * @deprecated Magic value
-     * @param block the block involved in this event
+     * @param block   the block involved in this event
      * @param changed the changed block's type id
+     * @deprecated Magic value
      */
+    @Deprecated
     public BlockPhysicsEvent(final Block block, final int changed) {
         super(block);
         this.changed = changed;
@@ -34,6 +34,7 @@ public class BlockPhysicsEvent extends BlockEvent implements Cancellable {
      * @return Changed block's type id
      * @deprecated Magic value
      */
+    @Deprecated
     public int getChangedTypeId() {
         return changed;
     }

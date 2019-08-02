@@ -1,6 +1,6 @@
 package org.bukkit.event.player;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Warning;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -13,12 +13,13 @@ import java.util.Set;
  * Holds information for player chat and commands
  *
  * @deprecated This event will fire from the main thread and allows the use of
- *     all of the Bukkit API, unlike the {@link AsyncPlayerChatEvent}.
- *     <p>
- *     Listening to this event forces chat to wait for the main thread which
- *     causes delays for chat. {@link AsyncPlayerChatEvent} is the encouraged
- *     alternative for thread safe implementations.
+ * all of the Bukkit API, unlike the {@link AsyncPlayerChatEvent}.
+ * <p>
+ * Listening to this event forces chat to wait for the main thread which
+ * causes delays for chat. {@link AsyncPlayerChatEvent} is the encouraged
+ * alternative for thread safe implementations.
  */
+@Deprecated
 @Warning(reason = "Listening to this event forces chat to wait for the main thread, delaying chat messages.")
 public class PlayerChatEvent extends PlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();

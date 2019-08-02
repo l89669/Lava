@@ -1,8 +1,3 @@
-/**
- * THIS CLASS IS ONLY HERE FOR PLUGIN COMPATIBILITY!
- * THIS CLASS IS ONLY HERE FOR PLUGIN COMPATIBILITY!
- * THIS CLASS IS ONLY HERE FOR PLUGIN COMPATIBILITY!
- */
 package com.destroystokyo.paper.event.player;
 
 import org.bukkit.entity.Player;
@@ -26,6 +21,10 @@ public class PlayerLocaleChangeEvent extends PlayerEvent {
         this.newLocale = newLocale;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Gets the locale the player switched from.
      *
@@ -46,10 +45,6 @@ public class PlayerLocaleChangeEvent extends PlayerEvent {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

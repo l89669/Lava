@@ -58,17 +58,17 @@ public class CraftWorldBorder implements WorldBorder {
     }
 
     @Override
+    public void setCenter(Location location) {
+        this.setCenter(location.getX(), location.getZ());
+    }
+
+    @Override
     public void setCenter(double x, double z) {
         // PAIL: TODO: Magic Values
         x = Math.min(3.0E7D, Math.max(-3.0E7D, x));
         z = Math.min(3.0E7D, Math.max(-3.0E7D, z));
 
         this.handle.setCenter(x, z);
-    }
-
-    @Override
-    public void setCenter(Location location) {
-        this.setCenter(location.getX(), location.getZ());
     }
 
     @Override

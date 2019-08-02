@@ -27,7 +27,6 @@ import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.CachedServerIcon;
-import org.lavapowered.lava.internal.Lava;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,7 +66,7 @@ public final class Bukkit {
      */
     public static void setServer(Server server) {
         if (Bukkit.server != null) {
-            Bukkit.server = server;
+            throw new UnsupportedOperationException("Cannot redefine singleton Server");
         }
 
         Bukkit.server = server;
@@ -360,10 +359,7 @@ public final class Bukkit {
      *
      * @param name the name to look up
      * @return a player if one was found, null otherwise
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     * guaranteed to be unique
      */
-
     public static Player getPlayer(String name) {
         return server.getPlayer(name);
     }
@@ -373,10 +369,7 @@ public final class Bukkit {
      *
      * @param name Exact name of the player to retrieve
      * @return a player object if one was found, null otherwise
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     * guaranteed to be unique
      */
-
     public static Player getPlayerExact(String name) {
         return server.getPlayerExact(name);
     }
@@ -390,10 +383,7 @@ public final class Bukkit {
      *
      * @param name the (partial) name to match
      * @return list of all possible players
-     * @deprecated Use {@link #getPlayer(UUID)} as player names are no longer
-     * guaranteed to be unique
      */
-
     public static List<Player> matchPlayer(String name) {
         return server.matchPlayer(name);
     }
@@ -567,7 +557,7 @@ public final class Bukkit {
      * Dispatches a command on this server, and executes it if found.
      *
      * @param sender      the apparent sender of the command
-     * @param commandLine the command arguments. Example: <code>test abc
+     * @param commandLine the command + arguments. Example: <code>test abc
      *                    123</code>
      * @return returns false if no target is found
      * @throws CommandException thrown when the executor for the given command
@@ -712,7 +702,7 @@ public final class Bukkit {
      * @deprecated Persistent storage of users should be by UUID as names are no longer
      * unique past a single session.
      */
-
+    @Deprecated
     public static OfflinePlayer getOfflinePlayer(String name) {
         return server.getOfflinePlayer(name);
     }
@@ -1095,7 +1085,7 @@ public final class Bukkit {
     /**
      * Create a ChunkData for use in a generator.
      * <p>
-     * See {@link ChunkGenerator#generateChunkData(World, Random, int, int, ChunkGenerator.BiomeGrid)}
+     * See {@link ChunkGenerator#generateChunkData(World, java.util.Random, int, int, ChunkGenerator.BiomeGrid)}
      *
      * @param world the world to create the ChunkData for
      * @return a new ChunkData for the world

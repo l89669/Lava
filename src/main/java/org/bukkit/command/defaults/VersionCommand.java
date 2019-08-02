@@ -24,6 +24,14 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class VersionCommand extends BukkitCommand {
+    // Contributed by Techcable <Techcable@outlook.com> in GH PR #65 of Paper / Modified by GMatrixGames
+    private static final String BRANCH = "rewrite";
+    private final ReentrantLock versionLock = new ReentrantLock();
+    private final Set<CommandSender> versionWaiters = new HashSet<>();
+    private boolean hasVersion = false;
+    private String versionMessage = null;
+    private boolean versionTaskStarted = false;
+    private long lastCheck = 0;
     public VersionCommand(String name) {
         super(name);
 
@@ -31,6 +39,64 @@ public class VersionCommand extends BukkitCommand {
         this.usageMessage = "/version [plugin name]";
         this.setPermission("bukkit.command.version");
         this.setAliases(Arrays.asList("ver", "about"));
+    }
+
+    // Lava Start - Taken from Paper / Modified by GMatrixGames
+    private static int getDistance(String repo, String verInfo) {
+        try {
+            int currentVer = Integer.decode(verInfo);
+            return getFromJenkins(currentVer);
+        } catch (NumberFormatException ex) {
+            verInfo = verInfo.replace("\"", "");
+            return getFromRepo("LavaPowered/Lava", verInfo);
+        }
+    }
+
+    private static int getFromJenkins(int currentVer) {
+        try {
+            // Lava
+            try (BufferedReader reader = Resources.asCharSource(
+                    new URL("https://ci.codemc.org/job/LavaPowered/job/Lava/lastSuccessfulBuild/buildNumber"), // Lava
+                    Charsets.UTF_8
+            ).openBufferedStream()) {
+                int newVer = Integer.decode(reader.readLine());
+                return newVer - currentVer;
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+                return -2;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    private static int getFromRepo(String repo, String hash) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + BRANCH + "..." + hash).openConnection();
+            connection.connect();
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
+            try (
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
+            ) {
+                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
+                String status = (String) obj.get("status");
+                switch (status) {
+                    case "identical":
+                        return 0;
+                    case "behind":
+                        return ((Number) obj.get("behind_by")).intValue();
+                    default:
+                        return -1;
+                }
+            } catch (ParseException | NumberFormatException e) {
+                e.printStackTrace();
+                return -1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     @Override
@@ -125,7 +191,7 @@ public class VersionCommand extends BukkitCommand {
         Validate.notNull(alias, "Alias cannot be null");
 
         if (args.length == 1) {
-            List<String> completions = new ArrayList<String>();
+            List<String> completions = new ArrayList<>();
             String toComplete = args[0].toLowerCase(java.util.Locale.ENGLISH);
             for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
                 if (StringUtil.startsWithIgnoreCase(plugin.getName(), toComplete)) {
@@ -136,13 +202,6 @@ public class VersionCommand extends BukkitCommand {
         }
         return ImmutableList.of();
     }
-
-    private final ReentrantLock versionLock = new ReentrantLock();
-    private boolean hasVersion = false;
-    private String versionMessage = null;
-    private final Set<CommandSender> versionWaiters = new HashSet<CommandSender>();
-    private boolean versionTaskStarted = false;
-    private long lastCheck = 0;
 
     private void sendVersion(CommandSender sender) {
         if (hasVersion) {
@@ -164,7 +223,7 @@ public class VersionCommand extends BukkitCommand {
             sender.sendMessage("Checking version, please wait...");
             if (!versionTaskStarted) {
                 versionTaskStarted = true;
-                new Thread(() -> obtainVersion()).start();
+                new Thread(this::obtainVersion).start();
             }
         } finally {
             versionLock.unlock();
@@ -223,66 +282,5 @@ public class VersionCommand extends BukkitCommand {
         }
     }
 
-    // LB Start - Taken from Paper / Modified by GMatrixGames
-    private static int getDistance(String repo, String verInfo) {
-        try {
-            int currentVer = Integer.decode(verInfo);
-            return getFromJenkins(currentVer);
-        } catch (NumberFormatException ex) {
-            verInfo = verInfo.replace("\"", "");
-            return getFromRepo("LavaPowered/Lava", verInfo);
-        }
-    }
-
-    private static int getFromJenkins(int currentVer) {
-        try {
-            // Lava
-            try (BufferedReader reader = Resources.asCharSource(
-                    new URL("https://ci.codemc.org/job/LavaPowered/job/Lava/lastSuccessfulBuild/buildNumber"), // Lava
-                    Charsets.UTF_8
-            ).openBufferedStream()) {
-                int newVer = Integer.decode(reader.readLine());
-                return newVer - currentVer;
-            } catch (NumberFormatException ex) {
-                ex.printStackTrace();
-                return -2;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    // Contributed by Techcable <Techcable@outlook.com> in GH PR #65 of Paper / Modified by GMatrixGames
-    private static final String BRANCH = "rewrite";
-
-    private static int getFromRepo(String repo, String hash) {
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL("https://api.github.com/repos/" + repo + "/compare/" + BRANCH + "..." + hash).openConnection();
-            connection.connect();
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) return -2; // Unknown commit
-            try (
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), Charsets.UTF_8))
-            ) {
-                JSONObject obj = (JSONObject) new JSONParser().parse(reader);
-                String status = (String) obj.get("status");
-                switch (status) {
-                    case "identical":
-                        return 0;
-                    case "behind":
-                        return ((Number) obj.get("behind_by")).intValue();
-                    default:
-                        return -1;
-                }
-            } catch (ParseException | NumberFormatException e) {
-                e.printStackTrace();
-                return -1;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    // MB End
+    // Lava End
 }

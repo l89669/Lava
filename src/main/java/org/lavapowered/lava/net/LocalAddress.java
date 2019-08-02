@@ -8,13 +8,13 @@ public class LocalAddress {
     private final InetAddress host;
     private final int port;
 
-    public static LocalAddress create(InetAddress localHost, int localPort) {
-        return new LocalAddress(localHost, localPort);
-    }
-
     public LocalAddress(InetAddress localHost, int localPort) {
         host = localHost;
         port = localPort;
+    }
+
+    public static LocalAddress create(InetAddress localHost, int localPort) {
+        return new LocalAddress(localHost, localPort);
     }
 
     public InetAddress host() {

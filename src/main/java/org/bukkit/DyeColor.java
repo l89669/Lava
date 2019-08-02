@@ -101,7 +101,7 @@ public enum DyeColor {
     private final Color color;
     private final Color firework;
 
-    private DyeColor(final int woolData, final int dyeData, Color color, Color firework) {
+    DyeColor(final int woolData, final int dyeData, Color color, Color firework) {
         this.woolData = (byte) woolData;
         this.dyeData = (byte) dyeData;
         this.color = color;
@@ -113,11 +113,11 @@ public enum DyeColor {
      *
      * @param data Wool data value to fetch
      * @return The {@link DyeColor} representing the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      * @see #getByDyeData(byte)
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static DyeColor getByWoolData(final byte data) {
         int i = 0xff & data;
         if (i >= BY_WOOL_DATA.length) {
@@ -131,11 +131,11 @@ public enum DyeColor {
      *
      * @param data Dye data value to fetch
      * @return The {@link DyeColor} representing the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      * @see #getByWoolData(byte)
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static DyeColor getByDyeData(final byte data) {
         int i = 0xff & data;
         if (i >= BY_DYE_DATA.length) {
@@ -149,7 +149,7 @@ public enum DyeColor {
      *
      * @param color Color value to get the dye by
      * @return The {@link DyeColor} representing the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      */
     public static DyeColor getByColor(final Color color) {
         return BY_COLOR.get(color);
@@ -160,7 +160,7 @@ public enum DyeColor {
      *
      * @param color Color value to get dye by
      * @return The {@link DyeColor} representing the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      */
     public static DyeColor getByFireworkColor(final Color color) {
         return BY_FIREWORK.get(color);
@@ -173,7 +173,7 @@ public enum DyeColor {
      * @see #getDyeData()
      * @deprecated Magic value
      */
-
+    @Deprecated
     public byte getWoolData() {
         return woolData;
     }
@@ -185,7 +185,7 @@ public enum DyeColor {
      * @see #getWoolData()
      * @deprecated Magic value
      */
-
+    @Deprecated
     public byte getDyeData() {
         return dyeData;
     }

@@ -11,14 +11,14 @@ public final class MapCursor {
     /**
      * Initialize the map cursor.
      *
-     * @param x The x coordinate, from -128 to 127.
-     * @param y The y coordinate, from -128 to 127.
+     * @param x         The x coordinate, from -128 to 127.
+     * @param y         The y coordinate, from -128 to 127.
      * @param direction The facing of the cursor, from 0 to 15.
-     * @param type The type (color/style) of the map cursor.
-     * @param visible Whether the cursor is visible by default.
+     * @param type      The type (color/style) of the map cursor.
+     * @param visible   Whether the cursor is visible by default.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public MapCursor(byte x, byte y, byte direction, byte type, boolean visible) {
         this.x = x;
         this.y = y;
@@ -30,11 +30,11 @@ public final class MapCursor {
     /**
      * Initialize the map cursor.
      *
-     * @param x The x coordinate, from -128 to 127.
-     * @param y The y coordinate, from -128 to 127.
+     * @param x         The x coordinate, from -128 to 127.
+     * @param y         The y coordinate, from -128 to 127.
      * @param direction The facing of the cursor, from 0 to 15.
-     * @param type The type (color/style) of the map cursor.
-     * @param visible Whether the cursor is visible by default.
+     * @param type      The type (color/style) of the map cursor.
+     * @param visible   Whether the cursor is visible by default.
      */
     public MapCursor(byte x, byte y, byte direction, Type type, boolean visible) {
         this.x = x;
@@ -125,6 +125,7 @@ public final class MapCursor {
      * @return The type (color/style) of the map cursor.
      * @deprecated Magic value
      */
+    @Deprecated
     public byte getRawType() {
         return type;
     }
@@ -135,7 +136,7 @@ public final class MapCursor {
      * @param type The type (color/style) of the map cursor.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public void setRawType(byte type) {
         if (type < 0 || type > 15) {
             throw new IllegalArgumentException("Type must be in the range 0-15");
@@ -181,32 +182,28 @@ public final class MapCursor {
 
         private byte value;
 
-        private Type(int value) {
+        Type(int value) {
             this.value = (byte) value;
         }
 
         /**
-         *
          * @param value the value
          * @return the matching type
          * @deprecated Magic value
          */
-
+        @Deprecated
         public static Type byValue(byte value) {
             for (Type t : values()) {
-                if (t.value == value) {
-                    return t;
-                }
+                if (t.value == value) return t;
             }
             return null;
         }
 
         /**
-         *
          * @return the value
          * @deprecated Magic value
          */
-
+        @Deprecated
         public byte getValue() {
             return value;
         }

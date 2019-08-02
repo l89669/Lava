@@ -39,11 +39,6 @@ class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta {
     }
 
     @Override
-    public void setEffect(FireworkEffect effect) {
-        this.effect = effect;
-    }
-
-    @Override
     public boolean hasEffect() {
         return effect != null;
     }
@@ -51,6 +46,11 @@ class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta {
     @Override
     public FireworkEffect getEffect() {
         return effect;
+    }
+
+    @Override
+    public void setEffect(FireworkEffect effect) {
+        this.effect = effect;
     }
 
     @Override

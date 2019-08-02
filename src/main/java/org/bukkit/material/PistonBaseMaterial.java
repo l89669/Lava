@@ -14,7 +14,7 @@ public class PistonBaseMaterial extends MaterialData implements Directional, Red
      * @param type the raw type id
      * @deprecated Magic value
      */
-
+    @Deprecated
     public PistonBaseMaterial(final int type) {
         super(type);
     }
@@ -30,7 +30,7 @@ public class PistonBaseMaterial extends MaterialData implements Directional, Red
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public PistonBaseMaterial(final int type, final byte data) {
         super(type, data);
     }
@@ -39,10 +39,10 @@ public class PistonBaseMaterial extends MaterialData implements Directional, Red
      * Constructs a PistonBaseMaterial.
      *
      * @param type the material type to use
-     * @param data the raw data value 
+     * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public PistonBaseMaterial(final Material type, final byte data) {
         super(type, data);
     }

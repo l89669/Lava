@@ -48,12 +48,67 @@ public class CraftBlock implements Block {
         this.chunk = chunk;
     }
 
-    private net.minecraft.block.Block getNMSBlock() {
-        return CraftMagicNumbers.getBlock(this); // TODO: UPDATE THIS
-    }
-
     private static net.minecraft.block.Block getNMSBlock(int type) {
         return CraftMagicNumbers.getBlock(type);
+    }
+
+    public static BlockFace notchToBlockFace(EnumFacing notch) {
+        if (notch == null) return BlockFace.SELF;
+        switch (notch) {
+            case DOWN:
+                return BlockFace.DOWN;
+            case UP:
+                return BlockFace.UP;
+            case NORTH:
+                return BlockFace.NORTH;
+            case SOUTH:
+                return BlockFace.SOUTH;
+            case WEST:
+                return BlockFace.WEST;
+            case EAST:
+                return BlockFace.EAST;
+            default:
+                return BlockFace.SELF;
+        }
+    }
+
+    public static EnumFacing blockFaceToNotch(BlockFace face) {
+        switch (face) {
+            case DOWN:
+                return EnumFacing.DOWN;
+            case UP:
+                return EnumFacing.UP;
+            case NORTH:
+                return EnumFacing.NORTH;
+            case SOUTH:
+                return EnumFacing.SOUTH;
+            case WEST:
+                return EnumFacing.WEST;
+            case EAST:
+                return EnumFacing.EAST;
+            default:
+                return null;
+        }
+    }
+
+    public static Biome biomeBaseToBiome(net.minecraft.world.biome.Biome base) {
+        if (base == null) {
+            return null;
+        }
+
+        return Biome.valueOf(net.minecraft.world.biome.Biome.REGISTRY.getNameForObject(base).getResourcePath().toUpperCase(java.util.Locale.ENGLISH));
+    }
+
+    public static net.minecraft.world.biome.Biome biomeToBiomeBase(Biome bio) {
+        if (bio == null) {
+            return null;
+        }
+
+        return net.minecraft.world.biome.Biome.REGISTRY.getObject(new ResourceLocation(bio.name().toLowerCase(java.util.Locale.ENGLISH)));
+    }
+
+    private net.minecraft.block.Block getNMSBlock() {
+        return CraftMagicNumbers.getBlock(this); // TODO: UPDATE THIS
     }
 
     public World getWorld() {
@@ -97,10 +152,6 @@ public class CraftBlock implements Block {
         return chunk;
     }
 
-    public void setData(final byte data) {
-        setData(data, 3);
-    }
-
     public void setData(final byte data, boolean applyPhysics) {
         if (applyPhysics) {
             setData(data, 3);
@@ -113,7 +164,7 @@ public class CraftBlock implements Block {
         net.minecraft.world.World world = chunk.getHandle().getWorld();
         BlockPos position = new BlockPos(x, y, z);
         IBlockState blockData = world.getBlockState(position);
-        world.setBlockState(position, blockData.getBlock().getDefaultState(), flag);
+        world.setBlockState(position, blockData.getBlock().getStateFromMeta(data), flag);
     }
 
     private IBlockState getData0() {
@@ -125,8 +176,8 @@ public class CraftBlock implements Block {
         return (byte) blockData.getBlock().getMetaFromState(blockData);
     }
 
-    public void setType(final Material type) {
-        setType(type, true);
+    public void setData(final byte data) {
+        setData(data, 3);
     }
 
     @Override
@@ -144,7 +195,7 @@ public class CraftBlock implements Block {
     }
 
     public boolean setTypeIdAndData(final int type, final byte data, final boolean applyPhysics) {
-        IBlockState blockData = getNMSBlock(type).getDefaultState();
+        IBlockState blockData = getNMSBlock(type).getStateFromMeta(data);
         BlockPos position = new BlockPos(x, y, z);
 
         // SPIGOT-611: need to do this to prevent glitchiness. Easier to handle this here (like /setblock) than to fix weirdness in tile entity cleanup
@@ -173,6 +224,10 @@ public class CraftBlock implements Block {
         return Material.getMaterial(getTypeId());
     }
 
+    public void setType(final Material type) {
+        setType(type, true);
+    }
+
     @Deprecated
     @Override
     public int getTypeId() {
@@ -190,7 +245,6 @@ public class CraftBlock implements Block {
     public byte getLightFromBlocks() {
         return (byte) chunk.getHandle().getWorld().getLightFor(EnumSkyBlock.BLOCK, new BlockPos(this.x, this.y, this.z));
     }
-
 
     public Block getFace(final BlockFace face) {
         return getRelative(face, 1);
@@ -232,48 +286,10 @@ public class CraftBlock implements Block {
         return "CraftBlock{" + "chunk=" + chunk + ",x=" + x + ",y=" + y + ",z=" + z + ",type=" + getType() + ",data=" + getData() + '}';
     }
 
-    public static BlockFace notchToBlockFace(EnumFacing notch) {
-        if (notch == null) return BlockFace.SELF;
-        switch (notch) {
-            case DOWN:
-                return BlockFace.DOWN;
-            case UP:
-                return BlockFace.UP;
-            case NORTH:
-                return BlockFace.NORTH;
-            case SOUTH:
-                return BlockFace.SOUTH;
-            case WEST:
-                return BlockFace.WEST;
-            case EAST:
-                return BlockFace.EAST;
-            default:
-                return BlockFace.SELF;
-        }
-    }
-
-    public static EnumFacing blockFaceToNotch(BlockFace face) {
-        switch (face) {
-            case DOWN:
-                return EnumFacing.DOWN;
-            case UP:
-                return EnumFacing.UP;
-            case NORTH:
-                return EnumFacing.NORTH;
-            case SOUTH:
-                return EnumFacing.SOUTH;
-            case WEST:
-                return EnumFacing.WEST;
-            case EAST:
-                return EnumFacing.EAST;
-            default:
-                return null;
-        }
-    }
-
     public BlockState getState() {
         Material material = getType();
-        // Lava start - if null, check for TE that implements IInventory (cauldron stuff)
+
+        // Cauldron start - if null, check for TE that implements IInventory
         if (material == null) {
             TileEntity te = ((CraftWorld) this.getWorld()).getHandle().getTileEntity(new BlockPos(this.getX(), this.getY(), this.getZ()));
             if (te != null && te instanceof IInventory) {
@@ -284,7 +300,7 @@ public class CraftBlock implements Block {
             // pass default state
             return new CraftBlockState(this);
         }
-        // Lava end
+        // Cauldron end
 
         switch (material) {
             case SIGN:
@@ -362,7 +378,7 @@ public class CraftBlock implements Block {
                 TileEntity tileEntity = chunk.getCraftWorld().getTileEntityAt(x, y, z);
                 if (tileEntity != null) {
                     // block with unhandled TileEntity:
-                    return new CraftBlockEntityState<TileEntity>(this, (Class<TileEntity>) tileEntity.getClass());
+                    return new CraftBlockEntityState<>(this, tileEntity.getClass());
                 } else {
                     // Block without TileEntity:
                     return new CraftBlockState(this);
@@ -376,22 +392,6 @@ public class CraftBlock implements Block {
 
     public void setBiome(Biome bio) {
         getWorld().setBiome(x, z, bio);
-    }
-
-    public static Biome biomeBaseToBiome(net.minecraft.world.biome.Biome base) {
-        if (base == null) {
-            return null;
-        }
-
-        return Biome.valueOf(net.minecraft.world.biome.Biome.REGISTRY.getNameForObject(base).getResourcePath().toUpperCase(java.util.Locale.ENGLISH));
-    }
-
-    public static net.minecraft.world.biome.Biome biomeToBiomeBase(Biome bio) {
-        if (bio == null) {
-            return null;
-        }
-
-        return net.minecraft.world.biome.Biome.REGISTRY.getObject(new ResourceLocation(bio.name().toLowerCase(java.util.Locale.ENGLISH)));
     }
 
     public double getTemperature() {
@@ -471,7 +471,7 @@ public class CraftBlock implements Block {
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getById(getNMSBlock().getMobilityFlag(getNMSBlock().getDefaultState()).ordinal());
+        return PistonMoveReaction.getById(getNMSBlock().getMobilityFlag(getNMSBlock().getStateFromMeta(getData())).ordinal());
     }
 
     private boolean itemCausesDrops(ItemStack item) {
@@ -487,7 +487,7 @@ public class CraftBlock implements Block {
         boolean result = false;
 
         if (block != null && block != Blocks.AIR) {
-            block.dropBlockAsItemWithChance(chunk.getHandle().getWorld(), new BlockPos(x, y, z), block.getDefaultState(), 1.0F, 0);
+            block.dropBlockAsItemWithChance(chunk.getHandle().getWorld(), new BlockPos(x, y, z), block.getStateFromMeta(data), 1.0F, 0);
             result = true;
         }
 
@@ -504,12 +504,12 @@ public class CraftBlock implements Block {
     }
 
     public Collection<ItemStack> getDrops() {
-        List<ItemStack> drops = new ArrayList<ItemStack>();
+        List<ItemStack> drops = new ArrayList<>();
 
         net.minecraft.block.Block block = this.getNMSBlock();
         if (block != Blocks.AIR) {
             IBlockState data = getData0();
-            // based on nms.Block.dropNaturally
+            // based on net.minecraft.server.Block#dropNaturally
             int count = block.quantityDroppedWithBonus(0, chunk.getHandle().getWorld().rand);
             for (int i = 0; i < count; ++i) {
                 Item item = block.getItemDropped(data, chunk.getHandle().getWorld().rand, 0);
@@ -530,7 +530,7 @@ public class CraftBlock implements Block {
                         drops.add(CraftItemStack.asBukkitCopy(nmsStack));
                         // We don't want to drop cocoa blocks, we want to drop cocoa beans.
                     } else if (Blocks.COCOA == block) {
-                        int age = (Integer) data.getValue(BlockCocoa.AGE);
+                        int age = data.getValue(BlockCocoa.AGE);
                         int dropAmount = (age >= 2 ? 3 : 1);
                         for (int j = 0; j < dropAmount; ++j) {
                             drops.add(new ItemStack(Material.INK_SACK, 1, (short) 3));

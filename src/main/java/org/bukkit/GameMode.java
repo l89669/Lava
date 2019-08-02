@@ -27,8 +27,8 @@ public enum GameMode {
     ADVENTURE(2),
 
     /**
-     * Spectator mode cannot interact with the world in anyway and is 
-     * invisible to normal players. This grants the player the 
+     * Spectator mode cannot interact with the world in anyway and is
+     * invisible to normal players. This grants the player the
      * ability to no-clip through the world.
      */
     SPECTATOR(3);
@@ -43,7 +43,7 @@ public enum GameMode {
 
     private final int value;
 
-    private GameMode(final int value) {
+    GameMode(final int value) {
         this.value = value;
     }
 
@@ -52,10 +52,10 @@ public enum GameMode {
      *
      * @param value Value to check
      * @return Associative {@link GameMode} with the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static GameMode getByValue(final int value) {
         return BY_ID.get(value);
     }
@@ -66,7 +66,7 @@ public enum GameMode {
      * @return An integer value of this gamemode
      * @deprecated Magic value
      */
-
+    @Deprecated
     public int getValue() {
         return value;
     }

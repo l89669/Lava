@@ -1,6 +1,6 @@
 package org.bukkit.event.player;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -123,9 +123,9 @@ public class PlayerCommandPreprocessEvent extends PlayerEvent implements Cancell
      * UnsupportedOperationException} if the event caller provides an
      * unmodifiable set.
      *
-     * @deprecated This method is provided for backward compatibility with no
-     *     guarantee to the effect of viewing or modifying the set.
      * @return All Players who will see this chat message
+     * @deprecated This method is provided for backward compatibility with no
+     * guarantee to the effect of viewing or modifying the set.
      */
     @Deprecated
     public Set<Player> getRecipients() {

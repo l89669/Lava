@@ -26,11 +26,10 @@ public class Bed extends MaterialData implements Directional {
     }
 
     /**
-     *
      * @param type the raw type id
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Bed(final int type) {
         super(type);
     }
@@ -44,7 +43,7 @@ public class Bed extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Bed(final int type, final byte data) {
         super(type, data);
     }
@@ -54,7 +53,7 @@ public class Bed extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Bed(final Material type, final byte data) {
         super(type, data);
     }

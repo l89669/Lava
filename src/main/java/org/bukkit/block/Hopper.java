@@ -7,4 +7,3 @@ import org.bukkit.Nameable;
  */
 public interface Hopper extends Container, Nameable {
 }
-

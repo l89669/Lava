@@ -1,22 +1,6 @@
 --- ../src-base/minecraft/net/minecraftforge/fml/common/network/internal/FMLNetworkHandler.java
 +++ ../src-work/minecraft/net/minecraftforge/fml/common/network/internal/FMLNetworkHandler.java
-@@ -19,34 +19,27 @@
- 
- package net.minecraftforge.fml.common.network.internal;
- 
-+import com.google.gson.JsonArray;
-+import com.google.gson.JsonObject;
- import io.netty.channel.ChannelPipeline;
- import io.netty.channel.embedded.EmbeddedChannel;
--
--import java.util.ArrayList;
--import java.util.Comparator;
--import java.util.EnumMap;
--import java.util.List;
--import java.util.Map;
--import java.util.stream.Collectors;
--
- import net.minecraft.entity.Entity;
+@@ -33,9 +33,12 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.inventory.Container;
@@ -28,27 +12,10 @@
 +import net.minecraft.util.math.BlockPos;
  import net.minecraft.world.World;
  import net.minecraftforge.common.util.FakePlayer;
--import net.minecraftforge.fml.common.FMLCommonHandler;
--import net.minecraftforge.fml.common.FMLContainer;
--import net.minecraftforge.fml.common.FMLLog;
--import net.minecraftforge.fml.common.Loader;
--import net.minecraftforge.fml.common.ModContainer;
-+import net.minecraftforge.fml.common.*;
- import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
- import net.minecraftforge.fml.common.network.FMLOutboundHandler;
--import net.minecraftforge.fml.common.network.NetworkRegistry;
- import net.minecraftforge.fml.common.network.FMLOutboundHandler.OutboundTarget;
-+import net.minecraftforge.fml.common.network.NetworkRegistry;
- import net.minecraftforge.fml.common.network.handshake.FMLHandshakeMessage;
- import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
- import net.minecraftforge.fml.common.network.internal.FMLMessage.CompleteHandshake;
-@@ -54,40 +47,51 @@
- import net.minecraftforge.fml.common.registry.EntityRegistry.EntityRegistration;
- import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
--
--import com.google.gson.JsonArray;
--import com.google.gson.JsonObject;
+ import net.minecraftforge.fml.common.FMLCommonHandler;
+@@ -58,36 +61,49 @@
+ import com.google.gson.JsonArray;
+ import com.google.gson.JsonObject;
  import org.apache.commons.lang3.tuple.Pair;
 +import org.bukkit.Bukkit;
 +import org.bukkit.craftbukkit.event.CraftEventFactory;
@@ -57,8 +24,6 @@
 +import org.bukkit.event.inventory.InventoryType;
  
  import javax.annotation.Nullable;
-+import java.util.*;
-+import java.util.stream.Collectors;
  
 -public class FMLNetworkHandler
 -{
@@ -108,10 +73,11 @@
 +                        return;
 +                    }
 +                }
++                // Lava end
                  entityPlayerMP.getNextWindowId();
                  entityPlayerMP.closeContainer();
                  int windowId = entityPlayerMP.currentWindowId;
-@@ -101,33 +105,24 @@
+@@ -101,33 +117,24 @@
                  entityPlayerMP.openContainer.addListener(entityPlayerMP);
                  net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.player.PlayerContainerEvent.Open(entityPlayer, entityPlayer.openContainer));
              }
@@ -151,7 +117,7 @@
              return null;
          }
  
-@@ -135,34 +130,28 @@
+@@ -135,34 +142,28 @@
      }
  
      @Nullable
@@ -193,7 +159,7 @@
                  ModContainer modContainer = reject.getKey();
                  rejectStrings.add(modContainer.getName() + ": " + reject.getValue());
              }
-@@ -173,47 +162,41 @@
+@@ -173,47 +174,41 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -226,10 +192,11 @@
          channelPair.get(side).attr(NetworkDispatcher.FML_DISPATCHER).set(target);
          channelPair.get(side).writeOutbound(push);
  
-         ArrayList<FMLProxyPacket> list = new ArrayList<FMLProxyPacket>();
+-        ArrayList<FMLProxyPacket> list = new ArrayList<FMLProxyPacket>();
 -        for (Object o: channelPair.get(side).outboundMessages())
 -        {
 -            list.add((FMLProxyPacket)o);
++        ArrayList<FMLProxyPacket> list = new ArrayList<>();
 +        for (Object o : channelPair.get(side).outboundMessages()) {
 +            list.add((FMLProxyPacket) o);
          }
@@ -243,7 +210,7 @@
 +    public static void enhanceStatusQuery(JsonObject jsonobject) {
          JsonObject fmlData = new JsonObject();
 -        fmlData.addProperty("type", "FML");
-+        fmlData.addProperty("type", "BUKKIT"); // Show bukkit icon in server list
++        fmlData.addProperty("type", "BUKKIT"); // Show the Bukkit icon in server list.
          JsonArray modList = new JsonArray();
 -        for (ModContainer mc : Loader.instance().getActiveModList())
 -        {

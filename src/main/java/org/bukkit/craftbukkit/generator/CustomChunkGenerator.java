@@ -22,20 +22,6 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     private final Random random;
     private final MapGenStronghold strongholdGen = new MapGenStronghold();
 
-    private static class CustomBiomeGrid implements BiomeGrid {
-        net.minecraft.world.biome.Biome[] biome;
-
-        @Override
-        public Biome getBiome(int x, int z) {
-            return CraftBlock.biomeBaseToBiome(biome[(z << 4) | x]);
-        }
-
-        @Override
-        public void setBiome(int x, int z, Biome bio) {
-            biome[(z << 4) | x] = CraftBlock.biomeToBiomeBase(bio);
-        }
-    }
-
     public CustomChunkGenerator(World world, long seed, ChunkGenerator generator) {
         this.world = (WorldServer) world;
         this.generator = generator;
@@ -225,7 +211,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
 
     @Override
     public boolean isInsideStructure(World world, String type, BlockPos position) {
-        return "Stronghold".equals(type) && this.strongholdGen != null ? this.strongholdGen.isInsideStructure(position) : false;
+        return ("Stronghold".equals(type) && this.strongholdGen != null) && this.strongholdGen.isInsideStructure(position);
     }
 
     @Override
@@ -240,5 +226,19 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     @Override
     public void recreateStructures(Chunk chunk, int i, int j) {
         strongholdGen.generate(this.world, i, j, null);
+    }
+
+    private static class CustomBiomeGrid implements BiomeGrid {
+        net.minecraft.world.biome.Biome[] biome;
+
+        @Override
+        public Biome getBiome(int x, int z) {
+            return CraftBlock.biomeBaseToBiome(biome[(z << 4) | x]);
+        }
+
+        @Override
+        public void setBiome(int x, int z, Biome bio) {
+            biome[(z << 4) | x] = CraftBlock.biomeToBiomeBase(bio);
+        }
     }
 }

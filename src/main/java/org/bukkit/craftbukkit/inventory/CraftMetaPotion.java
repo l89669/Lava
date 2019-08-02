@@ -158,14 +158,14 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
     }
 
     @Override
-    public void setBasePotionData(PotionData data) {
-        Validate.notNull(data, "PotionData cannot be null");
-        this.type = data;
+    public PotionData getBasePotionData() {
+        return type;
     }
 
     @Override
-    public PotionData getBasePotionData() {
-        return type;
+    public void setBasePotionData(PotionData data) {
+        Validate.notNull(data, "PotionData cannot be null");
+        this.type = data;
     }
 
     public boolean hasCustomEffects() {

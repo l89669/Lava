@@ -1,9 +1,16 @@
 package org.spigotmc;
 
 import com.google.common.base.Throwables;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.stats.StatList;
+import org.apache.logging.log4j.LogManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -12,14 +19,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 public class SpigotConfig {
-
-    private static File CONFIG_FILE;
     private static final String HEADER = "This is the main configuration file for Spigot.\n"
             + "As you can see, there's tons to configure. Some options may impact gameplay, so use\n"
             + "with caution, and make sure you know what each option does before configuring.\n"
@@ -33,9 +36,42 @@ public class SpigotConfig {
             + "Forums: http://www.spigotmc.org/\n";
     /*========================================================================*/
     public static YamlConfiguration config;
+    public static boolean logCommands;
+    public static int tabComplete;
+    public static String whitelistMessage;
+    /*========================================================================*/
+    public static String unknownCommandMessage;
+    public static String serverFullMessage;
+    public static String outdatedClientMessage = "Outdated client! Please use {0}";
+    public static String outdatedServerMessage = "Outdated server! I\'m still on {0}";
+    public static int timeoutTime = 60;
+    public static boolean restartOnCrash = true;
+    public static String restartScript = "./start.sh";
+    public static String restartMessage;
+    public static boolean bungee;
+    public static boolean lateBind;
+    public static boolean disableStatSaving;
+    public static TObjectIntHashMap<String> forcedStats = new TObjectIntHashMap<>();
+    public static int playerSample;
+    public static int playerShuffle;
+    public static List<String> spamExclusions;
+    public static boolean silentCommandBlocks;
+    public static boolean filterCreativeItems;
+    public static Set<String> replaceCommands;
+    public static int userCacheCap;
+    public static boolean saveUserCacheOnStopOnly;
+    public static int intCacheLimit;
+    public static double movedWronglyThreshold;
+    public static double movedTooQuicklyMultiplier;
+    public static double maxHealth = 2048;
+    public static double movementSpeed = 2048;
+    public static double attackDamage = 2048;
+    public static int itemDirtyTicks;
+    public static boolean disableAdvancementSaving;
+    public static List<String> disabledAdvancements;
     static int version;
     static Map<String, Command> commands;
-    /*========================================================================*/
+    private static File CONFIG_FILE;
 
     public static void init(File configFile) {
         CONFIG_FILE = configFile;
@@ -52,8 +88,6 @@ public class SpigotConfig {
         config.options().copyDefaults(true);
 
         commands = new HashMap<>();
-        commands.put("spigot", new SpigotCommand("spigot"));
-        commands.put("tps", new TicksPerSecondCommand("tps"));
 
         version = getInt("config-version", 11);
         set("config-version", 11);
@@ -118,7 +152,46 @@ public class SpigotConfig {
         return config.getDouble(path, config.getDouble(path));
     }
 
-    public static boolean bungee;
+    private static void logCommands() {
+        logCommands = getBoolean("commands.log", true);
+    }
+
+    private static void tabComplete() {
+        if (version < 6) {
+            boolean oldValue = getBoolean("commands.tab-complete", true);
+            if (oldValue) {
+                set("commands.tab-complete", 0);
+            } else {
+                set("commands.tab-complete", -1);
+            }
+        }
+        tabComplete = getInt("commands.tab-complete", 0);
+    }
+
+    private static String transform(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s).replaceAll("\\\\n", "\n");
+    }
+
+    private static void messages() {
+        if (version < 8) {
+            set("messages.outdated-client", outdatedClientMessage);
+            set("messages.outdated-server", outdatedServerMessage);
+        }
+
+        whitelistMessage = transform(getString("messages.whitelist", "You are not whitelisted on this server!"));
+        unknownCommandMessage = transform(getString("messages.unknown-command", "Unknown command. Type \"/help\" for help."));
+        serverFullMessage = transform(getString("messages.server-full", "The server is full!"));
+        outdatedClientMessage = transform(getString("messages.outdated-client", outdatedClientMessage));
+        outdatedServerMessage = transform(getString("messages.outdated-server", outdatedServerMessage));
+    }
+
+    private static void watchdog() {
+        timeoutTime = getInt("settings.timeout-time", timeoutTime);
+        restartOnCrash = getBoolean("settings.restart-on-crash", restartOnCrash);
+        restartScript = getString("settings.restart-script", restartScript);
+        restartMessage = transform(getString("messages.restart", "Server is restarting"));
+        WatchdogThread.doStart(timeoutTime, restartOnCrash);
+    }
 
     private static void bungee() {
         if (version < 4) {
@@ -128,9 +201,63 @@ public class SpigotConfig {
         bungee = getBoolean("settings.bungeecord", false);
     }
 
-    public static int userCacheCap;
-    public static boolean saveUserCacheOnStopOnly;
-    public static int intCacheLimit;
+    private static void nettyThreads() {
+        int count = getInt("settings.netty-threads", 4);
+        System.setProperty("io.netty.eventLoopThreads", Integer.toString(count));
+        Bukkit.getLogger().log(Level.INFO, "Using {0} threads for Netty based IO", count);
+    }
+
+    private static void lateBind() {
+        lateBind = getBoolean("settings.late-bind", false);
+    }
+
+    private static void stats() {
+        disableStatSaving = getBoolean("stats.disable-saving", false);
+
+        if (!config.contains("stats.forced-stats")) {
+            config.createSection("stats.forced-stats");
+        }
+
+        ConfigurationSection section = config.getConfigurationSection("stats.forced-stats");
+        for (String name : section.getKeys(true)) {
+            if (section.isInt(name)) {
+                if (StatList.getOneShotStat(name) == null) {
+                    Bukkit.getLogger().log(Level.WARNING, "Ignoring non existent stats.forced-stats " + name);
+                    continue;
+                }
+                forcedStats.put(name, section.getInt(name));
+            }
+        }
+    }
+
+    private static void playerSample() {
+        playerSample = Math.max(getInt("settings.sample-count", 12), 0); // Paper - Avoid negative counts
+        LogManager.getLogger("Spigot").info("Server Ping Player Sample Count: " + playerSample);
+    }
+
+    private static void playerShuffle() {
+        playerShuffle = getInt("settings.player-shuffle", 0);
+    }
+
+    private static void spamExclusions() {
+        spamExclusions = getList("commands.spam-exclusions", Arrays.asList("/skill"));
+    }
+
+    private static void silentCommandBlocks() {
+        silentCommandBlocks = getBoolean("commands.silent-commandblock-console", false);
+    }
+
+    private static void filterCreativeItems() {
+        filterCreativeItems = getBoolean("settings.filter-creative-items", true);
+    }
+
+    private static void replaceCommands() {
+        if (config.contains("replace-commands")) {
+            set("commands.replace-commands", config.getStringList("replace-commands"));
+            config.set("replace-commands", null);
+        }
+        replaceCommands = new HashSet<>((List<String>) getList("commands.replace-commands", Arrays.asList("setblock", "summon", "testforblock", "tellraw")));
+    }
 
     private static void userCacheCap() {
         userCacheCap = getInt("settings.user-cache-size", 1000);
@@ -142,5 +269,31 @@ public class SpigotConfig {
 
     private static void intCacheLimit() {
         intCacheLimit = getInt("settings.int-cache-limit", 1024);
+    }
+
+    private static void movedWronglyThreshold() {
+        movedWronglyThreshold = getDouble("settings.moved-wrongly-threshold", 0.0625D);
+    }
+
+    private static void movedTooQuicklyMultiplier() {
+        movedTooQuicklyMultiplier = getDouble("settings.moved-too-quickly-multiplier", 10.0D);
+    }
+
+    private static void attributeMaxes() {
+        maxHealth = getDouble("settings.attribute.maxHealth.max", maxHealth);
+        ((RangedAttribute) SharedMonsterAttributes.MAX_HEALTH).maximumValue = maxHealth;
+        movementSpeed = getDouble("settings.attribute.movementSpeed.max", movementSpeed);
+        ((RangedAttribute) SharedMonsterAttributes.MOVEMENT_SPEED).maximumValue = movementSpeed;
+        attackDamage = getDouble("settings.attribute.attackDamage.max", attackDamage);
+        ((RangedAttribute) SharedMonsterAttributes.ATTACK_DAMAGE).maximumValue = attackDamage;
+    }
+
+    private static void itemDirtyTicks() {
+        itemDirtyTicks = getInt("settings.item-dirty-ticks", 20);
+    }
+
+    private static void disabledAdvancements() {
+        disableAdvancementSaving = getBoolean("advancements.disable-saving", false);
+        disabledAdvancements = getList("advancements.disabled", Arrays.asList("minecraft:story/disabled"));
     }
 }

@@ -17,6 +17,10 @@ public class WrappedCollections {
         return new WrappedCollection<>(c);
     }
 
+    public static <T> List<T> wrappedList(List<T> list) {
+        return new WrappedList<>(list);
+    }
+
     /**
      * @serial include
      */
@@ -133,10 +137,6 @@ public class WrappedCollections {
         private void writeObject(ObjectOutputStream s) throws IOException {
             s.defaultWriteObject();
         }
-    }
-
-    public static <T> List<T> wrappedList(List<T> list) {
-        return new WrappedList<>(list);
     }
 
     /**

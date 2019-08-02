@@ -55,6 +55,11 @@ public class CraftJukebox extends CraftBlockEntityState<TileEntityJukebox> imple
     }
 
     @Override
+    public boolean isPlaying() {
+        return getRawData() == 1;
+    }
+
+    @Override
     public void setPlaying(Material record) {
         if (record == null || CraftMagicNumbers.getItem(record) == null) {
             record = Material.AIR;
@@ -66,11 +71,6 @@ public class CraftJukebox extends CraftBlockEntityState<TileEntityJukebox> imple
         } else {
             setRawData((byte) 1);
         }
-    }
-
-    @Override
-    public boolean isPlaying() {
-        return getRawData() == 1;
     }
 
     @Override

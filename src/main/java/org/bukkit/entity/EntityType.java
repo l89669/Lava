@@ -2,7 +2,6 @@ package org.bukkit.entity;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import net.minecraftforge.cauldron.entity.CraftCustomEntity;
 import org.bukkit.entity.minecart.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
@@ -260,14 +259,10 @@ public enum EntityType {
     /**
      * An unknown entity without an Entity Class
      */
-    UNKNOWN(null, null, -1, false),
-    /**
-     * A custom modded entity, using {@link CraftCustomEntity} class
-     */
-    FORGE_MOD("forge_mod", CraftCustomEntity.class, -1, false);
+    UNKNOWN(null, null, -1, false);
 
-    private static final Map<String, EntityType> NAME_MAP = new HashMap<>();
-    private static final Map<Short, EntityType> ID_MAP = new HashMap<>();
+    private static final Map<String, EntityType> NAME_MAP = new HashMap<String, EntityType>();
+    private static final Map<Short, EntityType> ID_MAP = new HashMap<Short, EntityType>();
 
     static {
         for (EntityType type : values()) {
@@ -285,11 +280,11 @@ public enum EntityType {
     private short typeId;
     private boolean independent, living;
 
-    private EntityType(String name, Class<? extends Entity> clazz, int typeId) {
+    EntityType(String name, Class<? extends Entity> clazz, int typeId) {
         this(name, clazz, typeId, true);
     }
 
-    private EntityType(String name, Class<? extends Entity> clazz, int typeId, boolean independent) {
+    EntityType(String name, Class<? extends Entity> clazz, int typeId, boolean independent) {
         this.name = name;
         this.clazz = clazz;
         this.typeId = (short) typeId;
@@ -304,6 +299,7 @@ public enum EntityType {
      * @return the matching entity type or null
      * @deprecated Magic value
      */
+    @Deprecated
     public static EntityType fromName(String name) {
         if (name == null) {
             return null;
@@ -316,6 +312,7 @@ public enum EntityType {
      * @return the matching entity type or null
      * @deprecated Magic value
      */
+    @Deprecated
     public static EntityType fromId(int id) {
         if (id > Short.MAX_VALUE) {
             return null;
@@ -327,6 +324,7 @@ public enum EntityType {
      * @return the entity type's name
      * @deprecated Magic value
      */
+    @Deprecated
     public String getName() {
         return name;
     }
@@ -339,6 +337,7 @@ public enum EntityType {
      * @return the raw type id
      * @deprecated Magic value
      */
+    @Deprecated
     public short getTypeId() {
         return typeId;
     }

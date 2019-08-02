@@ -1,6 +1,6 @@
 package org.bukkit.material;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.material.types.MushroomBlockTexture;
@@ -28,7 +28,6 @@ public class Mushroom extends MaterialData {
      * Constructs a brown/red mushroom block with all sides set to pores.
      *
      * @param shroom A brown or red mushroom material type.
-     *
      * @see Material#HUGE_MUSHROOM_1
      * @see Material#HUGE_MUSHROOM_2
      */
@@ -40,16 +39,15 @@ public class Mushroom extends MaterialData {
     /**
      * Constructs a brown/red mushroom cap block with the specified face or
      * faces set to cap texture.
-     *
+     * <p>
      * Setting any of the four sides will also set the top to cap.
-     *
+     * <p>
      * To set two side faces at once use e.g. north-west.
-     *
+     * <p>
      * Specify self to set all six faces at once.
      *
-     * @param shroom A brown or red mushroom material type.
+     * @param shroom  A brown or red mushroom material type.
      * @param capFace The face or faces to set to mushroom cap texture.
-     *
      * @see Material#HUGE_MUSHROOM_1
      * @see Material#HUGE_MUSHROOM_2
      * @see BlockFace
@@ -61,9 +59,8 @@ public class Mushroom extends MaterialData {
     /**
      * Constructs a brown/red mushroom block with the specified textures.
      *
-     * @param shroom A brown or red mushroom material type.
+     * @param shroom  A brown or red mushroom material type.
      * @param texture The textured mushroom faces.
-     *
      * @see Material#HUGE_MUSHROOM_1
      * @see Material#HUGE_MUSHROOM_2
      */
@@ -73,10 +70,10 @@ public class Mushroom extends MaterialData {
 
     /**
      * @param shroom the type
-     * @param data the raw data value
+     * @param data   the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Mushroom(Material shroom, byte data) {
         super(shroom, data);
         Validate.isTrue(shroom == Material.HUGE_MUSHROOM_1 || shroom == Material.HUGE_MUSHROOM_2, "Not a mushroom!");
@@ -87,7 +84,7 @@ public class Mushroom extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Mushroom(int type, byte data) {
         super(type, data);
         Validate.isTrue(type == Material.HUGE_MUSHROOM_1.getId() || type == Material.HUGE_MUSHROOM_2.getId(), "Not a mushroom!");
@@ -105,15 +102,14 @@ public class Mushroom extends MaterialData {
      *
      * @see MushroomBlockTexture#STEM_SIDES
      * @see MushroomBlockTexture#ALL_STEM
-     *
      * @deprecated Use
      * {@link #setBlockTexture(MushroomBlockTexture)}
      * with {@link MushroomBlockTexture#STEM_SIDES } or
      * {@link MushroomBlockTexture#ALL_STEM}
      */
-
+    @Deprecated
     public void setStem() {
-        setData((byte) MushroomBlockTexture.STEM_SIDES.getData());
+        setData(MushroomBlockTexture.STEM_SIDES.getData());
     }
 
     /**
@@ -172,13 +168,12 @@ public class Mushroom extends MaterialData {
      * nature of how the data is stored, setting a face painted or not is not
      * guaranteed to leave the other faces unchanged.
      *
-     * @param face The face to paint or unpaint.
+     * @param face    The face to paint or unpaint.
      * @param painted True if you want to paint it, false if you want the
-     *     pores to show.
-     *
+     *                pores to show.
      * @deprecated Use MushroomBlockType cap options
      */
-
+    @Deprecated
     public void setFacePainted(BlockFace face, boolean painted) {
         if (painted == isFacePainted(face)) {
             return;
@@ -250,7 +245,7 @@ public class Mushroom extends MaterialData {
 
     /**
      * @return A set of all faces that are currently painted (an empty set if
-     *     it is a stem)
+     * it is a stem)
      */
     public Set<BlockFace> getPaintedFaces() {
         EnumSet<BlockFace> faces = EnumSet.noneOf(BlockFace.class);

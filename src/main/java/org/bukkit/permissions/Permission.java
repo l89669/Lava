@@ -1,11 +1,11 @@
 package org.bukkit.permissions;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
-import org.lavapowered.lava.internal.Lava;
 
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Represents a unique permission that may be attached to a {@link
@@ -89,7 +89,7 @@ public class Permission {
             try {
                 result.add(Permission.loadPermission(entry.getKey().toString(), (Map<?, ?>) entry.getValue(), def, result));
             } catch (Throwable ex) {
-                Lava.LOGGER.error(String.format(error, entry.getKey()), ex);
+                Bukkit.getServer().getLogger().log(Level.SEVERE, String.format(error, entry.getKey()), ex);
             }
         }
 
@@ -314,7 +314,7 @@ public class Permission {
      */
     public Permission addParent(String name, boolean value) {
         PluginManager pm = Bukkit.getServer().getPluginManager();
-        String lname = name.toLowerCase(Locale.ENGLISH);
+        String lname = name.toLowerCase(java.util.Locale.ENGLISH);
 
         Permission perm = pm.getPermission(lname);
 

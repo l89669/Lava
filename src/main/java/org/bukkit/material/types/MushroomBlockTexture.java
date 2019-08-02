@@ -76,7 +76,7 @@ public enum MushroomBlockTexture {
     private final Byte data;
     private final BlockFace capFace;
 
-    private MushroomBlockTexture(final int data, final BlockFace capFace) {
+    MushroomBlockTexture(final int data, final BlockFace capFace) {
         this.data = (byte) data;
         this.capFace = capFace;
     }
@@ -89,6 +89,7 @@ public enum MushroomBlockTexture {
      * null if it doesn't exist
      * @deprecated Magic value
      */
+    @Deprecated
     public static MushroomBlockTexture getByData(final byte data) {
         return BY_DATA.get(data);
     }
@@ -99,7 +100,6 @@ public enum MushroomBlockTexture {
      * @param face the required block face with cap texture
      * @return The {@link MushroomBlockTexture} representing the given block
      * face, or null if it doesn't exist
-     *
      * @see BlockFace
      */
     public static MushroomBlockTexture getCapByFace(final BlockFace face) {
@@ -112,6 +112,7 @@ public enum MushroomBlockTexture {
      * @return A byte containing the data value of this mushroom block face
      * @deprecated Magic value
      */
+    @Deprecated
     public byte getData() {
         return data;
     }

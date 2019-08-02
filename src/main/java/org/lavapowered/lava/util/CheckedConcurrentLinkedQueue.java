@@ -100,31 +100,7 @@ import java.util.function.Consumer;
  */
 public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements Queue<E>, Serializable {
     private static final long serialVersionUID = 196745693267521676L;
-
-    public E poll(com.google.common.base.Predicate<E> predicate, E singalInstance) {
-        restartFromHead:
-        for (; ; ) {
-            for (Node<E> h = head, p = h, q; ; ) {
-                E item = p.item;
-
-                if (predicate.apply(item)) return singalInstance; // Test predicate
-
-                if (item != null && p.casItem(item, null)) {
-                    // Successful CAS is the linearization point
-                    // for item to be removed from this queue.
-                    if (p != h) // hop two nodes at a time
-                        updateHead(h, ((q = p.next) != null) ? q : p);
-                    return item;
-                } else if ((q = p.next) == null) {
-                    updateHead(h, p);
-                    return null;
-                } else if (p == q)
-                    continue restartFromHead;
-                else
-                    p = q;
-            }
-        }
-    }
+    private static final sun.misc.Unsafe UNSAFE;
 
     /*
      * This is a modification of the Michael & Scott algorithm,
@@ -196,48 +172,19 @@ public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements
      * CAS, so they never regress, although again this is merely an
      * optimization.
      */
+    private static final long headOffset;
+    private static final long tailOffset;
 
-    private static class Node<E> {
-        volatile E item;
-        volatile Node<E> next;
-
-        /**
-         * Constructs a new node.  Uses relaxed write because item can
-         * only be seen after publication via casNext.
-         */
-        Node(E item) {
-            UNSAFE.putObject(this, itemOffset, item);
-        }
-
-        boolean casItem(E cmp, E val) {
-            return UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
-        }
-
-        void lazySetNext(Node<E> val) {
-            UNSAFE.putOrderedObject(this, nextOffset, val);
-        }
-
-        boolean casNext(Node<E> cmp, Node<E> val) {
-            return UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
-        }
-
-        // Unsafe mechanics
-
-        private static final sun.misc.Unsafe UNSAFE;
-        private static final long itemOffset;
-        private static final long nextOffset;
-
-        static {
-            try {
-                UNSAFE = Lava.UNSAFE;
-                Class<?> k = Node.class;
-                itemOffset = UNSAFE.objectFieldOffset
-                        (k.getDeclaredField("item"));
-                nextOffset = UNSAFE.objectFieldOffset
-                        (k.getDeclaredField("next"));
-            } catch (Exception e) {
-                throw new Error(e);
-            }
+    static {
+        try {
+            UNSAFE = Lava.UNSAFE;
+            Class<?> k = CheckedConcurrentLinkedQueue.class;
+            headOffset = UNSAFE.objectFieldOffset
+                    (k.getDeclaredField("head"));
+            tailOffset = UNSAFE.objectFieldOffset
+                    (k.getDeclaredField("tail"));
+        } catch (Exception e) {
+            throw new Error(e);
         }
     }
 
@@ -254,7 +201,6 @@ public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements
      * to not be reachable from head!
      */
     private transient volatile Node<E> head;
-
     /**
      * A node from which the last node on list (that is, the unique
      * node with node.next == null) can be reached in O(1) time.
@@ -268,6 +214,8 @@ public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements
      * - tail.next may or may not be self-pointing to tail.
      */
     private transient volatile Node<E> tail;
+
+    // Have to override just to update the javadoc
 
     /**
      * Creates a {@code ConcurrentLinkedQueue} that is initially empty.
@@ -303,7 +251,40 @@ public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements
         tail = t;
     }
 
-    // Have to override just to update the javadoc
+    /**
+     * Throws NullPointerException if argument is null.
+     *
+     * @param v the element
+     */
+    private static void checkNotNull(Object v) {
+        if (v == null)
+            throw new NullPointerException();
+    }
+
+    public E poll(com.google.common.base.Predicate<E> predicate, E singalInstance) {
+        restartFromHead:
+        for (; ; ) {
+            for (Node<E> h = head, p = h, q; ; ) {
+                E item = p.item;
+
+                if (predicate.apply(item)) return singalInstance; // Test predicate
+
+                if (item != null && p.casItem(item, null)) {
+                    // Successful CAS is the linearization point
+                    // for item to be removed from this queue.
+                    if (p != h) // hop two nodes at a time
+                        updateHead(h, ((q = p.next) != null) ? q : p);
+                    return item;
+                } else if ((q = p.next) == null) {
+                    updateHead(h, p);
+                    return null;
+                } else if (p == q)
+                    continue restartFromHead;
+                else
+                    p = q;
+            }
+        }
+    }
 
     /**
      * Inserts the specified element at the tail of this queue.
@@ -695,88 +676,6 @@ public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements
         return new Itr();
     }
 
-    private class Itr implements Iterator<E> {
-        /**
-         * Next node to return item for.
-         */
-        private Node<E> nextNode;
-
-        /**
-         * nextItem holds on to item fields because once we claim
-         * that an element exists in hasNext(), we must return it in
-         * the following next() call even if it was in the process of
-         * being removed when hasNext() was called.
-         */
-        private E nextItem;
-
-        /**
-         * Node of the last returned item, to support remove.
-         */
-        private Node<E> lastRet;
-
-        Itr() {
-            advance();
-        }
-
-        /**
-         * Moves to next valid node and returns item to return for
-         * next(), or null if no such.
-         */
-        private E advance() {
-            lastRet = nextNode;
-            E x = nextItem;
-
-            Node<E> pred, p;
-            if (nextNode == null) {
-                p = first();
-                pred = null;
-            } else {
-                pred = nextNode;
-                p = succ(nextNode);
-            }
-
-            for (; ; ) {
-                if (p == null) {
-                    nextNode = null;
-                    nextItem = null;
-                    return x;
-                }
-                E item = p.item;
-                if (item != null) {
-                    nextNode = p;
-                    nextItem = item;
-                    return x;
-                } else {
-                    // skip over nulls
-                    Node<E> next = succ(p);
-                    if (pred != null && next != null)
-                        pred.casNext(p, next);
-                    p = next;
-                }
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return nextNode != null;
-        }
-
-        @Override
-        public E next() {
-            if (nextNode == null) throw new NoSuchElementException();
-            return advance();
-        }
-
-        @Override
-        public void remove() {
-            Node<E> l = lastRet;
-            if (l == null) throw new IllegalStateException();
-            // rely on a future traversal to relink.
-            l.item = null;
-            lastRet = null;
-        }
-    }
-
     /**
      * Saves this queue to a stream (that is, serializes it).
      *
@@ -831,6 +730,79 @@ public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements
             h = t = new Node<E>(null);
         head = h;
         tail = t;
+    }
+
+    /**
+     * Returns a {@link Spliterator} over the elements in this queue.
+     *
+     * <p>The returned spliterator is
+     * <a href="package-summary.html#Weakly"><i>weakly consistent</i></a>.
+     *
+     * <p>The {@code Spliterator} reports {@link Spliterator#CONCURRENT},
+     * {@link Spliterator#ORDERED}, and {@link Spliterator#NONNULL}.
+     *
+     * @return a {@code Spliterator} over the elements in this queue
+     * @implNote The {@code Spliterator} implements {@code trySplit} to permit limited
+     * parallelism.
+     * @since 1.8
+     */
+    @Override
+    public Spliterator<E> spliterator() {
+        return new CLQSpliterator<E>(this);
+    }
+
+    private boolean casTail(Node<E> cmp, Node<E> val) {
+        return UNSAFE.compareAndSwapObject(this, tailOffset, cmp, val);
+    }
+
+    // Unsafe mechanics
+
+    private boolean casHead(Node<E> cmp, Node<E> val) {
+        return UNSAFE.compareAndSwapObject(this, headOffset, cmp, val);
+    }
+
+    private static class Node<E> {
+        private static final sun.misc.Unsafe UNSAFE;
+        private static final long itemOffset;
+        private static final long nextOffset;
+
+        static {
+            try {
+                UNSAFE = Lava.UNSAFE;
+                Class<?> k = Node.class;
+                itemOffset = UNSAFE.objectFieldOffset
+                        (k.getDeclaredField("item"));
+                nextOffset = UNSAFE.objectFieldOffset
+                        (k.getDeclaredField("next"));
+            } catch (Exception e) {
+                throw new Error(e);
+            }
+        }
+
+        volatile E item;
+        volatile Node<E> next;
+
+        // Unsafe mechanics
+
+        /**
+         * Constructs a new node.  Uses relaxed write because item can
+         * only be seen after publication via casNext.
+         */
+        Node(E item) {
+            UNSAFE.putObject(this, itemOffset, item);
+        }
+
+        boolean casItem(E cmp, E val) {
+            return UNSAFE.compareAndSwapObject(this, itemOffset, cmp, val);
+        }
+
+        void lazySetNext(Node<E> val) {
+            UNSAFE.putOrderedObject(this, nextOffset, val);
+        }
+
+        boolean casNext(Node<E> cmp, Node<E> val) {
+            return UNSAFE.compareAndSwapObject(this, nextOffset, cmp, val);
+        }
     }
 
     /**
@@ -929,59 +901,85 @@ public class CheckedConcurrentLinkedQueue<E> extends AbstractQueue<E> implements
         }
     }
 
-    /**
-     * Returns a {@link Spliterator} over the elements in this queue.
-     *
-     * <p>The returned spliterator is
-     * <a href="package-summary.html#Weakly"><i>weakly consistent</i></a>.
-     *
-     * <p>The {@code Spliterator} reports {@link Spliterator#CONCURRENT},
-     * {@link Spliterator#ORDERED}, and {@link Spliterator#NONNULL}.
-     *
-     * @return a {@code Spliterator} over the elements in this queue
-     * @implNote The {@code Spliterator} implements {@code trySplit} to permit limited
-     * parallelism.
-     * @since 1.8
-     */
-    @Override
-    public Spliterator<E> spliterator() {
-        return new CLQSpliterator<E>(this);
-    }
+    private class Itr implements Iterator<E> {
+        /**
+         * Next node to return item for.
+         */
+        private Node<E> nextNode;
 
-    /**
-     * Throws NullPointerException if argument is null.
-     *
-     * @param v the element
-     */
-    private static void checkNotNull(Object v) {
-        if (v == null)
-            throw new NullPointerException();
-    }
+        /**
+         * nextItem holds on to item fields because once we claim
+         * that an element exists in hasNext(), we must return it in
+         * the following next() call even if it was in the process of
+         * being removed when hasNext() was called.
+         */
+        private E nextItem;
 
-    private boolean casTail(Node<E> cmp, Node<E> val) {
-        return UNSAFE.compareAndSwapObject(this, tailOffset, cmp, val);
-    }
+        /**
+         * Node of the last returned item, to support remove.
+         */
+        private Node<E> lastRet;
 
-    private boolean casHead(Node<E> cmp, Node<E> val) {
-        return UNSAFE.compareAndSwapObject(this, headOffset, cmp, val);
-    }
+        Itr() {
+            advance();
+        }
 
-    // Unsafe mechanics
+        /**
+         * Moves to next valid node and returns item to return for
+         * next(), or null if no such.
+         */
+        private E advance() {
+            lastRet = nextNode;
+            E x = nextItem;
 
-    private static final sun.misc.Unsafe UNSAFE;
-    private static final long headOffset;
-    private static final long tailOffset;
+            Node<E> pred, p;
+            if (nextNode == null) {
+                p = first();
+                pred = null;
+            } else {
+                pred = nextNode;
+                p = succ(nextNode);
+            }
 
-    static {
-        try {
-            UNSAFE = Lava.UNSAFE;
-            Class<?> k = CheckedConcurrentLinkedQueue.class;
-            headOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("head"));
-            tailOffset = UNSAFE.objectFieldOffset
-                    (k.getDeclaredField("tail"));
-        } catch (Exception e) {
-            throw new Error(e);
+            for (; ; ) {
+                if (p == null) {
+                    nextNode = null;
+                    nextItem = null;
+                    return x;
+                }
+                E item = p.item;
+                if (item != null) {
+                    nextNode = p;
+                    nextItem = item;
+                    return x;
+                } else {
+                    // skip over nulls
+                    Node<E> next = succ(p);
+                    if (pred != null && next != null)
+                        pred.casNext(p, next);
+                    p = next;
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nextNode != null;
+        }
+
+        @Override
+        public E next() {
+            if (nextNode == null) throw new NoSuchElementException();
+            return advance();
+        }
+
+        @Override
+        public void remove() {
+            Node<E> l = lastRet;
+            if (l == null) throw new IllegalStateException();
+            // rely on a future traversal to relink.
+            l.item = null;
+            lastRet = null;
         }
     }
 }

@@ -1,22 +1,20 @@
 package org.bukkit.command;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.command.defaults.HelpCommand;
 import org.bukkit.command.defaults.PluginsCommand;
-import org.bukkit.command.defaults.VersionCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
-import org.lavapowered.lava.commands.ModsCommand;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class SimpleCommandMap implements CommandMap {
     private static final Pattern PATTERN_ON_SPACE = Pattern.compile(" ", Pattern.LITERAL);
-    protected final Map<String, Command> knownCommands = new HashMap<>();
+    protected final Map<String, Command> knownCommands = new HashMap<String, Command>();
     private final Server server;
 
     public SimpleCommandMap(final Server server) {
@@ -26,8 +24,7 @@ public class SimpleCommandMap implements CommandMap {
 
     private void setDefaultCommands() {
         register("bukkit", new PluginsCommand("plugins"));
-        register("bukkit", new VersionCommand("version"));
-        register("lava", new ModsCommand("mods"));
+        register("bukkit", new TimingsCommand("timings"));
     }
 
     public void setFallbackCommands() {
@@ -56,8 +53,8 @@ public class SimpleCommandMap implements CommandMap {
      * {@inheritDoc}
      */
     public boolean register(String label, String fallbackPrefix, Command command) {
-        label = label.toLowerCase(Locale.ENGLISH).trim();
-        fallbackPrefix = fallbackPrefix.toLowerCase(Locale.ENGLISH).trim();
+        label = label.toLowerCase(java.util.Locale.ENGLISH).trim();
+        fallbackPrefix = fallbackPrefix.toLowerCase(java.util.Locale.ENGLISH).trim();
         boolean registered = register(label, command, false, fallbackPrefix);
 
         Iterator<String> iterator = command.getAliases().iterator();
@@ -124,7 +121,7 @@ public class SimpleCommandMap implements CommandMap {
             return false;
         }
 
-        String sentCommandLabel = args[0].toLowerCase(Locale.ENGLISH);
+        String sentCommandLabel = args[0].toLowerCase(java.util.Locale.ENGLISH);
         Command target = getCommand(sentCommandLabel);
 
         if (target == null) {
@@ -132,11 +129,15 @@ public class SimpleCommandMap implements CommandMap {
         }
 
         try {
+            target.timings.startTiming(); // Spigot
             // Note: we don't return the result of target.execute as thats success / failure, we return handled (true) or not handled (false)
             target.execute(sender, sentCommandLabel, Arrays.copyOfRange(args, 1, args.length));
+            target.timings.stopTiming(); // Spigot
         } catch (CommandException ex) {
+            target.timings.stopTiming(); // Spigot
             throw ex;
         } catch (Throwable ex) {
+            target.timings.stopTiming(); // Spigot
             throw new CommandException("Unhandled exception executing '" + commandLine + "' in " + target, ex);
         }
 
@@ -153,7 +154,8 @@ public class SimpleCommandMap implements CommandMap {
     }
 
     public Command getCommand(String name) {
-        return knownCommands.get(name.toLowerCase(Locale.ENGLISH));
+        Command target = knownCommands.get(name.toLowerCase(java.util.Locale.ENGLISH));
+        return target;
     }
 
     public List<String> tabComplete(CommandSender sender, String cmdLine) {
@@ -167,7 +169,7 @@ public class SimpleCommandMap implements CommandMap {
         int spaceIndex = cmdLine.indexOf(' ');
 
         if (spaceIndex == -1) {
-            ArrayList<String> completions = new ArrayList<>();
+            ArrayList<String> completions = new ArrayList<String>();
             Map<String, Command> knownCommands = this.knownCommands;
 
             final String prefix = (sender instanceof Player ? "/" : "");
@@ -186,7 +188,7 @@ public class SimpleCommandMap implements CommandMap {
                 }
             }
 
-            completions.sort(String.CASE_INSENSITIVE_ORDER);
+            Collections.sort(completions, String.CASE_INSENSITIVE_ORDER);
             return completions;
         }
 
@@ -228,7 +230,7 @@ public class SimpleCommandMap implements CommandMap {
             }
 
             String[] commandStrings = entry.getValue();
-            List<String> targets = new ArrayList<>();
+            List<String> targets = new ArrayList<String>();
             StringBuilder bad = new StringBuilder();
 
             for (String commandString : commandStrings) {
@@ -252,9 +254,9 @@ public class SimpleCommandMap implements CommandMap {
 
             // We register these as commands so they have absolute priority.
             if (targets.size() > 0) {
-                knownCommands.put(alias.toLowerCase(Locale.ENGLISH), new FormattedCommandAlias(alias.toLowerCase(Locale.ENGLISH), targets.toArray(new String[targets.size()])));
+                knownCommands.put(alias.toLowerCase(java.util.Locale.ENGLISH), new FormattedCommandAlias(alias.toLowerCase(java.util.Locale.ENGLISH), targets.toArray(new String[targets.size()])));
             } else {
-                knownCommands.remove(alias.toLowerCase(Locale.ENGLISH));
+                knownCommands.remove(alias.toLowerCase(java.util.Locale.ENGLISH));
             }
         }
     }

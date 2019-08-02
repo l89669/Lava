@@ -1,6 +1,6 @@
 package org.bukkit.potion;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Color;
 
 import java.util.HashMap;
@@ -146,7 +146,7 @@ public abstract class PotionEffectType {
      * Loot table unluck.
      */
     public static final PotionEffectType UNLUCK = new PotionEffectTypeWrapper(27);
-    private static final Map<Integer, PotionEffectType> byId = new HashMap<Integer, PotionEffectType>(); // Cauldron change underlying storage to map
+    private static final PotionEffectType[] byId = new PotionEffectType[300];
     private static final Map<String, PotionEffectType> byName = new HashMap<String, PotionEffectType>();
     // will break on updates.
     private static boolean acceptingNew = true;
@@ -163,13 +163,11 @@ public abstract class PotionEffectType {
      * @return Resulting type, or null if not found.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static PotionEffectType getById(int id) {
-        if (id >= byId.size() || id < 0) // Cauldron
-        {
+        if (id >= byId.length || id < 0)
             return null;
-        }
-        return byId.get(id); // Cauldron
+        return byId[id];
     }
 
     /**
@@ -191,8 +189,6 @@ public abstract class PotionEffectType {
      * @param type PotionType to register
      */
     public static void registerPotionEffectType(PotionEffectType type) {
-        // Cauldron start - allow vanilla to replace potions
-        /*
         if (byId[type.id] != null || byName.containsKey(type.getName().toLowerCase(java.util.Locale.ENGLISH))) {
             throw new IllegalArgumentException("Cannot set already-set type");
         } else if (!acceptingNew) {
@@ -201,8 +197,6 @@ public abstract class PotionEffectType {
         }
 
         byId[type.id] = type;
-        */
-        byId.put(type.id, type);
         byName.put(type.getName().toLowerCase(java.util.Locale.ENGLISH), type);
     }
 
@@ -220,24 +214,17 @@ public abstract class PotionEffectType {
      * @return Array of types.
      */
     public static PotionEffectType[] values() {
-        // Cauldron start
-        int maxId = 0;
-        for (int id : byId.keySet()) {
-            maxId = Math.max(maxId, id);
-        }
-        PotionEffectType[] result = new PotionEffectType[maxId + 1];
-        return byId.values().toArray(result); // Cauldron change underlying storage to map
-        // Cauldron end
+        return byId.clone();
     }
 
     /**
      * Creates a PotionEffect from this PotionEffectType, applying duration
      * modifiers and checks.
      *
-     * @see PotionBrewer#createEffect(PotionEffectType, int, int)
-     * @param duration time in ticks
+     * @param duration  time in ticks
      * @param amplifier the effect's amplifier
      * @return a resulting potion effect
+     * @see PotionBrewer#createEffect(PotionEffectType, int, int)
      */
     public PotionEffect createEffect(int duration, int amplifier) {
         return new PotionEffect(this, isInstant() ? 1 : (int) (duration * getDurationModifier()), amplifier);
@@ -256,6 +243,7 @@ public abstract class PotionEffectType {
      * @return Unique ID
      * @deprecated Magic value
      */
+    @Deprecated
     public int getId() {
         return id;
     }
@@ -290,10 +278,7 @@ public abstract class PotionEffectType {
             return false;
         }
         final PotionEffectType other = (PotionEffectType) obj;
-        if (this.id != other.id) {
-            return false;
-        }
-        return true;
+        return this.id == other.id;
     }
 
     @Override

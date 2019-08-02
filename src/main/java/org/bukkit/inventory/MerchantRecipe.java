@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Represents a merchant's trade.
- *
+ * <p>
  * Trades can take one or two ingredients, and provide one result. The
  * ingredients' Itemstack amounts are respected in the trade.
  * <br>

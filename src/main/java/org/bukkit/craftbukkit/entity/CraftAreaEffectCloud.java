@@ -195,14 +195,14 @@ public class CraftAreaEffectCloud extends CraftEntity implements AreaEffectCloud
     }
 
     @Override
-    public void setBasePotionData(PotionData data) {
-        Validate.notNull(data, "PotionData cannot be null");
-        getHandle().setType(CraftPotionUtil.fromBukkit(data));
+    public PotionData getBasePotionData() {
+        return CraftPotionUtil.toBukkit(getHandle().getType());
     }
 
     @Override
-    public PotionData getBasePotionData() {
-        return CraftPotionUtil.toBukkit(getHandle().getType());
+    public void setBasePotionData(PotionData data) {
+        Validate.notNull(data, "PotionData cannot be null");
+        getHandle().setType(CraftPotionUtil.fromBukkit(data));
     }
 
     public ProjectileSource getSource() {
@@ -212,9 +212,9 @@ public class CraftAreaEffectCloud extends CraftEntity implements AreaEffectCloud
 
     public void setSource(ProjectileSource shooter) {
         if (shooter instanceof CraftLivingEntity) {
-            getHandle().setOwner((EntityLiving) ((CraftLivingEntity) shooter).getHandle());
+            getHandle().setOwner(((CraftLivingEntity) shooter).getHandle());
         } else {
-            getHandle().setOwner((EntityLiving) null);
+            getHandle().setOwner(null);
         }
     }
 }

@@ -8,9 +8,11 @@ import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.item.EntityExpBottle;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.DamageSource;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,6 +38,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+    public String entityName;
     private CraftEntityEquipment equipment;
 
     public CraftLivingEntity(final CraftServer server, final EntityLivingBase entity) {
@@ -44,23 +47,33 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         if (entity instanceof EntityLiving || entity instanceof EntityArmorStand) {
             equipment = new CraftEntityEquipment(this);
         }
+        this.entityName = EntityRegistry.entityTypeMap.get(entity.getClass());
+        if (entityName == null) {
+            entityName = entity.getName();
+        }
     }
 
+    @Override
     public double getHealth() {
         return Math.min(Math.max(0, getHandle().getHealth()), getMaxHealth());
     }
 
+    @Override
     public void setHealth(double health) {
         health = (float) health;
         if ((health < 0) || (health > getMaxHealth())) {
-            throw new IllegalArgumentException("Health must be between 0 and " + getMaxHealth() + "(" + health + ")");
+            // Paper - Be more informative
+            throw new IllegalArgumentException("Health must be between 0 and " + getMaxHealth() + ", but was " + health
+                    + ". (attribute base value: " + this.getHandle().getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).getAttributeValue()
+                    + (this instanceof CraftPlayer ? ", player: " + this.getName() + ')' : ')'));
         }
-
+        // Cauldron start - setHealth must be set before onDeath to respect events that may prevent death.
         getHandle().setHealth((float) health);
 
-        if (health == 0) {
-            getHandle().onDeath(DamageSource.GENERIC);
+        if (entity instanceof EntityPlayerMP && health == 0) {
+            ((EntityPlayerMP) entity).onDeath(DamageSource.GENERIC);
         }
+        // Cauldron end
     }
 
     public double getMaxHealth() {
@@ -201,7 +214,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public String toString() {
-        return "CraftLivingEntity{" + "id=" + getEntityId() + '}';
+        return "CraftLivingEntity{" + "id=" + getEntityId() + ", name=" + this.entityName + "}";
     }
 
     public Player getKiller() {
@@ -357,12 +370,12 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
         return equipment;
     }
 
-    public void setCanPickupItems(boolean pickup) {
-        getHandle().thisisatest = pickup;
-    }
-
     public boolean getCanPickupItems() {
         return getHandle().thisisatest;
+    }
+
+    public void setCanPickupItems(boolean pickup) {
+        getHandle().thisisatest = pickup;
     }
 
     @Override
@@ -438,16 +451,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     @Override
     public boolean hasAI() {
-        return (this.getHandle() instanceof EntityLiving) ? !((EntityLiving) this.getHandle()).isAIDisabled() : false;
-    }
-
-    @Override
-    public void setCollidable(boolean collidable) {
-        getHandle().collides = collidable;
+        return (this.getHandle() instanceof EntityLiving) && !((EntityLiving) this.getHandle()).isAIDisabled();
     }
 
     @Override
     public boolean isCollidable() {
         return getHandle().collides;
+    }
+
+    @Override
+    public void setCollidable(boolean collidable) {
+        getHandle().collides = collidable;
     }
 }

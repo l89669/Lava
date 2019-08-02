@@ -22,7 +22,7 @@ public enum SandstoneType {
 
     private final byte data;
 
-    private SandstoneType(final int data) {
+    SandstoneType(final int data) {
         this.data = (byte) data;
     }
 
@@ -31,10 +31,10 @@ public enum SandstoneType {
      *
      * @param data Data value to fetch
      * @return The {@link SandstoneType} representing the given value, or null
-     *     if it doesn't exist
+     * if it doesn't exist
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static SandstoneType getByData(final byte data) {
         return BY_DATA.get(data);
     }
@@ -45,7 +45,7 @@ public enum SandstoneType {
      * @return A byte containing the data value of this sandstone type
      * @deprecated Magic value
      */
-
+    @Deprecated
     public byte getData() {
         return data;
     }

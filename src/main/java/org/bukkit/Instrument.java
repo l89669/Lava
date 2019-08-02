@@ -62,7 +62,7 @@ public enum Instrument {
 
     private final byte type;
 
-    private Instrument(final int type) {
+    Instrument(final int type) {
         this.type = (byte) type;
     }
 
@@ -73,7 +73,7 @@ public enum Instrument {
      * @return The instrument
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static Instrument getByType(final byte type) {
         return BY_DATA.get(type);
     }
@@ -82,7 +82,7 @@ public enum Instrument {
      * @return The type ID of this instrument.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public byte getType() {
         return this.type;
     }

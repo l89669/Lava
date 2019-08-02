@@ -95,6 +95,18 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
         }
     }
 
+    CraftMetaFirework(Map<String, Object> map) {
+        super(map);
+
+        Integer power = SerializableMeta.getObject(Integer.class, map, FLIGHT.BUKKIT, true);
+        if (power != null) {
+            setPower(power);
+        }
+
+        Iterable<?> effects = SerializableMeta.getObject(Iterable.class, map, EXPLOSIONS.BUKKIT, true);
+        safelyAddEffects(effects);
+    }
+
     static FireworkEffect getEffect(NBTTagCompound explosion) {
         FireworkEffect.Builder effect = FireworkEffect.builder()
                 .flicker(explosion.getBoolean(EXPLOSION_FLICKER.NBT))
@@ -173,16 +185,18 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
         }
     }
 
-    CraftMetaFirework(Map<String, Object> map) {
-        super(map);
-
-        Integer power = SerializableMeta.getObject(Integer.class, map, FLIGHT.BUKKIT, true);
-        if (power != null) {
-            setPower(power);
+    static void addColors(NBTTagCompound compound, ItemMetaKey key, List<Color> colors) {
+        if (colors.isEmpty()) {
+            return;
         }
 
-        Iterable<?> effects = SerializableMeta.getObject(Iterable.class, map, EXPLOSIONS.BUKKIT, true);
-        safelyAddEffects(effects);
+        final int[] colorArray = new int[colors.size()];
+        int i = 0;
+        for (Color color : colors) {
+            colorArray[i++] = color.asRGB();
+        }
+
+        compound.setIntArray(key.NBT, colorArray);
     }
 
     public boolean hasEffects() {
@@ -232,20 +246,6 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
         if (hasPower()) {
             fireworks.setByte(FLIGHT.NBT, (byte) power);
         }
-    }
-
-    static void addColors(NBTTagCompound compound, ItemMetaKey key, List<Color> colors) {
-        if (colors.isEmpty()) {
-            return;
-        }
-
-        final int[] colorArray = new int[colors.size()];
-        int i = 0;
-        for (Color color : colors) {
-            colorArray[i++] = color.asRGB();
-        }
-
-        compound.setIntArray(key.NBT, colorArray);
     }
 
     @Override
@@ -362,7 +362,7 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
     }
 
     public List<FireworkEffect> getEffects() {
-        return this.effects == null ? ImmutableList.<FireworkEffect>of() : ImmutableList.copyOf(this.effects);
+        return this.effects == null ? ImmutableList.of() : ImmutableList.copyOf(this.effects);
     }
 
     public int getEffectsSize() {

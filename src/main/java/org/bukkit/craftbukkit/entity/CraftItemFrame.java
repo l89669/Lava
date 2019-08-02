@@ -19,6 +19,30 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
         super(server, entity);
     }
 
+    static int toInteger(Rotation rotation) {
+        // Translate Bukkit API rotation to NMS integer
+        switch (rotation) {
+            case NONE:
+                return 0;
+            case CLOCKWISE_45:
+                return 1;
+            case CLOCKWISE:
+                return 2;
+            case CLOCKWISE_135:
+                return 3;
+            case FLIPPED:
+                return 4;
+            case FLIPPED_45:
+                return 5;
+            case COUNTER_CLOCKWISE:
+                return 6;
+            case COUNTER_CLOCKWISE_45:
+                return 7;
+            default:
+                throw new IllegalArgumentException(rotation + " is not applicable to an ItemFrame");
+        }
+    }
+
     public boolean setFacingDirection(BlockFace face, boolean force) {
         if (!super.setFacingDirection(face, force)) {
             return false;
@@ -45,16 +69,21 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
         this.entity = frame;
     }
 
-    public void setItem(org.bukkit.inventory.ItemStack item) {
-        getHandle().setDisplayedItem(CraftItemStack.asNMSCopy(item));
-    }
-
     public org.bukkit.inventory.ItemStack getItem() {
         return CraftItemStack.asBukkitCopy(getHandle().getDisplayedItem());
     }
 
+    public void setItem(org.bukkit.inventory.ItemStack item) {
+        getHandle().setDisplayedItem(CraftItemStack.asNMSCopy(item));
+    }
+
     public Rotation getRotation() {
         return toBukkitRotation(getHandle().getRotation());
+    }
+
+    public void setRotation(Rotation rotation) {
+        Validate.notNull(rotation, "Rotation cannot be null");
+        getHandle().setItemRotation(toInteger(rotation));
     }
 
     Rotation toBukkitRotation(int value) {
@@ -78,35 +107,6 @@ public class CraftItemFrame extends CraftHanging implements ItemFrame {
                 return Rotation.COUNTER_CLOCKWISE_45;
             default:
                 throw new AssertionError("Unknown rotation " + value + " for " + getHandle());
-        }
-    }
-
-    public void setRotation(Rotation rotation) {
-        Validate.notNull(rotation, "Rotation cannot be null");
-        getHandle().setItemRotation(toInteger(rotation));
-    }
-
-    static int toInteger(Rotation rotation) {
-        // Translate Bukkit API rotation to NMS integer
-        switch (rotation) {
-            case NONE:
-                return 0;
-            case CLOCKWISE_45:
-                return 1;
-            case CLOCKWISE:
-                return 2;
-            case CLOCKWISE_135:
-                return 3;
-            case FLIPPED:
-                return 4;
-            case FLIPPED_45:
-                return 5;
-            case COUNTER_CLOCKWISE:
-                return 6;
-            case COUNTER_CLOCKWISE_45:
-                return 7;
-            default:
-                throw new IllegalArgumentException(rotation + " is not applicable to an ItemFrame");
         }
     }
 

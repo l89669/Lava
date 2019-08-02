@@ -1,6 +1,6 @@
 package org.bukkit.attribute;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.util.NumberConversions;
 
@@ -99,6 +99,6 @@ public class AttributeModifier implements ConfigurationSerializable {
         /**
          * Multiply amount by this value, after adding 1 to it.
          */
-        MULTIPLY_SCALAR_1;
+        MULTIPLY_SCALAR_1
     }
 }

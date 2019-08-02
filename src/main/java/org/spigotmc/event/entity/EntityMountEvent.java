@@ -11,12 +11,16 @@ import org.bukkit.event.entity.EntityEvent;
 public class EntityMountEvent extends EntityEvent implements Cancellable {
 
     private static final HandlerList handlers = new HandlerList();
-    private boolean cancelled;
     private final Entity mount;
+    private boolean cancelled;
 
     public EntityMountEvent(Entity what, Entity mount) {
         super(what);
         this.mount = mount;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public Entity getMount() {
@@ -35,10 +39,6 @@ public class EntityMountEvent extends EntityEvent implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

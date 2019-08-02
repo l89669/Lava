@@ -168,9 +168,9 @@ public interface AreaEffectCloud extends Entity {
     /**
      * Adds a custom potion effect to this cloud.
      *
-     * @param effect the potion effect to add
+     * @param effect    the potion effect to add
      * @param overwrite true if any existing effect of the same type should be
-     * overwritten
+     *                  overwritten
      * @return true if the effect was added as a result of this call
      */
     boolean addCustomEffect(PotionEffect effect, boolean overwrite);
@@ -215,12 +215,12 @@ public interface AreaEffectCloud extends Entity {
      *
      * @return the {@link ProjectileSource} that threw the LingeringPotion
      */
-    public ProjectileSource getSource();
+    ProjectileSource getSource();
 
     /**
      * Set the original source of this cloud.
      *
      * @param source the {@link ProjectileSource} that threw the LingeringPotion
      */
-    public void setSource(ProjectileSource source);
+    void setSource(ProjectileSource source);
 }

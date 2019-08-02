@@ -1,7 +1,7 @@
 package org.bukkit.conversations;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * BooleanPrompt is the base class for any prompt that requires a boolean
@@ -21,9 +21,8 @@ public abstract class BooleanPrompt extends ValidatingPrompt {
 
     @Override
     protected Prompt acceptValidatedInput(ConversationContext context, String input) {
-        if (input.equalsIgnoreCase("y") || input.equals("1") || input.equalsIgnoreCase("right") || input.equalsIgnoreCase("correct") || input.equalsIgnoreCase("valid")) {
+        if (input.equalsIgnoreCase("y") || input.equals("1") || input.equalsIgnoreCase("right") || input.equalsIgnoreCase("correct") || input.equalsIgnoreCase("valid"))
             input = "true"; // Spigot
-        }
         return acceptValidatedInput(context, BooleanUtils.toBoolean(input));
     }
 
@@ -32,7 +31,7 @@ public abstract class BooleanPrompt extends ValidatingPrompt {
      * response.
      *
      * @param context Context information about the conversation.
-     * @param input The user's boolean response.
+     * @param input   The user's boolean response.
      * @return The next {@link Prompt} in the prompt graph.
      */
     protected abstract Prompt acceptValidatedInput(ConversationContext context, boolean input);

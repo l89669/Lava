@@ -166,6 +166,10 @@ public final class Title {
         );
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     /**
      * Gets the text of this title
      *
@@ -215,10 +219,6 @@ public final class Title {
      */
     public int getFadeOut() {
         return this.fadeOut;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     /**
@@ -352,5 +352,4 @@ public final class Title {
             return new Title(this.title, this.subtitle, this.fadeIn, this.stay, this.fadeOut);
         }
     }
-
 }

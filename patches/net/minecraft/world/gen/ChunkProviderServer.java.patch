@@ -1,19 +1,22 @@
 --- ../src-base/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
 +++ ../src-work/minecraft/net/minecraft/world/gen/ChunkProviderServer.java
-@@ -5,12 +5,6 @@
+@@ -4,13 +4,14 @@
+ import com.google.common.collect.Sets;
  import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
  import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
- import it.unimi.dsi.fastutil.objects.ObjectIterator;
--import java.io.IOException;
--import java.util.Collection;
--import java.util.Iterator;
--import java.util.List;
--import java.util.Set;
--import javax.annotation.Nullable;
+-import it.unimi.dsi.fastutil.objects.ObjectIterator;
++
+ import java.io.IOException;
+ import java.util.Collection;
+ import java.util.Iterator;
+ import java.util.List;
+ import java.util.Set;
+ import javax.annotation.Nullable;
++
  import net.minecraft.crash.CrashReport;
  import net.minecraft.crash.CrashReportCategory;
  import net.minecraft.entity.EnumCreatureType;
-@@ -26,98 +20,94 @@
+@@ -26,98 +27,84 @@
  import net.minecraft.world.chunk.storage.IChunkLoader;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -21,20 +24,14 @@
  
 -public class ChunkProviderServer implements IChunkProvider
 -{
-+import javax.annotation.Nullable;
-+import java.io.IOException;
-+import java.util.Collection;
-+import java.util.Iterator;
-+import java.util.List;
-+import java.util.Set;
-+
 +public class ChunkProviderServer implements IChunkProvider {
      private static final Logger LOGGER = LogManager.getLogger();
 -    private final Set<Long> droppedChunksSet = Sets.<Long>newHashSet();
 +    public final Set<Long> droppedChunksSet = Sets.newHashSet();
      public final IChunkGenerator chunkGenerator;
      public final IChunkLoader chunkLoader;
-     public final Long2ObjectMap<Chunk> id2ChunkMap = new Long2ObjectOpenHashMap<Chunk>(8192);
+-    public final Long2ObjectMap<Chunk> id2ChunkMap = new Long2ObjectOpenHashMap<Chunk>(8192);
++    public final Long2ObjectMap<Chunk> id2ChunkMap = new Long2ObjectOpenHashMap<>(8192);
      public final WorldServer world;
 -    private final Set<Long> loadingChunks = com.google.common.collect.Sets.newHashSet();
 +    private final Set<Long> loadingChunks = Sets.newHashSet();
@@ -57,23 +54,23 @@
 -    {
 -        if (this.world.provider.canDropChunk(chunkIn.x, chunkIn.z))
 -        {
+-            this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.x, chunkIn.z)));
 +    public void queueUnload(Chunk chunkIn) {
 +        if (this.world.provider.canDropChunk(chunkIn.x, chunkIn.z)) {
-             this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.x, chunkIn.z)));
++            this.droppedChunksSet.add(ChunkPos.asLong(chunkIn.x, chunkIn.z));
              chunkIn.unloadQueued = true;
          }
      }
  
 -    public void queueUnloadAll()
 -    {
-+    public void queueUnloadAll() {
-         ObjectIterator objectiterator = this.id2ChunkMap.values().iterator();
- 
+-        ObjectIterator objectiterator = this.id2ChunkMap.values().iterator();
+-
 -        while (objectiterator.hasNext())
 -        {
 -            Chunk chunk = (Chunk)objectiterator.next();
-+        while (objectiterator.hasNext()) {
-+            Chunk chunk = (Chunk) objectiterator.next();
++    public void queueUnloadAll() {
++        for (Chunk chunk : this.id2ChunkMap.values()) {
              this.queueUnload(chunk);
          }
      }
@@ -84,7 +81,7 @@
 +    public Chunk getLoadedChunk(int x, int z) {
          long i = ChunkPos.asLong(x, z);
 -        Chunk chunk = (Chunk)this.id2ChunkMap.get(i);
-+        Chunk chunk = (Chunk) this.id2ChunkMap.get(i);
++        Chunk chunk = this.id2ChunkMap.get(i);
  
 -        if (chunk != null)
 -        {
@@ -149,7 +146,7 @@
                      // We can only use the async queue for already generated chunks
                      net.minecraftforge.common.chunkio.ChunkIOExecutor.queueChunkLoad(this.world, loader, this, x, z, runnable);
                      return null;
-@@ -130,20 +120,15 @@
+@@ -130,109 +117,84 @@
          return chunk;
      }
  
@@ -174,12 +171,16 @@
                  CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception generating new chunk");
                  CrashReportCategory crashreportcategory = crashreport.makeCategory("Chunk to be generated");
                  crashreportcategory.addCrashSection("Location", String.format("%d,%d", x, z));
-@@ -154,85 +139,65 @@
+-                crashreportcategory.addCrashSection("Position hash", Long.valueOf(i));
++                crashreportcategory.addCrashSection("Position hash", i);
+                 crashreportcategory.addCrashSection("Generator", this.chunkGenerator);
+                 throw new ReportedException(crashreport);
+             }
  
              this.id2ChunkMap.put(i, chunk);
              chunk.onLoad();
 -            chunk.populate(this, this.chunkGenerator);
-+            chunk.populateCB(this, this.chunkGenerator, false);
++            chunk.populateCB(this, this.chunkGenerator, true);
          }
  
          return chunk;
@@ -207,7 +208,7 @@
 -        {
 -            LOGGER.error("Couldn't load chunk", (Throwable)exception);
 +        } catch (Exception exception) {
-+            LOGGER.error("Couldn't load chunk", (Throwable) exception);
++            LOGGER.error("Couldn't load chunk", exception);
              return null;
          }
      }
@@ -220,7 +221,7 @@
 +        try {
              this.chunkLoader.saveExtraChunkData(this.world, chunkIn);
 +        } catch (Exception exception) {
-+            LOGGER.error("Couldn't save entities", (Throwable) exception);
++            LOGGER.error("Couldn't save entities", exception);
          }
 -        catch (Exception exception)
 -        {
@@ -237,9 +238,9 @@
              chunkIn.setLastSaveTime(this.world.getTotalWorldTime());
              this.chunkLoader.saveChunk(this.world, chunkIn);
 +        } catch (IOException ioexception) {
-+            LOGGER.error("Couldn't save chunk", (Throwable) ioexception);
++            LOGGER.error("Couldn't save chunk", ioexception);
 +        } catch (MinecraftException minecraftexception) {
-+            LOGGER.error("Couldn't save chunk; already in use by another instance of Minecraft?", (Throwable) minecraftexception);
++            LOGGER.error("Couldn't save chunk; already in use by another instance of Minecraft?", minecraftexception);
          }
 -        catch (IOException ioexception)
 -        {
@@ -281,7 +282,7 @@
                      return false;
                  }
              }
-@@ -241,87 +206,106 @@
+@@ -241,42 +203,39 @@
          return true;
      }
  
@@ -313,7 +314,7 @@
 +                for (int i = 0; i < 100 && iterator.hasNext(); iterator.remove()) {
                      Long olong = iterator.next();
 -                    Chunk chunk = (Chunk)this.id2ChunkMap.get(olong);
-+                    Chunk chunk = (Chunk) this.id2ChunkMap.get(olong);
++                    Chunk chunk = this.id2ChunkMap.get(olong);
  
 -                    if (chunk != null && chunk.unloadQueued)
 -                    {
@@ -337,12 +338,12 @@
              }
  
 -            if (this.id2ChunkMap.isEmpty()) net.minecraftforge.common.DimensionManager.unloadWorld(this.world.provider.getDimension());
--
-+            // Lava - stops forge from automatically unloading world on startup
++            // Lava - Stops forge automatically unloading world on startup.
 +            // if (this.id2ChunkMap.isEmpty()) net.minecraftforge.common.DimensionManager.unloadWorld(this.world.provider.getDimension());
+ 
              this.chunkLoader.chunkTick();
          }
- 
+@@ -284,44 +243,67 @@
          return false;
      }
  

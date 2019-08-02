@@ -17,7 +17,7 @@ public abstract class TexturedMaterial extends MaterialData {
      * @param type the raw type id
      * @deprecated Magic value
      */
-
+    @Deprecated
     public TexturedMaterial(int type) {
         super(type);
     }
@@ -27,7 +27,7 @@ public abstract class TexturedMaterial extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public TexturedMaterial(final int type, final byte data) {
         super(type, data);
     }
@@ -37,7 +37,7 @@ public abstract class TexturedMaterial extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public TexturedMaterial(final Material type, final byte data) {
         super(type, data);
     }
@@ -67,8 +67,7 @@ public abstract class TexturedMaterial extends MaterialData {
     /**
      * Sets the material this block is made of
      *
-     * @param material
-     *            New material of this block
+     * @param material New material of this block
      */
     public void setMaterial(Material material) {
         if (getTextures().contains(material)) {
@@ -84,7 +83,7 @@ public abstract class TexturedMaterial extends MaterialData {
      * @return index of data in textures list
      * @deprecated Magic value
      */
-
+    @Deprecated
     protected int getTextureIndex() {
         return getData(); // Default to using all bits - override for other mappings
     }
@@ -95,7 +94,7 @@ public abstract class TexturedMaterial extends MaterialData {
      * @param idx - index of data in textures list
      * @deprecated Magic value
      */
-
+    @Deprecated
     protected void setTextureIndex(int idx) {
         setData((byte) idx); // Default to using all bits - override for other mappings
     }

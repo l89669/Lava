@@ -12,7 +12,7 @@ public class Stairs extends MaterialData implements Directional {
      * @param type the raw type id
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Stairs(final int type) {
         super(type);
     }
@@ -26,7 +26,7 @@ public class Stairs extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Stairs(final int type, final byte data) {
         super(type, data);
     }
@@ -36,7 +36,7 @@ public class Stairs extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Stairs(final Material type, final byte data) {
         super(type, data);
     }
@@ -118,7 +118,7 @@ public class Stairs extends MaterialData implements Directional {
      * Set step inverted state
      *
      * @param inv - true if step is inverted (top half), false if step is
-     *     normal (bottom half)
+     *            normal (bottom half)
      */
     public void setInverted(boolean inv) {
         int dat = getData() & 0x3;

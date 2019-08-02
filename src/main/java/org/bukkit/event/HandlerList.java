@@ -140,9 +140,8 @@ public class HandlerList {
      * @param listener listener to register
      */
     public synchronized void register(RegisteredListener listener) {
-        if (handlerslots.get(listener.getPriority()).contains(listener)) {
+        if (handlerslots.get(listener.getPriority()).contains(listener))
             throw new IllegalStateException("This listener is already registered to priority " + listener.getPriority().toString());
-        }
         handlers = null;
         handlerslots.get(listener.getPriority()).add(listener);
     }
@@ -184,9 +183,7 @@ public class HandlerList {
                 }
             }
         }
-        if (changed) {
-            handlers = null;
-        }
+        if (changed) handlers = null;
     }
 
     /**
@@ -204,18 +201,14 @@ public class HandlerList {
                 }
             }
         }
-        if (changed) {
-            handlers = null;
-        }
+        if (changed) handlers = null;
     }
 
     /**
      * Bake HashMap and ArrayLists to 2d array - does nothing if not necessary
      */
     public synchronized void bake() {
-        if (handlers != null) {
-            return; // don't re-bake when still valid
-        }
+        if (handlers != null) return; // don't re-bake when still valid
         List<RegisteredListener> entries = new ArrayList<RegisteredListener>();
         for (Entry<EventPriority, ArrayList<RegisteredListener>> entry : handlerslots.entrySet()) {
             entries.addAll(entry.getValue());
@@ -230,9 +223,7 @@ public class HandlerList {
      */
     public RegisteredListener[] getRegisteredListeners() {
         RegisteredListener[] handlers;
-        while ((handlers = this.handlers) == null) {
-            bake(); // This prevents fringe cases of returning null
-        }
+        while ((handlers = this.handlers) == null) bake(); // This prevents fringe cases of returning null
         return handlers;
     }
 }

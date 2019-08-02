@@ -10,7 +10,7 @@ import org.bukkit.TreeSpecies;
  * @deprecated Flower pots are now tile entities, use
  * {@link org.bukkit.block.FlowerPot}.
  */
-
+@Deprecated
 public class FlowerPot extends MaterialData {
 
     /**
@@ -24,7 +24,7 @@ public class FlowerPot extends MaterialData {
      * @param type the raw type id
      * @deprecated Magic value
      */
-
+    @Deprecated
     public FlowerPot(final int type) {
         super(type);
     }
@@ -38,7 +38,7 @@ public class FlowerPot extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public FlowerPot(final int type, final byte data) {
         super(type, data);
     }
@@ -48,7 +48,7 @@ public class FlowerPot extends MaterialData {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public FlowerPot(final Material type, final byte data) {
         super(type, data);
     }
@@ -57,7 +57,7 @@ public class FlowerPot extends MaterialData {
      * Get the material in the flower pot
      *
      * @return material MaterialData for the block currently in the flower pot
-     *     or null if empty
+     * or null if empty
      */
     public MaterialData getContents() {
         switch (getData()) {

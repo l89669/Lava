@@ -71,7 +71,6 @@ import org.bukkit.event.vehicle.VehicleCreateEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.meta.BookMeta;
-import org.spigotmc.AsyncCatcher;
 
 import javax.annotation.Nullable;
 import java.net.InetAddress;
@@ -83,6 +82,7 @@ import java.util.Map;
 public class CraftEventFactory {
     public static final DamageSource MELTING = CraftDamageSource.copyOf(DamageSource.ON_FIRE);
     public static final DamageSource POISON = CraftDamageSource.copyOf(DamageSource.MAGIC);
+    private static final Function<? super Double, Double> ZERO = Functions.constant(-0.0);
     public static Block blockDamage; // For use in EntityDamageByBlockEvent
     public static Entity entityDamage; // For use in EntityDamageByEntityEvent
 
@@ -408,15 +408,15 @@ public class CraftEventFactory {
         Bukkit.getServer().getPluginManager().callEvent(event);
 
         victim.expToDrop = event.getDroppedExp();
-        //Lava start - clear captured drops to allow plugins make changes to them
+        // Lava start - clear captured drops to allow plugins make changes to them
         victim.capturedDrops.clear();
         for (org.bukkit.inventory.ItemStack stack : event.getDrops()) {
             if (stack == null || stack.getType() == Material.AIR || stack.getAmount() == 0) continue;
-            EntityItem entityitem = new EntityItem(victim.world, entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ(), CraftItemStack.asNMSCopy(stack));
-            // world.dropItemNaturally(entity.getLocation(), stack); we don't want this, spawn items in EntityLivingBase.onDeath() (cauldron stuff)
+            net.minecraft.entity.item.EntityItem entityitem = new net.minecraft.entity.item.EntityItem(victim.world, entity.getLocation().getX(), entity.getLocation().getY(), entity.getLocation().getZ(), CraftItemStack.asNMSCopy(stack));
+            // world.dropItemNaturally(entity.getLocation(), stack); // Cauldron - we don't want this, spawn items in EntityLivingBase.onDeath()
             victim.capturedDrops.add(entityitem);
         }
-        //Lava end
+        // Lava end
         return event;
     }
 
@@ -598,8 +598,6 @@ public class CraftEventFactory {
 
         return event;
     }
-
-    private static final Function<? super Double, Double> ZERO = Functions.constant(-0.0);
 
     public static EntityDamageEvent handleLivingEntityDamageEvent(Entity damagee, DamageSource source, double rawDamage, double hardHatModifier, double blockingModifier, double armorModifier, double resistanceModifier, double magicModifier, double absorptionModifier, Function<Double, Double> hardHat, Function<Double, Double> blocking, Function<Double, Double> armor, Function<Double, Double> resistance, Function<Double, Double> magic, Function<Double, Double> absorption) {
         Map<DamageModifier, Double> modifiers = new EnumMap<DamageModifier, Double>(DamageModifier.class);
@@ -904,13 +902,8 @@ public class CraftEventFactory {
     }
 
     public static void handleInventoryCloseEvent(EntityPlayer human) {
-        if (AsyncCatcher.catchInv()) {
-            return;
-        }
         InventoryCloseEvent event = new InventoryCloseEvent(human.openContainer.getBukkitView());
-        if (human.openContainer.getBukkitView() != null) {
-            human.world.getServer().getPluginManager().callEvent(event);
-        }
+        human.world.getServer().getPluginManager().callEvent(event);
         human.openContainer.transferTo(human.inventoryContainer, human.getBukkitEntity());
     }
 

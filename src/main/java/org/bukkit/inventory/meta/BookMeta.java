@@ -124,17 +124,17 @@ public interface BookMeta extends ItemMeta {
      * Clears the existing book pages, and sets the book to use the provided
      * pages. Maximum 50 pages with 256 characters per page.
      *
-     * @param pages A list of strings, each being a page
+     * @param pages A list of pages to set the book to use
      */
-    void setPages(String... pages);
+    void setPages(List<String> pages);
 
     /**
      * Clears the existing book pages, and sets the book to use the provided
      * pages. Maximum 50 pages with 256 characters per page.
      *
-     * @param pages A list of pages to set the book to use
+     * @param pages A list of strings, each being a page
      */
-    void setPages(List<String> pages);
+    void setPages(String... pages);
 
     /**
      * Adds new pages to the end of the book. Up to a maximum of 50 pages with
@@ -175,11 +175,12 @@ public interface BookMeta extends ItemMeta {
         /**
          * Unused; unobtainable by players. Can't be copied.
          */
-        TATTERED;
+        TATTERED
     }
 
     // Spigot start
-    public class Spigot extends ItemMeta.Spigot {
+    class Spigot extends ItemMeta.Spigot {
+
         /**
          * Gets the specified page in the book. The given page must exist.
          *
@@ -217,9 +218,9 @@ public interface BookMeta extends ItemMeta {
          * Clears the existing book pages, and sets the book to use the provided
          * pages. Maximum 50 pages with 256 characters per page.
          *
-         * @param pages A list of component arrays, each being a page
+         * @param pages A list of pages to set the book to use
          */
-        public void setPages(BaseComponent[]... pages) {
+        public void setPages(List<BaseComponent[]> pages) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
@@ -227,9 +228,9 @@ public interface BookMeta extends ItemMeta {
          * Clears the existing book pages, and sets the book to use the provided
          * pages. Maximum 50 pages with 256 characters per page.
          *
-         * @param pages A list of pages to set the book to use
+         * @param pages A list of component arrays, each being a page
          */
-        public void setPages(List<BaseComponent[]> pages) {
+        public void setPages(BaseComponent[]... pages) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 

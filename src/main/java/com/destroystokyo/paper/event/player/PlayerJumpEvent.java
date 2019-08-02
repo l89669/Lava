@@ -26,6 +26,10 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
         this.to = to;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Gets the cancellation state of this event. A cancelled event will not
      * be executed in the server, but will still pass to other plugins
@@ -36,6 +40,7 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
      *
      * @return true if this event is cancelled
      */
+    @Override
     public boolean isCancelled() {
         return cancel;
     }
@@ -50,6 +55,7 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
      *
      * @param cancel true if you wish to cancel this event
      */
+    @Override
     public void setCancelled(boolean cancel) {
         this.cancel = cancel;
     }
@@ -92,10 +98,6 @@ public class PlayerJumpEvent extends PlayerEvent implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

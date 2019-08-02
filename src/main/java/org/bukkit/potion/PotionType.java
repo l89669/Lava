@@ -23,7 +23,7 @@ public enum PotionType {
     REGEN(PotionEffectType.REGENERATION, true, true),
     STRENGTH(PotionEffectType.INCREASE_DAMAGE, true, true),
     WEAKNESS(PotionEffectType.WEAKNESS, false, true),
-    LUCK(PotionEffectType.LUCK, false, false);;
+    LUCK(PotionEffectType.LUCK, false, false);
 
     private final PotionEffectType effect;
     private final boolean upgradeable;
@@ -38,7 +38,7 @@ public enum PotionType {
     /**
      * @deprecated Non-functional
      */
-
+    @Deprecated
     public static PotionType getByDamageValue(int damage) {
         return null;
     }
@@ -46,15 +46,13 @@ public enum PotionType {
     /**
      * @deprecated Misleading
      */
-
+    @Deprecated
     public static PotionType getByEffect(PotionEffectType effectType) {
-        if (effectType == null) {
+        if (effectType == null)
             return WATER;
-        }
         for (PotionType type : PotionType.values()) {
-            if (effectType.equals(type.effect)) {
+            if (effectType.equals(type.effect))
                 return type;
-            }
         }
         return null;
     }
@@ -91,7 +89,7 @@ public enum PotionType {
     /**
      * @deprecated Non-functional
      */
-
+    @Deprecated
     public int getDamageValue() {
         return this.ordinal();
     }

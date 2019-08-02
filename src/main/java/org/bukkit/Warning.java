@@ -36,7 +36,7 @@ public @interface Warning {
     /**
      * This represents the states that server verbose for warnings may be.
      */
-    public enum WarningState {
+    enum WarningState {
 
         /**
          * Indicates all warnings should be printed for deprecated items.
@@ -74,7 +74,7 @@ public @interface Warning {
          *
          * @param value The string value to check
          * @return {@link #DEFAULT} if not found, or the respective
-         *     WarningState
+         * WarningState
          */
         public static WarningState value(final String value) {
             if (value == null) {
@@ -93,11 +93,11 @@ public @interface Warning {
          *
          * @param warning The warning annotation added to a deprecated item
          * @return <ul>
-         *     <li>ON is always True
-         *     <li>OFF is always false
-         *     <li>DEFAULT is false if and only if annotation is not null and
-         *     specifies false for {@link Warning#value()}, true otherwise.
-         *     </ul>
+         * <li>ON is always True
+         * <li>OFF is always false
+         * <li>DEFAULT is false if and only if annotation is not null and
+         * specifies false for {@link Warning#value()}, true otherwise.
+         * </ul>
          */
         public boolean printFor(Warning warning) {
             if (this == DEFAULT) {

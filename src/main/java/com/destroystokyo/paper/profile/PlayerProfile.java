@@ -49,6 +49,13 @@ public interface PlayerProfile {
     Set<ProfileProperty> getProperties();
 
     /**
+     * Sets multiple properties. If any of the set properties already exist, it will be replaced
+     *
+     * @param properties The properties to set
+     */
+    void setProperties(Collection<ProfileProperty> properties);
+
+    /**
      * Check if the Profile has the specified property
      *
      * @param property Property name to check
@@ -62,13 +69,6 @@ public interface PlayerProfile {
      * @param property Property to set.
      */
     void setProperty(ProfileProperty property);
-
-    /**
-     * Sets multiple properties. If any of the set properties already exist, it will be replaced
-     *
-     * @param properties The properties to set
-     */
-    void setProperties(Collection<ProfileProperty> properties);
 
     /**
      * Removes a specific property from this profile

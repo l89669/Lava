@@ -43,7 +43,7 @@ public enum PistonMoveReaction {
 
     private int id;
 
-    private PistonMoveReaction(int id) {
+    PistonMoveReaction(int id) {
         this.id = id;
     }
 
@@ -52,6 +52,7 @@ public enum PistonMoveReaction {
      * @return The move reaction with that ID
      * @deprecated Magic value
      */
+    @Deprecated
     public static PistonMoveReaction getById(int id) {
         return byId.get(id);
     }
@@ -60,6 +61,7 @@ public enum PistonMoveReaction {
      * @return The ID of the move reaction
      * @deprecated Magic value
      */
+    @Deprecated
     public int getId() {
         return this.id;
     }

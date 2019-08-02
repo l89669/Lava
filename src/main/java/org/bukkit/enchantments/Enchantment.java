@@ -210,6 +210,7 @@ public abstract class Enchantment {
      * @return Resulting Enchantment, or null if not found
      * @deprecated Magic value
      */
+    @Deprecated
     public static Enchantment getById(int id) {
         return byId.get(id);
     }
@@ -239,6 +240,7 @@ public abstract class Enchantment {
      * @return Unique ID
      * @deprecated Magic value
      */
+    @Deprecated
     public int getId() {
         return id;
     }
@@ -319,10 +321,7 @@ public abstract class Enchantment {
             return false;
         }
         final Enchantment other = (Enchantment) obj;
-        if (this.id != other.id) {
-            return false;
-        }
-        return true;
+        return this.id == other.id;
     }
 
     @Override

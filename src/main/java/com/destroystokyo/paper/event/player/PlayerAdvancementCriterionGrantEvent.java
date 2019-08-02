@@ -21,6 +21,10 @@ public class PlayerAdvancementCriterionGrantEvent extends PlayerEvent implements
         this.criterion = criterion;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Get the advancement which has been affected.
      *
@@ -39,20 +43,18 @@ public class PlayerAdvancementCriterionGrantEvent extends PlayerEvent implements
         return criterion;
     }
 
+    @Override
     public boolean isCancelled() {
         return cancel;
     }
 
+    @Override
     public void setCancelled(boolean cancel) {
         this.cancel = cancel;
     }
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

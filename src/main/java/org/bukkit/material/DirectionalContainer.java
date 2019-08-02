@@ -11,7 +11,7 @@ public class DirectionalContainer extends MaterialData implements Directional {
      * @param type the raw type id
      * @deprecated Magic value
      */
-
+    @Deprecated
     public DirectionalContainer(final int type) {
         super(type);
     }
@@ -25,7 +25,7 @@ public class DirectionalContainer extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public DirectionalContainer(final int type, final byte data) {
         super(type, data);
     }
@@ -35,7 +35,7 @@ public class DirectionalContainer extends MaterialData implements Directional {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public DirectionalContainer(final Material type, final byte data) {
         super(type, data);
     }

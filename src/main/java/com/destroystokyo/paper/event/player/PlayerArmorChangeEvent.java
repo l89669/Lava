@@ -34,6 +34,10 @@ public class PlayerArmorChangeEvent extends PlayerEvent {
         this.newItem = newItem;
     }
 
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
     /**
      * Gets the type of slot being altered.
      *
@@ -74,10 +78,6 @@ public class PlayerArmorChangeEvent extends PlayerEvent {
         return HANDLERS;
     }
 
-    public static HandlerList getHandlerList() {
-        return HANDLERS;
-    }
-
     public enum SlotType {
         HEAD(DIAMOND_HELMET, GOLD_HELMET, IRON_HELMET, CHAINMAIL_HELMET, LEATHER_HELMET, PUMPKIN, JACK_O_LANTERN),
         CHEST(DIAMOND_CHESTPLATE, GOLD_CHESTPLATE, IRON_CHESTPLATE, CHAINMAIL_CHESTPLATE, LEATHER_CHESTPLATE, ELYTRA),
@@ -89,21 +89,6 @@ public class PlayerArmorChangeEvent extends PlayerEvent {
 
         SlotType(Material... types) {
             this.mutableTypes.addAll(Arrays.asList(types));
-        }
-
-        /**
-         * Gets an immutable set of all allowed material types that can be placed in an
-         * armor slot.
-         *
-         * @return immutable set of material types
-         */
-        @Nonnull
-        public Set<Material> getTypes() {
-            if (immutableTypes == null) {
-                immutableTypes = Collections.unmodifiableSet(mutableTypes);
-            }
-
-            return immutableTypes;
         }
 
         /**
@@ -130,6 +115,21 @@ public class PlayerArmorChangeEvent extends PlayerEvent {
          */
         public static boolean isEquipable(Material material) {
             return getByMaterial(material) != null;
+        }
+
+        /**
+         * Gets an immutable set of all allowed material types that can be placed in an
+         * armor slot.
+         *
+         * @return immutable set of material types
+         */
+        @Nonnull
+        public Set<Material> getTypes() {
+            if (immutableTypes == null) {
+                immutableTypes = Collections.unmodifiableSet(mutableTypes);
+            }
+
+            return immutableTypes;
         }
     }
 }

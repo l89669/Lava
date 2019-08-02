@@ -13,10 +13,10 @@ import java.util.logging.Level;
 
 public final class CraftMapView implements MapView {
 
-    private final Map<CraftPlayer, RenderData> renderCache = new HashMap<>();
-    private final List<MapRenderer> renderers = new ArrayList<>();
-    private final Map<MapRenderer, Map<CraftPlayer, CraftMapCanvas>> canvases = new HashMap<>();
     protected final MapData worldMap;
+    private final Map<CraftPlayer, RenderData> renderCache = new HashMap<CraftPlayer, RenderData>();
+    private final List<MapRenderer> renderers = new ArrayList<MapRenderer>();
+    private final Map<MapRenderer, Map<CraftPlayer, CraftMapCanvas>> canvases = new HashMap<MapRenderer, Map<CraftPlayer, CraftMapCanvas>>();
 
     public CraftMapView(MapData worldMap) {
         this.worldMap = worldMap;
@@ -66,12 +66,12 @@ public final class CraftMapView implements MapView {
         return worldMap.xCenter;
     }
 
-    public int getCenterZ() {
-        return worldMap.zCenter;
-    }
-
     public void setCenterX(int x) {
         worldMap.xCenter = x;
+    }
+
+    public int getCenterZ() {
+        return worldMap.zCenter;
     }
 
     public void setCenterZ(int z) {
@@ -123,7 +123,7 @@ public final class CraftMapView implements MapView {
             renderCache.put(context ? player : null, render);
         }
 
-        if (context && renderCache.containsKey(null)) {
+        if (context) {
             renderCache.remove(null);
         }
 

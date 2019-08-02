@@ -26,6 +26,10 @@ public class PlayerAttemptPickupItemEvent extends PlayerEvent implements Cancell
         this.remaining = remaining;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * Gets the Item attempted by the player.
      *
@@ -45,6 +49,15 @@ public class PlayerAttemptPickupItemEvent extends PlayerEvent implements Cancell
     }
 
     /**
+     * Gets if the item will fly at the player
+     *
+     * @return True if the item will fly at the player
+     */
+    public boolean getFlyAtPlayer() {
+        return this.flyAtPlayer;
+    }
+
+    /**
      * Set if the item will fly at the player
      * <p>Cancelling the event will set this value to false.</p>
      *
@@ -52,15 +65,6 @@ public class PlayerAttemptPickupItemEvent extends PlayerEvent implements Cancell
      */
     public void setFlyAtPlayer(boolean flyAtPlayer) {
         this.flyAtPlayer = flyAtPlayer;
-    }
-
-    /**
-     * Gets if the item will fly at the player
-     *
-     * @return True if the item will fly at the player
-     */
-    public boolean getFlyAtPlayer() {
-        return this.flyAtPlayer;
     }
 
     @Override
@@ -75,10 +79,6 @@ public class PlayerAttemptPickupItemEvent extends PlayerEvent implements Cancell
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 }

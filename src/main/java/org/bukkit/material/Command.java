@@ -14,7 +14,7 @@ public class Command extends MaterialData implements Redstone {
      * @param type the raw type id
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Command(final int type) {
         super(type);
     }
@@ -28,7 +28,7 @@ public class Command extends MaterialData implements Redstone {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Command(final int type, final byte data) {
         super(type, data);
     }
@@ -38,7 +38,7 @@ public class Command extends MaterialData implements Redstone {
      * @param data the raw data value
      * @deprecated Magic value
      */
-
+    @Deprecated
     public Command(final Material type, final byte data) {
         super(type, data);
     }
@@ -56,8 +56,7 @@ public class Command extends MaterialData implements Redstone {
     /**
      * Sets the current state of this Material
      *
-     * @param bool
-     *            whether or not the command block is powered
+     * @param bool whether or not the command block is powered
      */
     public void setPowered(boolean bool) {
         setData((byte) (bool ? (getData() | 1) : (getData() & -2)));

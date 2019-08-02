@@ -11,22 +11,55 @@ public class PluginsCommand extends BukkitCommand {
     public PluginsCommand(String name) {
         super(name);
         this.description = "Gets a list of plugins running on the server";
-        this.usageMessage = "/plugins";
+        this.usageMessage = "/plugins [load|unload|reload] [name]";
         this.setPermission("bukkit.command.plugins");
         this.setAliases(Arrays.asList("pl"));
     }
 
     @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
+        if (!testPermission(sender)) {
+            return true;
+        }
 
-        sender.sendMessage("Plugins " + getPluginList());
-        return true;
+        if (args.length == 0) {
+            sender.sendMessage("Plugins " + getPluginList());
+            return false;
+        }
+
+        switch (args[0].toLowerCase(Locale.ENGLISH)) {
+//            case "load":
+//                PluginManagers.loadPluginCommand(sender, currentAlias, args);
+//                break;
+//            case "unload":
+//                PluginManagers.unloadPluginCommand(sender, currentAlias, args);
+//                break;
+//            case "reload":
+//                PluginManagers.reloadPluginCommand(sender, currentAlias, args);
+//                break;
+            default:
+                sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+                return false;
+        }
+//        return true;
     }
 
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        return Collections.emptyList();
+        List<String> tabs = new ArrayList<String>();
+        if (args.length > 1) {
+            String action = args[0].toLowerCase();
+            if (action.equals("unload")) {
+                for (Plugin plugin : Bukkit.getServer().getPluginManager().getPlugins()) {
+                    tabs.add(plugin.getName());
+                }
+            } else if (action.equals("reload")) {
+                for (Plugin plugin : Bukkit.getServer().getPluginManager().getPlugins()) {
+                    tabs.add(plugin.getName());
+                }
+            }
+        }
+        return tabs;
     }
 
     private String getPluginList() {
@@ -43,6 +76,7 @@ public class PluginsCommand extends BukkitCommand {
                 pluginList.append(ChatColor.WHITE);
                 pluginList.append(", ");
             }
+
             pluginList.append(entry.getValue());
             pluginList.append(entry.getKey());
         }

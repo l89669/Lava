@@ -65,7 +65,6 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.StandardMessenger;
 import org.bukkit.scoreboard.Scoreboard;
-import org.lavapowered.lava.internal.Lava;
 import org.spigotmc.AsyncCatcher;
 import org.spigotmc.SpigotConfig;
 
@@ -75,6 +74,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -92,7 +92,6 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     private double health = 20;
     // Spigot start
     private final Player.Spigot spigot = new Player.Spigot() {
-
         @Override
         public InetSocketAddress getRawAddress() {
             return (InetSocketAddress) getHandle().connection.netManager.getRawAddress();
@@ -108,7 +107,6 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             CraftPlayer.this.setCollidable(collides);
         }
 
-        @Override
         public void respawn() {
             if (getHealth() <= 0 && isOnline()) {
                 server.getServer().getPlayerList().recreatePlayerEntity(getHandle(), 0, false);
@@ -131,7 +129,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                     if (effect.getName().startsWith(p.getParticleName().replace("_", ""))) {
                         particle = p;
                         if (effect.getData() != null) {
-                            if (effect.getData().equals(org.bukkit.Material.class)) {
+                            if (effect.getData().equals(Material.class)) {
                                 extra = new int[]{id};
                             } else {
                                 extra = new int[]{(data << 12) | (id & 0xFFF)};
@@ -160,12 +158,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             }
         }
 
-        @Override
         public String getLocale() {
             return getHandle().language;
         }
 
-        @Override
         public Set<Player> getHiddenPlayers() {
             Set<Player> ret = new HashSet<Player>();
             for (UUID u : hiddenPlayers.keySet()) {
@@ -365,9 +361,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void setCompassTarget(Location loc) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         // Do not directly assign here, from the packethandler we'll assign it.
         getHandle().connection.sendPacket(new SPacketSpawnPosition(new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())));
@@ -375,9 +369,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void chat(String msg) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         getHandle().connection.chat(msg, false);
     }
@@ -389,9 +381,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void playNote(Location loc, byte instrument, byte note) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         String instrumentName = null;
         switch (instrument) {
@@ -433,9 +423,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void playNote(Location loc, Instrument instrument, Note note) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         String instrumentName = null;
         switch (instrument.ordinal()) {
@@ -486,9 +474,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void playSound(Location loc, Sound sound, SoundCategory category, float volume, float pitch) {
-        if (loc == null || sound == null || category == null || getHandle().connection == null) {
-            return;
-        }
+        if (loc == null || sound == null || category == null || getHandle().connection == null) return;
 
         SPacketSoundEffect packet = new SPacketSoundEffect(CraftSound.getSoundEffect(CraftSound.getSound(sound)), net.minecraft.util.SoundCategory.valueOf(category.name()), loc.getX(), loc.getY(), loc.getZ(), volume, pitch);
         getHandle().connection.sendPacket(packet);
@@ -496,9 +482,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void playSound(Location loc, String sound, SoundCategory category, float volume, float pitch) {
-        if (loc == null || sound == null || category == null || getHandle().connection == null) {
-            return;
-        }
+        if (loc == null || sound == null || category == null || getHandle().connection == null) return;
 
         SPacketCustomSound packet = new SPacketCustomSound(sound, net.minecraft.util.SoundCategory.valueOf(category.name()), loc.getX(), loc.getY(), loc.getZ(), volume, pitch);
         getHandle().connection.sendPacket(packet);
@@ -521,9 +505,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void stopSound(String sound, SoundCategory category) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
         PacketBuffer packetdataserializer = new PacketBuffer(Unpooled.buffer());
 
         packetdataserializer.writeString(category == null ? "" : net.minecraft.util.SoundCategory.valueOf(category.name()).getName());
@@ -558,9 +540,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void sendBlockChange(Location loc, int material, byte data) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         SPacketBlockChange packet = new SPacketBlockChange(((CraftWorld) loc.getWorld()).getHandle(), new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
 
@@ -593,27 +573,32 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public boolean sendChunkChange(Location loc, int sx, int sy, int sz, byte[] data) {
-        if (getHandle().connection == null) {
-            return false;
-        }
+        if (getHandle().connection == null) return false;
 
         /*
         int x = loc.getBlockX();
         int y = loc.getBlockY();
         int z = loc.getBlockZ();
+
         int cx = x >> 4;
         int cz = z >> 4;
+
         if (sx <= 0 || sy <= 0 || sz <= 0) {
             return false;
         }
+
         if ((x + sx - 1) >> 4 != cx || (z + sz - 1) >> 4 != cz || y < 0 || y + sy > 128) {
             return false;
         }
+
         if (data.length != (sx * sy * sz * 5) / 2) {
             return false;
         }
+
         Packet51MapChunk packet = new Packet51MapChunk(x, y, z, sx, sy, sz, data);
+
         getHandle().connection.sendPacket(packet);
+
         return true;
         */
 
@@ -622,9 +607,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void sendMap(MapView map) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         RenderData data = ((CraftMapView) map).render(this);
         Collection<MapDecoration> icons = new ArrayList<>();
@@ -690,7 +673,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         if (fromWorld == toWorld) {
             entity.connection.teleport(to);
         } else {
-            server.getHandle().recreatePlayerEntity(entity, toWorld.dimension, true, to, true);
+            server.getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
         }
         return true;
     }
@@ -922,11 +905,6 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     @Override
-    public void giveExp(int amount) {
-        getHandle().addExperience(amount);
-    }
-
-    @Override
     public boolean isBanned() {
         return server.getBanList(BanList.Type.NAME).isBanned(getName());
     }
@@ -952,15 +930,18 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void setGameMode(GameMode mode) {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         if (mode == null) {
             throw new IllegalArgumentException("Mode cannot be null");
         }
 
         getHandle().setGameType(GameType.getByID(mode.getValue()));
+    }
+
+    @Override
+    public void giveExp(int exp) {
+        getHandle().addExperience(exp);
     }
 
     @Override
@@ -1076,12 +1057,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     private void hidePlayer0(@Nullable Plugin plugin, Player player) {
         Validate.notNull(player, "hidden player cannot be null");
-        if (getHandle().connection == null) {
-            return;
-        }
-        if (equals(player)) {
-            return;
-        }
+        if (getHandle().connection == null) return;
+        if (equals(player)) return;
 
         Set<WeakReference<Plugin>> hidingPlugins = hiddenPlayers.get(player.getUniqueId());
         if (hidingPlugins != null) {
@@ -1124,12 +1101,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     private void showPlayer0(@Nullable Plugin plugin, Player player) {
         Validate.notNull(player, "shown player cannot be null");
-        if (getHandle().connection == null) {
-            return;
-        }
-        if (equals(player)) {
-            return;
-        }
+        if (getHandle().connection == null) return;
+        if (equals(player)) return;
 
         Set<WeakReference<Plugin>> hidingPlugins = hiddenPlayers.get(player.getUniqueId());
         if (hidingPlugins == null) {
@@ -1282,9 +1255,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     @Override
     public void sendPluginMessage(Plugin source, String channel, byte[] message) {
         StandardMessenger.validatePluginMessage(server.getMessenger(), source, channel, message);
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
 
         if (channels.contains(channel) || SpigotConfig.bungee) {
             SPacketCustomPayload packet = new SPacketCustomPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(message)));
@@ -1341,9 +1312,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void sendSupportedChannels() {
-        if (getHandle().connection == null) {
-            return;
-        }
+        if (getHandle().connection == null) return;
         Set<String> listening = server.getMessenger().getIncomingChannels();
 
         if (!listening.isEmpty()) {
@@ -1351,7 +1320,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
             for (String channel : listening) {
                 try {
-                    stream.write(channel.getBytes("UTF8"));
+                    stream.write(channel.getBytes(StandardCharsets.UTF_8));
                     stream.write((byte) 0);
                 } catch (IOException ex) {
                     Logger.getLogger(CraftPlayer.class.getName()).log(Level.SEVERE, "Could not send Plugin Channel REGISTER to " + getName(), ex);
@@ -1563,7 +1532,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             getHandle().connection.sendPacket(new SPacketEntityProperties(getHandle().getEntityId(), set));
             sendHealthUpdate();
         }
-        getHandle().getDataManager().set(EntityLiving.HEALTH, (float) getScaledHealth());
+        getHandle().getDataManager().set(EntityLiving.HEALTH, getScaledHealth());
 
         getHandle().maxHealthCache = getMaxHealth();
     }
@@ -1586,7 +1555,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         double healthMod = scaledHealth ? healthScale : getMaxHealth();
         if (healthMod >= Float.MAX_VALUE || healthMod <= 0) {
             healthMod = 20; // Reset health
-            Lava.LOGGER.warn(getName() + " tried to crash the server with a large health attribute");
+            server.getLogger().warning(getName() + " tried to crash the server with a large health attribute");
         }
         collection.add(new ModifiableAttributeInstance(getHandle().getAttributeMap(), (new RangedAttribute(null, "generic.maxHealth", healthMod, 0.0D, Float.MAX_VALUE)).setDescription("Max Health").setShouldWatch(true)));
         // Spigot end
@@ -1611,9 +1580,6 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     @Override
     public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {
-        if (getHandle().connection == null) {
-            return;
-        }
         SPacketTitle times = new SPacketTitle(fadeIn, stay, fadeOut);
         getHandle().connection.sendPacket(times);
 
@@ -1721,6 +1687,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         return getHandle().language;
     }
 
+    @Override
     public Player.Spigot spigot() {
         return spigot;
     }

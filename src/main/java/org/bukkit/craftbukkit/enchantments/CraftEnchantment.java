@@ -14,6 +14,18 @@ public class CraftEnchantment extends Enchantment {
         this.target = target;
     }
 
+    public static net.minecraft.enchantment.Enchantment getRaw(Enchantment enchantment) {
+        if (enchantment instanceof EnchantmentWrapper) {
+            enchantment = ((EnchantmentWrapper) enchantment).getEnchantment();
+        }
+
+        if (enchantment instanceof CraftEnchantment) {
+            return ((CraftEnchantment) enchantment).target;
+        }
+
+        return null;
+    }
+
     @Override
     public int getMaxLevel() {
         return target.getMaxLevel();
@@ -137,18 +149,6 @@ public class CraftEnchantment extends Enchantment {
             default:
                 return "UNKNOWN_ENCHANT_" + getId();
         }
-    }
-
-    public static net.minecraft.enchantment.Enchantment getRaw(Enchantment enchantment) {
-        if (enchantment instanceof EnchantmentWrapper) {
-            enchantment = ((EnchantmentWrapper) enchantment).getEnchantment();
-        }
-
-        if (enchantment instanceof CraftEnchantment) {
-            return ((CraftEnchantment) enchantment).target;
-        }
-
-        return null;
     }
 
     @Override

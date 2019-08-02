@@ -43,7 +43,7 @@ public enum Difficulty {
 
     private final int value;
 
-    private Difficulty(final int value) {
+    Difficulty(final int value) {
         this.value = value;
     }
 
@@ -52,10 +52,10 @@ public enum Difficulty {
      *
      * @param value Value to check
      * @return Associative {@link Difficulty} with the given value, or null if
-     *     it doesn't exist
+     * it doesn't exist
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static Difficulty getByValue(final int value) {
         return BY_ID.get(value);
     }
@@ -66,7 +66,7 @@ public enum Difficulty {
      * @return An integer value of this difficulty
      * @deprecated Magic value
      */
-
+    @Deprecated
     public int getValue() {
         return value;
     }

@@ -13,74 +13,74 @@ public final class MapPalette {
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte TRANSPARENT = 0;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte LIGHT_GREEN = 4;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte LIGHT_BROWN = 8;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte GRAY_1 = 12;
 
     // Interface
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte RED = 16;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte PALE_BLUE = 20;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte GRAY_2 = 24;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte DARK_GREEN = 28;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte WHITE = 32;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte LIGHT_GRAY = 36;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte BROWN = 40;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte DARK_GRAY = 44;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte BLUE = 48;
     /**
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static final byte DARK_BROWN = 52;
     static final Color[] colors = {
             c(0, 0, 0), c(0, 0, 0), c(0, 0, 0), c(0, 0, 0),
@@ -176,7 +176,7 @@ public final class MapPalette {
      * @return A byte[] containing the pixels of the image.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static byte[] imageToBytes(Image image) {
         BufferedImage temp = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = temp.createGraphics();
@@ -203,7 +203,7 @@ public final class MapPalette {
      * @return The index in the palette.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static byte matchColor(int r, int g, int b) {
         return matchColor(new Color(r, g, b));
     }
@@ -216,11 +216,9 @@ public final class MapPalette {
      * @return The index in the palette.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static byte matchColor(Color color) {
-        if (color.getAlpha() < 128) {
-            return 0;
-        }
+        if (color.getAlpha() < 128) return 0;
 
         int index = 0;
         double best = -1;
@@ -244,7 +242,7 @@ public final class MapPalette {
      * @return The Color of the palette entry.
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static Color getColor(byte index) {
         if ((index > -49 && index < 0) || index > 127) {
             throw new IndexOutOfBoundsException();

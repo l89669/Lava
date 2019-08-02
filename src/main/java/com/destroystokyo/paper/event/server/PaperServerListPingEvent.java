@@ -23,12 +23,10 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
 
     @Nonnull
     private final StatusClient client;
-
-    private int numPlayers;
-    private boolean hidePlayers;
     @Nonnull
     private final List<PlayerProfile> playerSample = new ArrayList<>();
-
+    private int numPlayers;
+    private boolean hidePlayers;
     @Nonnull
     private String version;
     private int protocolVersion;
@@ -266,6 +264,25 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
         return (Player) player;
     }
 
+    @Deprecated
+    public List<String> getSampleText() {
+        List<String> sampleText = new ArrayList<>();
+        for (PlayerProfile profile : getPlayerSample()) {
+            sampleText.add(Strings.nullToEmpty(profile.getName()));
+        }
+        return sampleText;
+    }
+
+    // TODO: Remove in 1.13
+
+    @Deprecated
+    public void setSampleText(List<String> sample) {
+        getPlayerSample().clear();
+        for (String name : sample) {
+            getPlayerSample().add(Bukkit.createProfile(name));
+        }
+    }
+
     private final class PlayerIterator implements Iterator<Player> {
 
         private int next;
@@ -314,24 +331,6 @@ public class PaperServerListPingEvent extends ServerListPingEvent implements Can
             if (originalPlayerCount) {
                 numPlayers--;
             }
-        }
-    }
-
-    // TODO: Remove in 1.13
-    @Deprecated
-    public List<String> getSampleText() {
-        List<String> sampleText = new ArrayList<>();
-        for (PlayerProfile profile : getPlayerSample()) {
-            sampleText.add(Strings.nullToEmpty(profile.getName()));
-        }
-        return sampleText;
-    }
-
-    @Deprecated
-    public void setSampleText(List<String> sample) {
-        getPlayerSample().clear();
-        for (String name : sample) {
-            getPlayerSample().add(Bukkit.createProfile(name));
         }
     }
 

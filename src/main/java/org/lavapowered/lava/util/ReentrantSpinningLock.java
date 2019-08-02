@@ -11,10 +11,13 @@ public class ReentrantSpinningLock {
      * READ LOCK IS UNTESTED, USE WITH CATION.
      */
     private final AtomicBoolean writeLocked = new AtomicBoolean(false);
-
+    private final AtomicInteger readerThreads = new AtomicInteger(0);
     // --------- Thread local restricted fields ---------
     private long heldThreadId = 0;
     private int reentrantLocks = 0;
+    // --------- Wrappers to allow typical usages ---------
+    private SpinningWriteLock wrappedWriteLock = new SpinningWriteLock();
+    private SpinningReadLock wrappedReadLock = new SpinningReadLock();
 
     /**
      * Lock as a typical reentrant write lock
@@ -37,8 +40,6 @@ public class ReentrantSpinningLock {
             --reentrantLocks;
         }
     }
-
-    private final AtomicInteger readerThreads = new AtomicInteger(0);
 
     /**
      * Lock as a typical reentrant read lock
@@ -67,9 +68,13 @@ public class ReentrantSpinningLock {
         }
     }
 
-    // --------- Wrappers to allow typical usages ---------
-    private SpinningWriteLock wrappedWriteLock = new SpinningWriteLock();
-    private SpinningReadLock wrappedReadLock = new SpinningReadLock();
+    public SpinningWriteLock writeLock() {
+        return wrappedWriteLock;
+    }
+
+    public SpinningReadLock readLock() {
+        return wrappedReadLock;
+    }
 
     public class SpinningWriteLock {
         public void lock() {
@@ -90,13 +95,5 @@ public class ReentrantSpinningLock {
         public void unlock() {
             unlockWeak();
         }
-    }
-
-    public SpinningWriteLock writeLock() {
-        return wrappedWriteLock;
-    }
-
-    public SpinningReadLock readLock() {
-        return wrappedReadLock;
     }
 }

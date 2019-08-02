@@ -31,12 +31,11 @@ public class AsyncPlayerChatEvent extends PlayerEvent implements Cancellable {
     private String format = "<%1$s> %2$s";
 
     /**
-     *
-     * @param async This changes the event to a synchronous state.
-     * @param who the chat sender
+     * @param async   This changes the event to a synchronous state.
+     * @param who     the chat sender
      * @param message the message sent
      * @param players the players to receive the message. This may be a lazy
-     *     or unmodifiable collection.
+     *                or unmodifiable collection.
      */
     public AsyncPlayerChatEvent(final boolean async, final Player who, final String message, final Set<Player> players) {
         super(who, async);
@@ -76,7 +75,7 @@ public class AsyncPlayerChatEvent extends PlayerEvent implements Cancellable {
      * #getMessage()}
      *
      * @return {@link String#format(String, Object...)} compatible format
-     *     string
+     * string
      */
     public String getFormat() {
         return format;
@@ -90,10 +89,10 @@ public class AsyncPlayerChatEvent extends PlayerEvent implements Cancellable {
      * #getMessage()}
      *
      * @param format {@link String#format(String, Object...)} compatible
-     *     format string
+     *               format string
      * @throws IllegalFormatException if the underlying API throws the
-     *     exception
-     * @throws NullPointerException if format is null
+     *                                exception
+     * @throws NullPointerException   if format is null
      * @see String#format(String, Object...)
      */
     public void setFormat(final String format) throws IllegalFormatException, NullPointerException {

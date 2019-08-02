@@ -25,7 +25,7 @@ public enum WorldType {
 
     private final String name;
 
-    private WorldType(String name) {
+    WorldType(String name) {
         this.name = name;
     }
 

@@ -22,56 +22,6 @@ public class CraftInventoryView extends InventoryView {
         this.container = container;
     }
 
-    @Override
-    public Inventory getTopInventory() {
-        return viewing;
-    }
-
-    @Override
-    public Inventory getBottomInventory() {
-        return player.getInventory();
-    }
-
-    @Override
-    public HumanEntity getPlayer() {
-        return player;
-    }
-
-    @Override
-    public InventoryType getType() {
-        InventoryType type = viewing.getType();
-        if (type == InventoryType.CRAFTING && player.getGameMode() == GameMode.CREATIVE) {
-            return InventoryType.CREATIVE;
-        }
-        return type;
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack item) {
-        net.minecraft.item.ItemStack stack = CraftItemStack.asNMSCopy(item);
-        if (slot != -999) {
-            container.getSlot(slot).putStack(stack);
-        } else {
-            player.getHandle().dropItem(stack, false);
-        }
-    }
-
-    @Override
-    public ItemStack getItem(int slot) {
-        if (slot == -999) {
-            return null;
-        }
-        return CraftItemStack.asCraftMirror(container.getSlot(slot).getStack());
-    }
-
-    public boolean isInTop(int rawSlot) {
-        return rawSlot < viewing.getSize();
-    }
-
-    public Container getHandle() {
-        return container;
-    }
-
     public static SlotType getSlotType(InventoryView inventory, int slot) {
         SlotType type = SlotType.CONTAINER;
         if (slot >= 0 && slot < inventory.getTopInventory().getSize()) {
@@ -137,5 +87,55 @@ public class CraftInventoryView extends InventoryView {
             }
         }
         return type;
+    }
+
+    @Override
+    public Inventory getTopInventory() {
+        return viewing;
+    }
+
+    @Override
+    public Inventory getBottomInventory() {
+        return player.getInventory();
+    }
+
+    @Override
+    public HumanEntity getPlayer() {
+        return player;
+    }
+
+    @Override
+    public InventoryType getType() {
+        InventoryType type = viewing.getType();
+        if (type == InventoryType.CRAFTING && player.getGameMode() == GameMode.CREATIVE) {
+            return InventoryType.CREATIVE;
+        }
+        return type;
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack item) {
+        net.minecraft.item.ItemStack stack = CraftItemStack.asNMSCopy(item);
+        if (slot != -999) {
+            container.getSlot(slot).putStack(stack);
+        } else {
+            player.getHandle().dropItem(stack, false);
+        }
+    }
+
+    @Override
+    public ItemStack getItem(int slot) {
+        if (slot == -999) {
+            return null;
+        }
+        return CraftItemStack.asCraftMirror(container.getSlot(slot).getStack());
+    }
+
+    public boolean isInTop(int rawSlot) {
+        return rawSlot < viewing.getSize();
+    }
+
+    public Container getHandle() {
+        return container;
     }
 }

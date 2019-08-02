@@ -17,13 +17,13 @@ public class EntityChangeBlockEvent extends EntityEvent implements Cancellable {
     private boolean cancel;
 
     /**
-     *
-     * @param what the Entity causing the change
+     * @param what  the Entity causing the change
      * @param block the block (before the change)
-     * @param to the future material being changed to
-     * @param data the future block data
+     * @param to    the future material being changed to
+     * @param data  the future block data
      * @deprecated Magic value
      */
+    @Deprecated
     public EntityChangeBlockEvent(final Entity what, final Block block, final Material to, final byte data) {
         super(what);
         this.block = block;
@@ -68,6 +68,7 @@ public class EntityChangeBlockEvent extends EntityEvent implements Cancellable {
      * @return the data for the block that would be changed into
      * @deprecated Magic value
      */
+    @Deprecated
     public byte getData() {
         return data;
     }

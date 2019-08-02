@@ -16,10 +16,10 @@ import java.util.*;
  */
 public class SimpleHelpMap implements HelpMap {
 
-    private HelpTopic defaultTopic;
     private final Map<String, HelpTopic> helpTopics;
     private final Map<Class, HelpTopicFactory<Command>> topicFactoryMap;
     private final CraftServer server;
+    private HelpTopic defaultTopic;
     private HelpYamlReader yaml;
 
     @SuppressWarnings("unchecked")
@@ -196,10 +196,7 @@ public class SimpleHelpMap implements HelpMap {
         if ((command instanceof BukkitCommand) && ignoredPlugins.contains("Bukkit")) {
             return true;
         }
-        if (command instanceof PluginIdentifiableCommand && ignoredPlugins.contains(((PluginIdentifiableCommand) command).getPlugin().getName())) {
-            return true;
-        }
-        return false;
+        return command instanceof PluginIdentifiableCommand && ignoredPlugins.contains(((PluginIdentifiableCommand) command).getPlugin().getName());
     }
 
     public void registerHelpTopicFactory(Class commandClass, HelpTopicFactory factory) {

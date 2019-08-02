@@ -1,6 +1,6 @@
 package org.bukkit.potion;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -12,6 +12,7 @@ import java.util.Collection;
  * Potion Adapter for pre-1.9 data values
  * see @PotionMeta for 1.9+
  */
+@Deprecated
 public class Potion {
     private static final int EXTENDED_BIT = 0x40;
     private static final int POTION_BIT = 0xF;
@@ -41,7 +42,7 @@ public class Potion {
     /**
      * Create a new potion of the given type and level.
      *
-     * @param type The type of potion.
+     * @param type  The type of potion.
      * @param level The potion's level.
      */
     public Potion(PotionType type, int level) {
@@ -54,11 +55,11 @@ public class Potion {
     /**
      * Create a new potion of the given type and level.
      *
-     * @param type The type of potion.
-     * @param level The potion's level.
+     * @param type   The type of potion.
+     * @param level  The potion's level.
      * @param splash Whether it is a splash potion.
      * @deprecated In favour of using {@link #Potion(PotionType)} with {@link
-     *     #splash()}.
+     * #splash()}.
      */
     @Deprecated
     public Potion(PotionType type, int level, boolean splash) {
@@ -69,12 +70,12 @@ public class Potion {
     /**
      * Create a new potion of the given type and level.
      *
-     * @param type The type of potion.
-     * @param level The potion's level.
-     * @param splash Whether it is a splash potion.
+     * @param type     The type of potion.
+     * @param level    The potion's level.
+     * @param splash   Whether it is a splash potion.
      * @param extended Whether it has an extended duration.
      * @deprecated In favour of using {@link #Potion(PotionType)} with {@link
-     *     #extend()} and possibly {@link #splash()}.
+     * #extend()} and possibly {@link #splash()}.
      */
     @Deprecated
     public Potion(PotionType type, int level, boolean splash, boolean extended) {
@@ -91,7 +92,6 @@ public class Potion {
     }
 
     /**
-     *
      * @param damage the damage value
      * @return the produced potion
      */
@@ -162,9 +162,8 @@ public class Potion {
 
     public static Potion fromItemStack(ItemStack item) {
         Validate.notNull(item, "item cannot be null");
-        if (item.getType() != Material.POTION) {
+        if (item.getType() != Material.POTION)
             throw new IllegalArgumentException("item is not a potion");
-        }
         return fromDamage(item.getDurability());
     }
 
@@ -184,9 +183,8 @@ public class Potion {
      * @param other The new PotionBrewer
      */
     public static void setPotionBrewer(PotionBrewer other) {
-        if (brewer != null) {
-            brewer = other;
-        }
+        if (brewer != null)
+            throw new IllegalArgumentException("brewer can only be set internally");
         brewer = other;
     }
 
@@ -229,8 +227,8 @@ public class Potion {
      * Applies the effects that would be applied by this potion to the given
      * {@link LivingEntity}.
      *
-     * @see LivingEntity#addPotionEffects(Collection)
      * @param to The entity to apply the effects to
+     * @see LivingEntity#addPotionEffects(Collection)
      */
     public void apply(LivingEntity to) {
         Validate.notNull(to, "entity cannot be null");
@@ -253,9 +251,9 @@ public class Potion {
      * Returns a collection of {@link PotionEffect}s that this {@link Potion}
      * would confer upon a {@link LivingEntity}.
      *
+     * @return The effects that this potion applies
      * @see PotionBrewer#getEffectsFromDamage(int)
      * @see Potion#toDamageValue()
-     * @return The effects that this potion applies
      */
     public Collection<PotionEffect> getEffects() {
         return getBrewer().getEffects(type, level == 2, extended);
@@ -382,7 +380,6 @@ public class Potion {
     }
 
     /**
-     *
      * @return the name id
      * @deprecated Non-functional
      */

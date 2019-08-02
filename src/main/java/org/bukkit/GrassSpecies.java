@@ -32,7 +32,7 @@ public enum GrassSpecies {
 
     private final byte data;
 
-    private GrassSpecies(final int data) {
+    GrassSpecies(final int data) {
         this.data = (byte) data;
     }
 
@@ -41,10 +41,10 @@ public enum GrassSpecies {
      *
      * @param data Data value to fetch
      * @return The {@link GrassSpecies} representing the given value, or null
-     *     if it doesn't exist
+     * if it doesn't exist
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static GrassSpecies getByData(final byte data) {
         return BY_DATA.get(data);
     }
@@ -55,7 +55,7 @@ public enum GrassSpecies {
      * @return A byte containing the data value of this grass species
      * @deprecated Magic value
      */
-
+    @Deprecated
     public byte getData() {
         return data;
     }

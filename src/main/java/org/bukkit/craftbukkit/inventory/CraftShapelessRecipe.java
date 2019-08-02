@@ -39,7 +39,7 @@ public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe
         List<ItemStack> ingred = this.getIngredientList();
         NonNullList<Ingredient> data = NonNullList.withSize(ingred.size(), Ingredient.EMPTY);
         for (int i = 0; i < ingred.size(); i++) {
-            data.set(i, Ingredient.fromStacks(new net.minecraft.item.ItemStack[]{CraftItemStack.asNMSCopy(ingred.get(i))}));
+            data.set(i, Ingredient.fromStacks(CraftItemStack.asNMSCopy(ingred.get(i))));
         }
         // TODO: Check if it's correct way to register recipes
         ForgeRegistries.RECIPES.register(new ShapelessRecipes("", CraftItemStack.asNMSCopy(this.getResult()), data));

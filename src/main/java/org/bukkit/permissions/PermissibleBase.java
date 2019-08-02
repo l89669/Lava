@@ -2,9 +2,9 @@ package org.bukkit.permissions;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.lavapowered.lava.internal.Lava;
 
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Base Permissible for use in any Permissible object via proxy or extension
@@ -46,7 +46,7 @@ public class PermissibleBase implements Permissible {
             throw new IllegalArgumentException("Permission name cannot be null");
         }
 
-        return permissions.containsKey(name.toLowerCase(Locale.ENGLISH));
+        return permissions.containsKey(name.toLowerCase(java.util.Locale.ENGLISH));
     }
 
     public boolean isPermissionSet(Permission perm) {
@@ -62,7 +62,7 @@ public class PermissibleBase implements Permissible {
             throw new IllegalArgumentException("Permission name cannot be null");
         }
 
-        String name = inName.toLowerCase(Locale.ENGLISH);
+        String name = inName.toLowerCase(java.util.Locale.ENGLISH);
 
         // Paper start
         PermissionAttachmentInfo info = permissions.get(name);
@@ -85,7 +85,7 @@ public class PermissibleBase implements Permissible {
             throw new IllegalArgumentException("Permission cannot be null");
         }
 
-        String name = perm.getName().toLowerCase(Locale.ENGLISH);
+        String name = perm.getName().toLowerCase(java.util.Locale.ENGLISH);
 
         // Paper start
         PermissionAttachmentInfo info = permissions.get(name);
@@ -153,7 +153,7 @@ public class PermissibleBase implements Permissible {
         Bukkit.getServer().getPluginManager().subscribeToDefaultPerms(isOp(), parent);
 
         for (Permission perm : defaults) {
-            String name = perm.getName().toLowerCase(Locale.ENGLISH);
+            String name = perm.getName().toLowerCase(java.util.Locale.ENGLISH);
             permissions.put(name, new PermissionAttachmentInfo(parent, name, null, true));
             Bukkit.getServer().getPluginManager().subscribeToPermission(name, parent);
             calculateChildPermissions(perm.getChildren(), false, null);
@@ -183,7 +183,7 @@ public class PermissibleBase implements Permissible {
 
             Permission perm = Bukkit.getServer().getPluginManager().getPermission(name);
             boolean value = entry.getValue() ^ invert;
-            String lname = name.toLowerCase(Locale.ENGLISH);
+            String lname = name.toLowerCase(java.util.Locale.ENGLISH);
 
             permissions.put(lname, new PermissionAttachmentInfo(parent, lname, attachment, value));
             Bukkit.getServer().getPluginManager().subscribeToPermission(name, parent);
@@ -222,7 +222,7 @@ public class PermissibleBase implements Permissible {
         PermissionAttachment result = addAttachment(plugin);
 
         if (Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new RemoveAttachmentRunnable(result), ticks) == -1) {
-            Lava.LOGGER.error("Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
+            Bukkit.getServer().getLogger().log(Level.WARNING, "Could not add PermissionAttachment to " + parent + " for plugin " + plugin.getDescription().getFullName() + ": Scheduler returned -1");
             result.remove();
             return null;
         } else {
@@ -231,7 +231,7 @@ public class PermissibleBase implements Permissible {
     }
 
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-        return new HashSet<>(permissions.values());
+        return new HashSet<PermissionAttachmentInfo>(permissions.values());
     }
 
     private static class RemoveAttachmentRunnable implements Runnable {

@@ -53,5 +53,5 @@ public class ModsCommand extends BukkitCommand {
 
         return "(" + mods.size() + "): " + modList.toString();
     }
-	
+
 }

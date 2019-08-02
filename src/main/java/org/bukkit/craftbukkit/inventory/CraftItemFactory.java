@@ -40,6 +40,10 @@ public final class CraftItemFactory implements ItemFactory {
     private CraftItemFactory() {
     }
 
+    public static CraftItemFactory instance() {
+        return instance;
+    }
+
     public boolean isApplicable(ItemMeta meta, ItemStack itemstack) {
         if (itemstack == null) {
             return false;
@@ -173,10 +177,6 @@ public final class CraftItemFactory implements ItemFactory {
          * Doing it this way fills all conditions of the .equals() method.
          */
         return meta1.equalsCommon(meta2) && meta1.notUncommon(meta2) && meta2.notUncommon(meta1);
-    }
-
-    public static CraftItemFactory instance() {
-        return instance;
     }
 
     public ItemMeta asMetaFor(ItemMeta meta, ItemStack stack) {

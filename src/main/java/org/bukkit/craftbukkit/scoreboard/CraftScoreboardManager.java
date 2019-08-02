@@ -38,7 +38,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     // CraftBukkit method
     public CraftScoreboard getPlayerBoard(CraftPlayer player) {
         CraftScoreboard board = playerBoards.get(player);
-        return (CraftScoreboard) (board == null ? getMainScoreboard() : board);
+        return board == null ? getMainScoreboard() : board;
     }
 
     // CraftBukkit method
@@ -57,7 +57,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         if (scoreboard == mainScoreboard) {
             playerBoards.remove(player);
         } else {
-            playerBoards.put(player, (CraftScoreboard) scoreboard);
+            playerBoards.put(player, scoreboard);
         }
 
         // Old objective tracking
@@ -90,7 +90,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
     public Collection<Score> getScoreboardScores(IScoreCriteria criteria, String name, Collection<Score> collection) {
         for (CraftScoreboard scoreboard : scoreboards) {
             Scoreboard board = scoreboard.board;
-            for (ScoreObjective objective : (Iterable<ScoreObjective>) board.getObjectivesFromCriteria(criteria)) {
+            for (ScoreObjective objective : board.getObjectivesFromCriteria(criteria)) {
                 collection.add(board.getOrCreateScore(name, objective));
             }
         }

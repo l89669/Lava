@@ -37,6 +37,10 @@ public class PreLookupProfileEvent extends Event {
         this.name = name;
     }
 
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
     /**
      * @return Name of the profile
      */
@@ -94,7 +98,9 @@ public class PreLookupProfileEvent extends Event {
     @Deprecated
     public void setProperties(Multimap<String, Property> properties) {
         this.properties = new HashSet<>();
-        properties.values().forEach(property -> this.properties.add(new ProfileProperty(property.getName(), property.getValue(), property.getSignature())));
+        properties.values().forEach(property -> {
+            this.properties.add(new ProfileProperty(property.getName(), property.getValue(), property.getSignature()));
+        });
     }
 
     /**
@@ -105,7 +111,9 @@ public class PreLookupProfileEvent extends Event {
      */
     @Deprecated
     public void addProperties(Multimap<String, Property> properties) {
-        properties.values().forEach(property -> this.properties.add(new ProfileProperty(property.getName(), property.getValue(), property.getSignature())));
+        properties.values().forEach(property -> {
+            this.properties.add(new ProfileProperty(property.getName(), property.getValue(), property.getSignature()));
+        });
     }
 
     /**
@@ -139,10 +147,6 @@ public class PreLookupProfileEvent extends Event {
 
     @Override
     public HandlerList getHandlers() {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList() {
         return handlers;
     }
 

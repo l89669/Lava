@@ -1,7 +1,7 @@
 package org.bukkit.command;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -33,7 +33,7 @@ public abstract class Command {
     private String permissionMessage;
 
     protected Command(String name) {
-        this(name, "", "/" + name, new ArrayList<String>());
+        this(name, "", "/" + name, new ArrayList<>());
     }
 
     protected Command(String name, String description, String usageMessage, List<String> aliases) {
@@ -43,7 +43,7 @@ public abstract class Command {
         this.description = description;
         this.usageMessage = usageMessage;
         this.aliases = aliases;
-        this.activeAliases = new ArrayList<String>(aliases);
+        this.activeAliases = new ArrayList<>(aliases);
     }
 
     public static void broadcastCommandMessage(CommandSender source, String message) {
@@ -92,9 +92,9 @@ public abstract class Command {
     /**
      * Executes the command, returning its success
      *
-     * @param sender Source object which is executing this command
+     * @param sender       Source object which is executing this command
      * @param commandLabel The alias of the command used
-     * @param args All arguments passed to the command, split via ' '
+     * @param args         All arguments passed to the command, split via ' '
      * @return true if the command was successful, otherwise false
      */
     public abstract boolean execute(CommandSender sender, String commandLabel, String[] args);
@@ -104,10 +104,10 @@ public abstract class Command {
      * options the player can tab through.
      *
      * @param sender Source object which is executing this command
-     * @param alias the alias being used
-     * @param args All arguments passed to the command, split via ' '
+     * @param alias  the alias being used
+     * @param args   All arguments passed to the command, split via ' '
      * @return a list of tab-completions for the specified arguments. This
-     *     will never be null. List may be immutable.
+     * will never be null. List may be immutable.
      * @throws IllegalArgumentException if sender, alias, or args is null
      */
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
@@ -118,12 +118,12 @@ public abstract class Command {
      * Executed on tab completion for this command, returning a list of
      * options the player can tab through.
      *
-     * @param sender Source object which is executing this command
-     * @param alias the alias being used
-     * @param args All arguments passed to the command, split via ' '
+     * @param sender   Source object which is executing this command
+     * @param alias    the alias being used
+     * @param args     All arguments passed to the command, split via ' '
      * @param location The position looked at by the sender, or null if none
      * @return a list of tab-completions for the specified arguments. This
-     *     will never be null. List may be immutable.
+     * will never be null. List may be immutable.
      * @throws IllegalArgumentException if sender, alias, or args is null
      */
     public List<String> tabComplete(CommandSender sender, String alias, String[] args, Location location) throws IllegalArgumentException {
@@ -173,7 +173,7 @@ public abstract class Command {
      *
      * @param name New command name
      * @return returns true if the name change happened instantly or false if
-     *     the command was already registered
+     * the command was already registered
      */
     public boolean setName(String name) {
         if (!isRegistered()) {
@@ -270,7 +270,7 @@ public abstract class Command {
      *
      * @param name The command's name
      * @return returns true if the name change happened instantly or false if
-     *     the command was already registered
+     * the command was already registered
      */
     public boolean setLabel(String name) {
         this.nextLabel = name;
@@ -287,7 +287,7 @@ public abstract class Command {
      *
      * @param commandMap the CommandMap to register this command to
      * @return true if the registration was successful (the current registered
-     *     CommandMap was the passed CommandMap or null) false otherwise
+     * CommandMap was the passed CommandMap or null) false otherwise
      */
     public boolean register(CommandMap commandMap) {
         if (allowChangesFrom(commandMap)) {
@@ -304,8 +304,8 @@ public abstract class Command {
      *
      * @param commandMap the CommandMap to unregister
      * @return true if the unregistration was successful (the current
-     *     registered CommandMap was the passed CommandMap or null) false
-     *     otherwise
+     * registered CommandMap was the passed CommandMap or null) false
+     * otherwise
      */
     public boolean unregister(CommandMap commandMap) {
         if (allowChangesFrom(commandMap)) {
@@ -371,7 +371,7 @@ public abstract class Command {
      * Sets the message sent when a permission check fails
      *
      * @param permissionMessage new permission message, null to indicate
-     *     default message, or an empty string to indicate no message
+     *                          default message, or an empty string to indicate no message
      * @return this command object, for chaining
      */
     public Command setPermissionMessage(String permissionMessage) {

@@ -1,22 +1,25 @@
 package org.spigotmc.event.entity;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityEvent;
 
 /**
  * Called when an entity stops riding another entity.
  */
-public class EntityDismountEvent extends EntityEvent implements Cancellable { // Paper - implement Cancellable
+public class EntityDismountEvent extends EntityEvent {
 
     private static final HandlerList handlers = new HandlerList();
-    private boolean cancelled;
     private final Entity dismounted;
+    private boolean cancelled;
 
     public EntityDismountEvent(Entity what, Entity dismounted) {
         super(what);
         this.dismounted = dismounted;
+    }
+
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public Entity getDismounted() {
@@ -27,20 +30,4 @@ public class EntityDismountEvent extends EntityEvent implements Cancellable { //
     public HandlerList getHandlers() {
         return handlers;
     }
-
-    public static HandlerList getHandlerList() {
-        return handlers;
-    }
-
-    // Paper start - Implement cancellable methods
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancelled) {
-        this.cancelled = cancelled;
-    }
-    // Paper end
 }

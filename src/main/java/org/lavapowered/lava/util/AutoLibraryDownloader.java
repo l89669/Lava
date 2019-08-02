@@ -8,7 +8,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * Class used from the Lava project
+ * Class used from the Kettle project
  * https://github.com/KettleFoundation/Kettle/blob/master/src/main/java/kettlefoundation/kettle/downloads/DownloadServerFiles.java
  *
  * @author Hexeption

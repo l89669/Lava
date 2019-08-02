@@ -23,6 +23,7 @@ public class BlockPlaceEvent extends BlockEvent implements Cancellable {
     protected Player player;
     protected EquipmentSlot hand;
 
+    @Deprecated
     public BlockPlaceEvent(final Block placedBlock, final BlockState replacedBlockState, final Block placedAgainst, final ItemStack itemInHand, final Player thePlayer, final boolean canBuild) {
         this(placedBlock, replacedBlockState, placedAgainst, itemInHand, thePlayer, canBuild, EquipmentSlot.HAND);
     }
@@ -92,7 +93,7 @@ public class BlockPlaceEvent extends BlockEvent implements Cancellable {
      * Gets the item in the player's hand when they placed the block.
      *
      * @return The ItemStack for the item in the player's hand when they
-     *     placed the block
+     * placed the block
      */
     public ItemStack getItemInHand() {
         return itemInHand;
@@ -100,6 +101,7 @@ public class BlockPlaceEvent extends BlockEvent implements Cancellable {
 
     /**
      * Gets the hand which placed the block
+     *
      * @return Main or off-hand, depending on which hand was used to place the block
      */
     public EquipmentSlot getHand() {

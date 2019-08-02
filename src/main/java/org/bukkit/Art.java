@@ -1,7 +1,7 @@
 package org.bukkit;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 import java.util.HashMap;
 
@@ -48,7 +48,7 @@ public enum Art {
 
     private int id, width, height;
 
-    private Art(int id, int width, int height) {
+    Art(int id, int width, int height) {
         this.id = id;
         this.width = width;
         this.height = height;
@@ -61,7 +61,7 @@ public enum Art {
      * @return The painting
      * @deprecated Magic value
      */
-
+    @Deprecated
     public static Art getById(int id) {
         return BY_ID.get(id);
     }
@@ -76,7 +76,6 @@ public enum Art {
      */
     public static Art getByName(String name) {
         Validate.notNull(name, "Name cannot be null");
-
         return BY_NAME.get(name.toLowerCase(java.util.Locale.ENGLISH).replaceAll("_", ""));
     }
 
@@ -104,7 +103,7 @@ public enum Art {
      * @return The ID of this painting
      * @deprecated Magic value
      */
-
+    @Deprecated
     public int getId() {
         return id;
     }

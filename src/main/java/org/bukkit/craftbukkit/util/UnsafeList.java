@@ -215,10 +215,10 @@ public class UnsafeList<E> extends AbstractList<E> implements List<E>, RandomAcc
     }
 
     public class Itr implements Iterator<E> {
+        public boolean valid = true;
         int index;
         int lastRet = -1;
         int expectedModCount = modCount;
-        public boolean valid = true;
 
         public void reset() {
             index = 0;
