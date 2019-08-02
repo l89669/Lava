@@ -1,21 +1,85 @@
 --- ../src-base/minecraft/net/minecraft/entity/player/EntityPlayer.java
 +++ ../src-work/minecraft/net/minecraft/entity/player/EntityPlayer.java
-@@ -3,10 +3,11 @@
+@@ -3,25 +3,12 @@
  import com.google.common.base.Predicate;
  import com.google.common.collect.Lists;
  import com.mojang.authlib.GameProfile;
-+
- import java.nio.charset.StandardCharsets;
+-import java.nio.charset.StandardCharsets;
 -import java.util.List;
 -import java.util.UUID;
-+import java.util.*;
- import javax.annotation.Nullable;
-+
+-import javax.annotation.Nullable;
  import net.minecraft.block.Block;
- import net.minecraft.block.BlockBed;
+-import net.minecraft.block.BlockBed;
  import net.minecraft.block.BlockHorizontal;
-@@ -92,27 +93,36 @@
- import net.minecraft.world.WorldServer;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.enchantment.EnchantmentHelper;
+-import net.minecraft.entity.Entity;
+-import net.minecraft.entity.EntityList;
+-import net.minecraft.entity.EntityLiving;
+-import net.minecraft.entity.EntityLivingBase;
+-import net.minecraft.entity.EnumCreatureAttribute;
+-import net.minecraft.entity.IEntityMultiPart;
+-import net.minecraft.entity.IMerchant;
+-import net.minecraft.entity.MultiPartEntityPart;
+-import net.minecraft.entity.SharedMonsterAttributes;
++import net.minecraft.entity.*;
+ import net.minecraft.entity.ai.attributes.IAttributeInstance;
+ import net.minecraft.entity.item.EntityBoat;
+ import net.minecraft.entity.item.EntityItem;
+@@ -32,17 +19,11 @@
+ import net.minecraft.entity.passive.EntityPig;
+ import net.minecraft.entity.passive.EntityTameable;
+ import net.minecraft.entity.projectile.EntityFishHook;
+-import net.minecraft.init.Blocks;
+ import net.minecraft.init.Items;
+ import net.minecraft.init.MobEffects;
+ import net.minecraft.init.SoundEvents;
+-import net.minecraft.inventory.Container;
+-import net.minecraft.inventory.ContainerPlayer;
+-import net.minecraft.inventory.EntityEquipmentSlot;
+-import net.minecraft.inventory.IInventory;
+-import net.minecraft.inventory.InventoryEnderChest;
++import net.minecraft.inventory.*;
+ import net.minecraft.item.ItemArmor;
+-import net.minecraft.item.ItemAxe;
+ import net.minecraft.item.ItemElytra;
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.item.ItemSword;
+@@ -62,57 +43,53 @@
+ import net.minecraft.tileentity.TileEntityCommandBlock;
+ import net.minecraft.tileentity.TileEntitySign;
+ import net.minecraft.tileentity.TileEntityStructure;
+-import net.minecraft.util.CooldownTracker;
+-import net.minecraft.util.DamageSource;
+-import net.minecraft.util.EnumActionResult;
+-import net.minecraft.util.EnumFacing;
+-import net.minecraft.util.EnumHand;
+-import net.minecraft.util.EnumHandSide;
+-import net.minecraft.util.EnumParticleTypes;
+-import net.minecraft.util.FoodStats;
+-import net.minecraft.util.ResourceLocation;
+-import net.minecraft.util.SoundCategory;
+-import net.minecraft.util.SoundEvent;
++import net.minecraft.util.*;
+ import net.minecraft.util.datafix.DataFixer;
+ import net.minecraft.util.datafix.DataFixesManager;
+ import net.minecraft.util.datafix.FixTypes;
+-import net.minecraft.util.datafix.IDataFixer;
+-import net.minecraft.util.datafix.IDataWalker;
+ import net.minecraft.util.math.AxisAlignedBB;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.util.text.ITextComponent;
+ import net.minecraft.util.text.TextComponentString;
+ import net.minecraft.util.text.event.ClickEvent;
+-import net.minecraft.world.EnumDifficulty;
+-import net.minecraft.world.GameType;
+-import net.minecraft.world.IInteractionObject;
+-import net.minecraft.world.LockCode;
+-import net.minecraft.world.World;
+-import net.minecraft.world.WorldServer;
++import net.minecraft.world.*;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
 +import org.bukkit.craftbukkit.entity.CraftHumanEntity;
@@ -29,6 +93,10 @@
 +import org.bukkit.event.player.PlayerVelocityEvent;
 +import org.bukkit.util.Vector;
  
++import javax.annotation.Nullable;
++import java.nio.charset.StandardCharsets;
++import java.util.*;
++
  @SuppressWarnings("incomplete-switch")
 -public abstract class EntityPlayer extends EntityLivingBase
 -{
@@ -63,7 +131,7 @@
      protected int flyToggleTimer;
      public float prevCameraYaw;
      public float cameraYaw;
-@@ -123,9 +133,9 @@
+@@ -123,9 +100,9 @@
      public double chasingPosX;
      public double chasingPosY;
      public double chasingPosZ;
@@ -75,7 +143,7 @@
      public float renderOffsetX;
      @SideOnly(Side.CLIENT)
      public float renderOffsetY;
-@@ -147,25 +157,32 @@
+@@ -147,25 +124,32 @@
      @Nullable
      public EntityFishHook fishEntity;
  
@@ -115,7 +183,7 @@
          super.applyEntityAttributes();
          this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
          this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.10000000149011612D);
-@@ -174,90 +191,72 @@
+@@ -174,90 +158,72 @@
          this.getAttributeMap().registerAttribute(REACH_DISTANCE);
      }
  
@@ -226,7 +294,7 @@
                  this.addStat(StatList.SNEAK_TIME);
              }
          }
-@@ -266,18 +265,15 @@
+@@ -266,18 +232,15 @@
          double d0 = MathHelper.clamp(this.posX, -2.9999999E7D, 2.9999999E7D);
          double d1 = MathHelper.clamp(this.posZ, -2.9999999E7D, 2.9999999E7D);
  
@@ -248,7 +316,7 @@
                  this.resetCooldown();
              }
  
-@@ -288,8 +284,7 @@
+@@ -288,8 +251,7 @@
          this.updateSize();
      }
  
@@ -258,7 +326,7 @@
          this.prevChasingPosX = this.chasingPosX;
          this.prevChasingPosY = this.chasingPosY;
          this.prevChasingPosZ = this.chasingPosZ;
-@@ -298,38 +293,32 @@
+@@ -298,38 +260,32 @@
          double d2 = this.posZ - this.chasingPosZ;
          double d3 = 10.0D;
  
@@ -303,7 +371,7 @@
              this.chasingPosY = this.posY;
              this.prevChasingPosY = this.chasingPosY;
          }
-@@ -339,120 +328,89 @@
+@@ -339,120 +295,89 @@
          this.chasingPosY += d1 * 0.25D;
      }
  
@@ -449,7 +517,7 @@
              double d0 = this.posX;
              double d1 = this.posY;
              double d2 = this.posZ;
-@@ -463,47 +421,40 @@
+@@ -463,47 +388,40 @@
              this.cameraYaw = 0.0F;
              this.addMountedMovementStat(this.posX - d0, this.posY - d1, this.posZ - d2);
  
@@ -508,7 +576,7 @@
                  this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
              }
          }
-@@ -513,61 +464,50 @@
+@@ -513,61 +431,50 @@
          super.onLivingUpdate();
          IAttributeInstance iattributeinstance = this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
  
@@ -584,7 +652,7 @@
                      this.collideWithPlayer(entity);
                  }
              }
-@@ -576,49 +516,40 @@
+@@ -576,49 +483,40 @@
          this.playShoulderEntityAmbientSound(this.getLeftShoulderEntity());
          this.playShoulderEntityAmbientSound(this.getRightShoulderEntity());
  
@@ -647,7 +715,7 @@
          super.onDeath(cause);
          this.setSize(0.2F, 0.2F);
          this.setPosition(this.posX, this.posY, this.posZ);
-@@ -627,27 +558,23 @@
+@@ -627,27 +525,23 @@
          captureDrops = true;
          capturedDrops.clear();
  
@@ -683,7 +751,7 @@
              this.motionX = 0.0D;
              this.motionZ = 0.0D;
          }
-@@ -658,47 +585,37 @@
+@@ -658,47 +552,37 @@
          this.setFlag(0, false);
      }
  
@@ -742,7 +810,7 @@
              int count = dropAll ? this.inventory.getCurrentItem().getCount() : 1;
              return net.minecraftforge.common.ForgeHooks.onPlayerTossEvent(this, inventory.decrStackSize(inventory.currentItem, count), true);
          }
-@@ -706,56 +623,69 @@
+@@ -706,56 +590,69 @@
      }
  
      @Nullable
@@ -843,7 +911,7 @@
                      this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
                  }
  
-@@ -766,46 +696,38 @@
+@@ -766,46 +663,38 @@
          }
      }
  
@@ -901,7 +969,7 @@
                  case 0:
                      f1 = 0.3F;
                      break;
-@@ -823,13 +745,11 @@
+@@ -823,13 +712,11 @@
              f *= f1;
          }
  
@@ -917,7 +985,7 @@
              f /= 5.0F;
          }
  
-@@ -837,37 +757,28 @@
+@@ -837,37 +724,28 @@
          return (f < 0 ? 0 : f);
      }
  
@@ -968,7 +1036,7 @@
          super.readEntityFromNBT(compound);
          this.setUniqueId(getUUID(this.gameProfile));
          NBTTagList nbttaglist = compound.getTagList("Inventory", 10);
-@@ -880,30 +791,33 @@
+@@ -880,30 +758,33 @@
          this.experienceTotal = compound.getInteger("XpTotal");
          this.xpSeed = compound.getInteger("XpSeed");
  
@@ -1011,7 +1079,7 @@
              int spawndim = spawndata.getInteger("Dim");
              this.spawnChunkMap.put(spawndim, new BlockPos(spawndata.getInteger("SpawnX"), spawndata.getInteger("SpawnY"), spawndata.getInteger("SpawnZ")));
              this.spawnForcedMap.put(spawndim, spawndata.getBoolean("SpawnForced"));
-@@ -913,40 +827,35 @@
+@@ -913,40 +794,35 @@
          this.foodStats.readNBT(compound);
          this.capabilities.readCapabilitiesFromNBT(compound);
  
@@ -1059,7 +1127,7 @@
              compound.setInteger("SpawnX", this.spawnPos.getX());
              compound.setInteger("SpawnY", this.spawnPos.getY());
              compound.setInteger("SpawnZ", this.spawnPos.getZ());
-@@ -954,8 +863,7 @@
+@@ -954,8 +830,7 @@
          }
  
          NBTTagList spawnlist = new NBTTagList();
@@ -1069,7 +1137,7 @@
              BlockPos spawn = entry.getValue();
              if (spawn == null) continue;
              Boolean forced = spawnForcedMap.get(entry.getKey());
-@@ -978,117 +886,111 @@
+@@ -978,117 +853,111 @@
          this.capabilities.writeCapabilitiesToNBT(compound);
          compound.setTag("EnderItems", this.enderChest.saveInventoryToNBT());
  
@@ -1241,7 +1309,7 @@
                      this.setItemStackToSlot(EntityEquipmentSlot.OFFHAND, ItemStack.EMPTY);
                  }
  
-@@ -1098,25 +1000,20 @@
+@@ -1098,25 +967,20 @@
          }
      }
  
@@ -1273,7 +1341,7 @@
              damageAmount = net.minecraftforge.common.ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
              if (damageAmount <= 0) return;
              damageAmount = net.minecraftforge.common.ISpecialArmor.ArmorProperties.applyArmor(this, inventory.armorInventory, damageSrc, damageAmount);
-@@ -1127,100 +1024,75 @@
+@@ -1127,100 +991,75 @@
              this.setAbsorptionAmount(this.getAbsorptionAmount() - (f - damageAmount));
              damageAmount = net.minecraftforge.common.ForgeHooks.onLivingDamage(this, damageSrc, damageAmount);
  
@@ -1398,7 +1466,7 @@
                              net.minecraftforge.event.ForgeEventFactory.onPlayerDestroyItem(this, itemstack1, p_190775_2_);
                              this.setHeldItem(p_190775_2_, ItemStack.EMPTY);
                          }
-@@ -1234,33 +1106,25 @@
+@@ -1234,33 +1073,25 @@
          }
      }
  
@@ -1441,7 +1509,7 @@
                      f1 = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), EnumCreatureAttribute.UNDEFINED);
                  }
  
-@@ -1269,16 +1133,14 @@
+@@ -1269,16 +1100,14 @@
                  f1 = f1 * f2;
                  this.resetCooldown();
  
@@ -1461,7 +1529,7 @@
                          ++i;
                          flag1 = true;
                      }
-@@ -1288,21 +1150,18 @@
+@@ -1288,21 +1117,18 @@
  
                      net.minecraftforge.event.entity.player.CriticalHitEvent hitResult = net.minecraftforge.common.ForgeHooks.getCriticalHit(this, targetEntity, flag2, flag2 ? 1.5F : 1.0F);
                      flag2 = hitResult != null;
@@ -1487,7 +1555,7 @@
                              flag3 = true;
                          }
                      }
-@@ -1311,14 +1170,21 @@
+@@ -1311,14 +1137,21 @@
                      boolean flag4 = false;
                      int j = EnchantmentHelper.getFireAspectModifier(this);
  
@@ -1516,7 +1584,7 @@
                          }
                      }
  
-@@ -1327,264 +1193,260 @@
+@@ -1327,264 +1160,260 @@
                      double d3 = targetEntity.motionZ;
                      boolean flag5 = targetEntity.attackEntityFrom(DamageSource.causePlayerDamage(this), f);
  
@@ -1912,7 +1980,7 @@
  
          this.sleeping = true;
          this.sleepTimer = 0;
-@@ -1593,112 +1455,105 @@
+@@ -1593,112 +1422,105 @@
          this.motionY = 0.0D;
          this.motionZ = 0.0D;
  
@@ -2068,7 +2136,7 @@
                  case SOUTH:
                      return 90.0F;
                  case WEST:
-@@ -1713,305 +1568,235 @@
+@@ -1713,305 +1535,235 @@
          return 0.0F;
      }
  
@@ -2459,7 +2527,7 @@
              this.experienceLevel = 0;
              this.experience = 0.0F;
              this.experienceTotal = 0;
-@@ -2020,226 +1805,169 @@
+@@ -2020,226 +1772,169 @@
          this.xpSeed = this.rand.nextInt();
      }
  
@@ -2745,7 +2813,7 @@
              }
  
              entity.setPosition(this.posX, this.posY + 0.699999988079071D, this.posZ);
-@@ -2247,19 +1975,28 @@
+@@ -2247,19 +1942,28 @@
          }
      }
  
@@ -2784,7 +2852,7 @@
              Team team = this.getTeam();
              return team == null || player == null || player.getTeam() != team || !team.getSeeFriendlyInvisiblesEnabled();
          }
-@@ -2269,23 +2006,19 @@
+@@ -2269,23 +1973,19 @@
  
      public abstract boolean isCreative();
  
@@ -2812,7 +2880,7 @@
          ITextComponent itextcomponent = new TextComponentString("");
          if (!prefixes.isEmpty()) for (ITextComponent prefix : prefixes) itextcomponent.appendSibling(prefix);
          itextcomponent.appendSibling(new TextComponentString(ScorePlayerTeam.formatPlayerName(this.getTeam(), this.getDisplayNameString())));
-@@ -2296,154 +2029,107 @@
+@@ -2296,154 +1996,107 @@
          return itextcomponent;
      }
  
@@ -3003,7 +3071,7 @@
                          return false;
                      }
                  }
-@@ -2455,110 +2141,94 @@
+@@ -2455,110 +2108,94 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -3147,7 +3215,7 @@
          return dimension == 0 ? spawnPos : spawnChunkMap.get(dimension);
      }
  
-@@ -2566,11 +2236,11 @@
+@@ -2566,11 +2203,11 @@
       * A dimension aware version of isSpawnForced.
       * Noramally isSpawnForced is used to determine if the respawn system should check for a bed or not.
       * This just extends that to be dimension aware.
@@ -3161,7 +3229,7 @@
          if (dimension == 0) return this.spawnForced;
          Boolean forced = this.spawnForcedMap.get(dimension);
          return forced == null ? false : forced;
-@@ -2579,34 +2249,27 @@
+@@ -2579,34 +2216,27 @@
      /**
       * A dimension aware version of setSpawnChunk.
       * This functions identically, but allows you to specify which dimension to affect, rather than affecting the player's current dimension.
@@ -3205,7 +3273,7 @@
              spawnChunkMap.remove(dimension);
              spawnForcedMap.remove(dimension);
          }
-@@ -2616,21 +2279,20 @@
+@@ -2616,21 +2246,20 @@
  
      /**
       * Returns the default eye height of the player
@@ -3232,7 +3300,7 @@
              this.displayname = net.minecraftforge.event.ForgeEventFactory.getPlayerDisplayName(this, this.getName());
          }
          return this.displayname;
-@@ -2639,42 +2301,49 @@
+@@ -2639,42 +2268,49 @@
      /**
       * Force the displayed name to refresh
       */
@@ -3297,7 +3365,7 @@
              if (facing == null) return (T) playerJoinedHandler;
              else if (facing.getAxis().isVertical()) return (T) playerMainHandler;
              else if (facing.getAxis().isHorizontal()) return (T) playerEquipmentHandler;
-@@ -2683,79 +2352,76 @@
+@@ -2683,79 +2319,76 @@
      }
  
      @Override
@@ -3407,7 +3475,7 @@
          OK,
          NOT_POSSIBLE_HERE,
          NOT_POSSIBLE_NOW,
-@@ -2763,4 +2429,11 @@
+@@ -2763,4 +2396,11 @@
          OTHER_PROBLEM,
          NOT_SAFE;
      }

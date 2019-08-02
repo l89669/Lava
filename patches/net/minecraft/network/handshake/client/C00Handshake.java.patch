@@ -1,19 +1,20 @@
 --- ../src-base/minecraft/net/minecraft/network/handshake/client/C00Handshake.java
 +++ ../src-work/minecraft/net/minecraft/network/handshake/client/C00Handshake.java
-@@ -1,6 +1,7 @@
+@@ -1,6 +1,5 @@
  package net.minecraft.network.handshake.client;
  
- import java.io.IOException;
-+
+-import java.io.IOException;
  import net.minecraft.network.EnumConnectionState;
  import net.minecraft.network.Packet;
  import net.minecraft.network.PacketBuffer;
-@@ -8,68 +9,62 @@
+@@ -8,68 +7,64 @@
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
  
 -public class C00Handshake implements Packet<INetHandlerHandshakeServer>
 -{
++import java.io.IOException;
++
 +public class C00Handshake implements Packet<INetHandlerHandshakeServer> {
      private int protocolVersion;
 -    private String ip;

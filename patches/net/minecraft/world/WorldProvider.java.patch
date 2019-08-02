@@ -1,14 +1,13 @@
 --- ../src-base/minecraft/net/minecraft/world/WorldProvider.java
 +++ ../src-work/minecraft/net/minecraft/world/WorldProvider.java
-@@ -1,6 +1,7 @@
+@@ -1,6 +1,5 @@
  package net.minecraft.world;
  
- import javax.annotation.Nullable;
-+
+-import javax.annotation.Nullable;
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.init.Biomes;
  import net.minecraft.init.Blocks;
-@@ -9,19 +10,14 @@
+@@ -9,19 +8,16 @@
  import net.minecraft.util.math.Vec3d;
  import net.minecraft.world.biome.Biome;
  import net.minecraft.world.biome.BiomeProvider;
@@ -26,6 +25,8 @@
 -public abstract class WorldProvider
 -{
 -    public static final float[] MOON_PHASE_FACTORS = new float[] {1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
++import javax.annotation.Nullable;
++
 +public abstract class WorldProvider {
 +    public static final float[] MOON_PHASE_FACTORS = new float[]{1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
      protected World world;

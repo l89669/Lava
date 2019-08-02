@@ -1,0 +1,12 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/asm/ReobfuscationMarker.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/asm/ReobfuscationMarker.java
+@@ -26,8 +26,8 @@
+ 
+ /**
+  * Used to force certain classes to reobfuscate
+- * @author cpw
+  *
++ * @author cpw
+  */
+ @Retention(RetentionPolicy.RUNTIME)
+ @Target({ElementType.TYPE})

@@ -1,0 +1,15 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/SaveInspectionHandler.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/SaveInspectionHandler.java
+@@ -29,11 +29,9 @@
+  * the save games list.
+  *
+  * @author cpw
+- *
+  */
+ @Retention(RetentionPolicy.RUNTIME)
+ @Target(ElementType.METHOD)
+-public @interface SaveInspectionHandler
+-{
++public @interface SaveInspectionHandler {
+ 
+ }

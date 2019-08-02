@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/tileentity/TileEntitySkull.java
 +++ ../src-work/minecraft/net/minecraft/tileentity/TileEntitySkull.java
-@@ -1,52 +1,103 @@
+@@ -1,52 +1,102 @@
  package net.minecraft.tileentity;
  
 +import com.google.common.base.Predicate;
@@ -15,12 +15,8 @@
 +import com.mojang.authlib.ProfileLookupCallback;
  import com.mojang.authlib.minecraft.MinecraftSessionService;
  import com.mojang.authlib.properties.Property;
-+
-+import java.util.Locale;
- import java.util.UUID;
-+import java.util.concurrent.*;
- import javax.annotation.Nullable;
-+
+-import java.util.UUID;
+-import javax.annotation.Nullable;
  import net.minecraft.block.BlockSkull;
 +import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.nbt.NBTTagCompound;
@@ -39,6 +35,11 @@
  
 -public class TileEntitySkull extends TileEntity implements ITickable
 -{
++import javax.annotation.Nullable;
++import java.util.Locale;
++import java.util.UUID;
++import java.util.concurrent.*;
++
 +public class TileEntitySkull extends TileEntity implements ITickable {
      private int skullType;
 -    private int skullRotation;
@@ -122,7 +123,7 @@
              NBTTagCompound nbttagcompound = new NBTTagCompound();
              NBTUtil.writeGameProfile(nbttagcompound, this.playerProfile);
              compound.setTag("Owner", nbttagcompound);
-@@ -55,156 +106,154 @@
+@@ -55,156 +105,154 @@
          return compound;
      }
  

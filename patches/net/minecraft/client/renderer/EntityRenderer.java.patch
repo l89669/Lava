@@ -1,24 +1,60 @@
 --- ../src-base/minecraft/net/minecraft/client/renderer/EntityRenderer.java
 +++ ../src-work/minecraft/net/minecraft/client/renderer/EntityRenderer.java
-@@ -3,6 +3,7 @@
+@@ -3,17 +3,7 @@
  import com.google.common.base.Predicate;
  import com.google.common.base.Predicates;
  import com.google.gson.JsonSyntaxException;
-+
- import java.awt.Graphics;
- import java.awt.image.BufferedImage;
- import java.awt.image.ImageObserver;
-@@ -12,6 +13,7 @@
- import java.util.Random;
- import javax.annotation.Nullable;
- import javax.imageio.ImageIO;
-+
+-import java.awt.Graphics;
+-import java.awt.image.BufferedImage;
+-import java.awt.image.ImageObserver;
+-import java.io.IOException;
+-import java.nio.FloatBuffer;
+-import java.util.List;
+-import java.util.Random;
+-import javax.annotation.Nullable;
+-import javax.imageio.ImageIO;
  import net.minecraft.block.Block;
- import net.minecraft.block.BlockBed;
+-import net.minecraft.block.BlockBed;
  import net.minecraft.block.material.Material;
-@@ -77,8 +79,7 @@
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.client.Minecraft;
+@@ -50,20 +40,8 @@
+ import net.minecraft.init.SoundEvents;
+ import net.minecraft.inventory.IInventory;
+ import net.minecraft.item.ItemStack;
+-import net.minecraft.util.BlockRenderLayer;
+-import net.minecraft.util.EntitySelectors;
+-import net.minecraft.util.EnumFacing;
+-import net.minecraft.util.EnumParticleTypes;
+-import net.minecraft.util.MouseFilter;
+-import net.minecraft.util.ReportedException;
+-import net.minecraft.util.ResourceLocation;
+-import net.minecraft.util.ScreenShotHelper;
+-import net.minecraft.util.SoundCategory;
+-import net.minecraft.util.math.AxisAlignedBB;
+-import net.minecraft.util.math.BlockPos;
+-import net.minecraft.util.math.MathHelper;
+-import net.minecraft.util.math.RayTraceResult;
+-import net.minecraft.util.math.Vec3d;
++import net.minecraft.util.*;
++import net.minecraft.util.math.*;
+ import net.minecraft.world.GameType;
+ import net.minecraft.world.World;
+ import net.minecraft.world.biome.Biome;
+@@ -76,9 +54,18 @@
+ import org.lwjgl.opengl.GLContext;
  import org.lwjgl.util.glu.Project;
  
++import javax.annotation.Nullable;
++import javax.imageio.ImageIO;
++import java.awt.*;
++import java.awt.image.BufferedImage;
++import java.awt.image.ImageObserver;
++import java.io.IOException;
++import java.nio.FloatBuffer;
++import java.util.List;
++import java.util.Random;
++
  @SideOnly(Side.CLIENT)
 -public class EntityRenderer implements IResourceManagerReloadListener
 -{
@@ -26,7 +62,7 @@
      private static final Logger LOGGER = LogManager.getLogger();
      private static final ResourceLocation RAIN_TEXTURES = new ResourceLocation("textures/environment/rain.png");
      private static final ResourceLocation SNOW_TEXTURES = new ResourceLocation("textures/environment/snow.png");
-@@ -136,14 +137,13 @@
+@@ -136,14 +123,13 @@
      private float itemActivationOffX;
      private float itemActivationOffY;
      private ShaderGroup shaderGroup;
@@ -43,7 +79,7 @@
          this.shaderIndex = SHADER_COUNT;
          this.mc = mcIn;
          this.resourceManager = resourceManagerIn;
-@@ -154,12 +154,10 @@
+@@ -154,12 +140,10 @@
          this.lightmapColors = this.lightmapTexture.getTextureData();
          this.shaderGroup = null;
  
@@ -60,7 +96,7 @@
                  float f2 = MathHelper.sqrt(f * f + f1 * f1);
                  this.rainXCoords[i << 5 | j] = -f1 / f2;
                  this.rainYCoords[i << 5 | j] = f / f2;
-@@ -167,15 +165,12 @@
+@@ -167,15 +151,12 @@
          }
      }
  
@@ -79,7 +115,7 @@
              this.shaderGroup.deleteShaderGroup();
          }
  
-@@ -183,83 +178,56 @@
+@@ -183,83 +164,56 @@
          this.shaderIndex = SHADER_COUNT;
      }
  
@@ -180,7 +216,7 @@
              ShaderLinkHelper.setNewStaticShaderLinkHelper();
          }
  
-@@ -268,8 +236,7 @@
+@@ -268,8 +222,7 @@
          this.fogColor2 = this.fogColor1;
          this.thirdPersonDistancePrev = 4.0F;
  
@@ -190,7 +226,7 @@
              float f = this.mc.gameSettings.mouseSensitivity * 0.6F + 0.2F;
              float f1 = f * f * f * 8.0F;
              this.smoothCamFilterX = this.mouseFilterXAxis.smooth(this.smoothCamYaw, 0.05F * f1);
-@@ -277,22 +244,19 @@
+@@ -277,22 +230,19 @@
              this.smoothCamPartialTicks = 0.0F;
              this.smoothCamYaw = 0.0F;
              this.smoothCamPitch = 0.0F;
@@ -216,7 +252,7 @@
          float f2 = f3 * (1.0F - f4) + f4;
          this.fogColor1 += (f2 - this.fogColor1) * 0.1F;
          ++this.rendererUpdateCount;
-@@ -300,42 +264,32 @@
+@@ -300,42 +250,32 @@
          this.addRainParticles();
          this.bossColorModifierPrev = this.bossColorModifier;
  
@@ -268,7 +304,7 @@
                  this.shaderGroup.createBindFramebuffers(width, height);
              }
  
-@@ -343,38 +297,30 @@
+@@ -343,38 +283,30 @@
          }
      }
  
@@ -315,7 +351,7 @@
                      d1 = this.mc.objectMouseOver.hitVec.distanceTo(vec3d);
                  }
  
-@@ -383,46 +329,34 @@
+@@ -383,46 +315,34 @@
                  this.pointedEntity = null;
                  Vec3d vec3d3 = null;
                  float f = 1.0F;
@@ -373,7 +409,7 @@
                                  this.pointedEntity = entity1;
                                  vec3d3 = raytraceresult.hitVec;
                                  d2 = d3;
-@@ -431,18 +365,15 @@
+@@ -431,18 +351,15 @@
                      }
                  }
  
@@ -396,7 +432,7 @@
                          this.mc.pointedEntity = this.pointedEntity;
                      }
                  }
-@@ -452,57 +383,46 @@
+@@ -452,57 +369,46 @@
          }
      }
  
@@ -466,7 +502,7 @@
                  f = f * 60.0F / 70.0F;
              }
  
-@@ -510,26 +430,22 @@
+@@ -510,26 +416,22 @@
          }
      }
  
@@ -502,7 +538,7 @@
              float f2 = entitylivingbase.attackedAtYaw;
              GlStateManager.rotate(-f2, 0.0F, 1.0F, 0.0F);
              GlStateManager.rotate(-f * 14.0F, 0.0F, 0.0F, 1.0F);
-@@ -537,37 +453,32 @@
+@@ -537,37 +439,32 @@
          }
      }
  
@@ -553,7 +589,7 @@
                  BlockPos blockpos = new BlockPos(entity);
                  IBlockState iblockstate = this.mc.world.getBlockState(blockpos);
                  net.minecraftforge.client.ForgeHooksClient.orientBedCamera(this.mc.world, blockpos, iblockstate, entity);
-@@ -575,75 +486,61 @@
+@@ -575,75 +472,61 @@
                  GlStateManager.rotate(entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * partialTicks + 180.0F, 0.0F, -1.0F, 0.0F);
                  GlStateManager.rotate(entity.prevRotationPitch + (entity.rotationPitch - entity.prevRotationPitch) * partialTicks, -1.0F, 0.0F, 0.0F);
              }
@@ -651,7 +687,7 @@
                  yaw = entityanimal.prevRotationYawHead + (entityanimal.rotationYawHead - entityanimal.prevRotationYawHead) * partialTicks + 180.0F;
              }
              IBlockState state = ActiveRenderInfo.getBlockStateAtEntityViewpoint(this.mc.world, entity, partialTicks);
-@@ -655,70 +552,61 @@
+@@ -655,70 +538,61 @@
          }
  
          GlStateManager.translate(0.0F, -f, 0.0F);
@@ -741,7 +777,7 @@
                  case 0:
                      GlStateManager.rotate(90.0F, 0.0F, 1.0F, 0.0F);
                      break;
-@@ -737,70 +625,60 @@
+@@ -737,70 +611,60 @@
          }
      }
  
@@ -830,7 +866,7 @@
          GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
          GlStateManager.matrixMode(5890);
          GlStateManager.loadIdentity();
-@@ -818,33 +696,27 @@
+@@ -818,33 +682,27 @@
          GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
      }
  
@@ -872,7 +908,7 @@
                          f2 = world.provider.getLightBrightnessTable()[i / 16];
                      }
  
-@@ -859,16 +731,14 @@
+@@ -859,16 +717,14 @@
                      f9 = f9 * 0.96F + 0.03F;
                      f10 = f10 * 0.96F + 0.03F;
  
@@ -891,7 +927,7 @@
                          f8 = 0.22F + f3 * 0.75F;
                          f9 = 0.28F + f6 * 0.75F;
                          f10 = 0.25F + f7 * 0.75F;
-@@ -876,25 +746,24 @@
+@@ -876,25 +732,24 @@
  
                      float[] colors = {f8, f9, f10};
                      world.provider.getLightmapColors(partialTicks, f, f2, f3, colors);
@@ -923,7 +959,7 @@
                              f12 = 1.0F / f10;
                          }
  
-@@ -903,18 +772,15 @@
+@@ -903,18 +758,15 @@
                          f10 = f10 * (1.0F - f15) + f10 * f12 * f15;
                      }
  
@@ -945,7 +981,7 @@
                          f10 = 1.0F;
                      }
  
-@@ -932,40 +798,34 @@
+@@ -932,40 +784,34 @@
                      f9 = f9 * 0.96F + 0.03F;
                      f10 = f10 * 0.96F + 0.03F;
  
@@ -995,7 +1031,7 @@
                      this.lightmapColors[i] = -16777216 | k << 16 | l << 8 | i1;
                  }
  
-@@ -976,74 +836,61 @@
+@@ -976,74 +822,61 @@
          }
      }
  
@@ -1086,7 +1122,7 @@
              anaglyphEnable = this.mc.gameSettings.anaglyph;
              final ScaledResolution scaledresolution = new ScaledResolution(this.mc);
              int i1 = scaledresolution.getScaledWidth();
-@@ -1052,31 +899,26 @@
+@@ -1052,31 +885,26 @@
              final int l1 = j1 - Mouse.getY() * j1 / this.mc.displayHeight - 1;
              int i2 = this.mc.gameSettings.limitFramerate;
  
@@ -1124,7 +1160,7 @@
                          GlStateManager.matrixMode(5890);
                          GlStateManager.pushMatrix();
                          GlStateManager.loadIdentity();
-@@ -1090,8 +932,7 @@
+@@ -1090,8 +918,7 @@
                  this.renderEndNanoTime = System.nanoTime();
                  this.mc.mcProfiler.endStartSection("gui");
  
@@ -1134,7 +1170,7 @@
                      GlStateManager.alphaFunc(516, 0.1F);
                      this.setupOverlayRendering();
                      this.renderItemActivation(i1, j1, partialTicks);
-@@ -1099,9 +940,7 @@
+@@ -1099,9 +926,7 @@
                  }
  
                  this.mc.mcProfiler.endSection();
@@ -1145,7 +1181,7 @@
                  GlStateManager.viewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);
                  GlStateManager.matrixMode(5889);
                  GlStateManager.loadIdentity();
-@@ -1115,36 +954,26 @@
+@@ -1115,36 +940,26 @@
                  net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.instance.fontRenderer = this.mc.fontRenderer;
              }
  
@@ -1191,7 +1227,7 @@
                              return String.format("Scaled: (%d, %d). Absolute: (%d, %d). Scale factor of %d", scaledresolution.getScaledWidth(), scaledresolution.getScaledHeight(), EntityRenderer.this.mc.displayWidth, EntityRenderer.this.mc.displayHeight, scaledresolution.getScaleFactor());
                          }
                      });
-@@ -1154,72 +983,54 @@
+@@ -1154,72 +969,54 @@
          }
      }
  
@@ -1281,7 +1317,7 @@
                          flag = !itemstack.isEmpty() && (itemstack.canDestroy(block) || itemstack.canPlaceOn(block));
                      }
                  }
-@@ -1229,12 +1040,10 @@
+@@ -1229,12 +1026,10 @@
          }
      }
  
@@ -1296,7 +1332,7 @@
              this.mc.setRenderViewEntity(this.mc.player);
          }
  
-@@ -1244,8 +1053,7 @@
+@@ -1244,8 +1039,7 @@
          GlStateManager.alphaFunc(516, 0.5F);
          this.mc.mcProfiler.startSection("center");
  
@@ -1306,7 +1342,7 @@
              anaglyphField = 0;
              GlStateManager.colorMask(false, true, true, false);
              this.renderWorldPass(0, partialTicks, finishTimeNano);
-@@ -1253,17 +1061,14 @@
+@@ -1253,17 +1047,14 @@
              GlStateManager.colorMask(true, false, false, false);
              this.renderWorldPass(1, partialTicks, finishTimeNano);
              GlStateManager.colorMask(true, true, true, false);
@@ -1326,7 +1362,7 @@
          RenderGlobal renderglobal = this.mc.renderGlobal;
          ParticleManager particlemanager = this.mc.effectRenderer;
          boolean flag = this.isDrawBlockOutline();
-@@ -1280,31 +1085,29 @@
+@@ -1280,31 +1071,29 @@
          this.mc.mcProfiler.endStartSection("culling");
          ICamera icamera = new Frustum();
          Entity entity = this.mc.getRenderViewEntity();
@@ -1365,7 +1401,7 @@
              this.renderCloudsCheck(renderglobal, partialTicks, pass, d0, d1, d2);
          }
  
-@@ -1313,10 +1116,9 @@
+@@ -1313,10 +1102,9 @@
          this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
          RenderHelper.disableStandardItemLighting();
          this.mc.mcProfiler.endStartSection("terrain_setup");
@@ -1378,7 +1414,7 @@
              this.mc.mcProfiler.endStartSection("updatechunks");
              this.mc.renderGlobal.updateChunks(finishTimeNano);
          }
-@@ -1325,19 +1127,18 @@
+@@ -1325,19 +1113,18 @@
          GlStateManager.matrixMode(5888);
          GlStateManager.pushMatrix();
          GlStateManager.disableAlpha();
@@ -1402,7 +1438,7 @@
              GlStateManager.matrixMode(5888);
              GlStateManager.popMatrix();
              GlStateManager.pushMatrix();
-@@ -1353,18 +1154,16 @@
+@@ -1353,18 +1140,16 @@
          GlStateManager.matrixMode(5888);
          GlStateManager.popMatrix();
  
@@ -1425,7 +1461,7 @@
              this.mc.debugRenderer.renderDebug(partialTicks, finishTimeNano);
          }
  
-@@ -1376,8 +1175,7 @@
+@@ -1376,8 +1161,7 @@
          this.mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
          GlStateManager.disableBlend();
  
@@ -1435,7 +1471,7 @@
              this.enableLightmap();
              this.mc.mcProfiler.endStartSection("litParticles");
              particlemanager.renderLitParticles(entity, partialTicks);
-@@ -1404,7 +1202,7 @@
+@@ -1404,7 +1188,7 @@
          this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
          GlStateManager.shadeModel(7425);
          this.mc.mcProfiler.endStartSection("translucent");
@@ -1444,7 +1480,7 @@
          if (!this.debugView) //Only render if render pass 0 happens as well.
          {
              RenderHelper.enableStandardItemLighting();
-@@ -1422,8 +1220,7 @@
+@@ -1422,8 +1206,7 @@
          GlStateManager.disableBlend();
          GlStateManager.disableFog();
  
@@ -1454,7 +1490,7 @@
              this.mc.mcProfiler.endStartSection("aboveClouds");
              this.renderCloudsCheck(renderglobal, partialTicks, pass, d0, d1, d2);
          }
-@@ -1433,21 +1230,18 @@
+@@ -1433,21 +1216,18 @@
  
          this.mc.mcProfiler.endStartSection("hand");
  
@@ -1480,7 +1516,7 @@
              GlStateManager.matrixMode(5888);
              GlStateManager.pushMatrix();
              this.setupFog(0, partialTicks);
-@@ -1456,23 +1250,20 @@
+@@ -1456,23 +1236,20 @@
              GlStateManager.popMatrix();
              GlStateManager.matrixMode(5889);
              GlStateManager.loadIdentity();
@@ -1509,7 +1545,7 @@
              Entity entity = this.mc.getRenderViewEntity();
              World world = this.mc.world;
              BlockPos blockpos = new BlockPos(entity);
-@@ -1481,82 +1272,65 @@
+@@ -1481,82 +1258,65 @@
              double d1 = 0.0D;
              double d2 = 0.0D;
              int j = 0;
@@ -1612,7 +1648,7 @@
              this.enableLightmap();
              Entity entity = this.mc.getRenderViewEntity();
              World world = this.mc.world;
-@@ -1570,68 +1344,57 @@
+@@ -1570,68 +1330,57 @@
              GlStateManager.enableBlend();
              GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
              GlStateManager.alphaFunc(516, 0.1F);
@@ -1699,7 +1735,7 @@
                                          tessellator.draw();
                                      }
  
-@@ -1640,26 +1403,22 @@
+@@ -1640,26 +1389,22 @@
                                      bufferbuilder.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
                                  }
  
@@ -1737,7 +1773,7 @@
                                          tessellator.draw();
                                      }
  
-@@ -1668,29 +1427,28 @@
+@@ -1668,29 +1413,28 @@
                                      bufferbuilder.begin(7, DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP);
                                  }
  
@@ -1778,7 +1814,7 @@
                  tessellator.draw();
              }
  
-@@ -1702,8 +1460,7 @@
+@@ -1702,8 +1446,7 @@
          }
      }
  
@@ -1788,7 +1824,7 @@
          ScaledResolution scaledresolution = new ScaledResolution(this.mc);
          GlStateManager.clear(256);
          GlStateManager.matrixMode(5889);
-@@ -1714,38 +1471,33 @@
+@@ -1714,38 +1457,33 @@
          GlStateManager.translate(0.0F, 0.0F, -2000.0F);
      }
  
@@ -1841,7 +1877,7 @@
                      f5 = f5 * afloat[3];
                      this.fogColorRed = this.fogColorRed * (1.0F - f5) + afloat[0] * f5;
                      this.fogColorGreen = this.fogColorGreen * (1.0F - f5) + afloat[1] * f5;
-@@ -1759,8 +1511,7 @@
+@@ -1759,8 +1497,7 @@
          this.fogColorBlue += (f3 - this.fogColorBlue) * f;
          float f8 = world.getRainStrength(partialTicks);
  
@@ -1851,7 +1887,7 @@
              float f4 = 1.0F - f8 * 0.5F;
              float f10 = 1.0F - f8 * 0.4F;
              this.fogColorRed *= f4;
-@@ -1770,8 +1521,7 @@
+@@ -1770,8 +1507,7 @@
  
          float f9 = world.getThunderStrength(partialTicks);
  
@@ -1861,7 +1897,7 @@
              float f11 = 1.0F - f9 * 0.5F;
              this.fogColorRed *= f11;
              this.fogColorGreen *= f11;
-@@ -1780,78 +1530,65 @@
+@@ -1780,78 +1516,65 @@
  
          IBlockState iblockstate = ActiveRenderInfo.getBlockStateAtEntityViewpoint(this.mc.world, entity, partialTicks);
  
@@ -1964,7 +2000,7 @@
                  f6 = 1.0F / this.fogColorBlue;
              }
  
-@@ -1863,8 +1600,7 @@
+@@ -1863,8 +1586,7 @@
              this.fogColorBlue = this.fogColorBlue * (1.0F - f15) + this.fogColorBlue * f6 * f15;
          }
  
@@ -1974,7 +2010,7 @@
              float f16 = (this.fogColorRed * 30.0F + this.fogColorGreen * 59.0F + this.fogColorBlue * 11.0F) / 100.0F;
              float f17 = (this.fogColorRed * 30.0F + this.fogColorGreen * 70.0F) / 100.0F;
              float f7 = (this.fogColorRed * 30.0F + this.fogColorBlue * 70.0F) / 100.0F;
-@@ -1883,8 +1619,7 @@
+@@ -1883,8 +1605,7 @@
          GlStateManager.clearColor(this.fogColorRed, this.fogColorGreen, this.fogColorBlue, 0.0F);
      }
  
@@ -1984,7 +2020,7 @@
          Entity entity = this.mc.getRenderViewEntity();
          this.setupFogColor(false);
          GlStateManager.glNormal3f(0.0F, -1.0F, 0.0F);
-@@ -1892,88 +1627,62 @@
+@@ -1892,88 +1613,62 @@
          IBlockState iblockstate = ActiveRenderInfo.getBlockStateAtEntityViewpoint(this.mc.world, entity, partialTicks);
          float hook = net.minecraftforge.client.ForgeHooksClient.getFogDensity(this, entity, iblockstate, partialTicks, 0.1F);
          if (hook >= 0) GlStateManager.setFogDensity(hook);
@@ -2093,7 +2129,7 @@
                  GlStateManager.setFogStart(f * 0.05F);
                  GlStateManager.setFogEnd(Math.min(f, 192.0F) * 0.5F);
              }
-@@ -1985,50 +1694,41 @@
+@@ -1985,50 +1680,41 @@
          GlStateManager.colorMaterial(1028, 4608);
      }
  
@@ -2153,7 +2189,7 @@
              GlStateManager.disableDepth();
          }
  
-@@ -2039,15 +1739,14 @@
+@@ -2039,15 +1725,14 @@
          Tessellator tessellator = Tessellator.getInstance();
          BufferBuilder bufferbuilder = tessellator.getBuffer();
          bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
@@ -2174,7 +2210,7 @@
              fontRendererIn.drawString(str, -fontRendererIn.getStringWidth(str) / 2, verticalShift, 553648127);
              GlStateManager.enableDepth();
          }
-@@ -2060,33 +1759,30 @@
+@@ -2060,33 +1745,30 @@
          GlStateManager.popMatrix();
      }
  

@@ -1,25 +1,53 @@
 --- ../src-base/minecraft/net/minecraft/item/crafting/IRecipe.java
 +++ ../src-work/minecraft/net/minecraft/item/crafting/IRecipe.java
-@@ -3,6 +3,7 @@
+@@ -3,10 +3,10 @@
  import net.minecraft.inventory.InventoryCrafting;
  import net.minecraft.item.ItemStack;
  import net.minecraft.util.NonNullList;
 +import net.minecraft.util.ResourceLocation;
  import net.minecraft.world.World;
  
- public interface IRecipe extends net.minecraftforge.registries.IForgeRegistryEntry<IRecipe>
-@@ -34,4 +35,14 @@
-     {
+-public interface IRecipe extends net.minecraftforge.registries.IForgeRegistryEntry<IRecipe>
+-{
++public interface IRecipe extends net.minecraftforge.registries.IForgeRegistryEntry<IRecipe> {
+     boolean matches(InventoryCrafting inv, World worldIn);
+ 
+     ItemStack getCraftingResult(InventoryCrafting inv);
+@@ -15,23 +15,29 @@
+ 
+     ItemStack getRecipeOutput();
+ 
+-    default NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv)
+-    {
++    default NonNullList<ItemStack> getRemainingItems(InventoryCrafting inv) {
+         return net.minecraftforge.common.ForgeHooks.defaultRecipeGetRemainingItems(inv);
+     }
+ 
+-default NonNullList<Ingredient> getIngredients()
+-    {
++    default NonNullList<Ingredient> getIngredients() {
+         return NonNullList.<Ingredient>create();
+     }
+ 
+-default boolean isDynamic()
+-    {
++    default boolean isDynamic() {
+         return false;
+     }
+ 
+-default String getGroup()
+-    {
++    default String getGroup() {
          return "";
      }
 +
-+  default org.bukkit.inventory.Recipe toBukkitRecipe() // CraftBukkit
-+  {
-+    return null;
-+  }
++    default org.bukkit.inventory.Recipe toBukkitRecipe() // CraftBukkit
++    {
++        return null;
++    }
 +
-+  default void setKey(ResourceLocation key) // CraftBukkit
-+  {
++    default void setKey(ResourceLocation key) // CraftBukkit
++    {
 +
-+  }
++    }
  }

@@ -1,0 +1,18 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/network/simpleimpl/IMessage.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/network/simpleimpl/IMessage.java
+@@ -25,7 +25,6 @@
+  * Implement this interface for each message you wish to define.
+  *
+  * @author cpw
+- *
+  */
+ public interface IMessage {
+     /**
+@@ -37,6 +36,7 @@
+ 
+     /**
+      * Deconstruct your message into the supplied byte buffer
++     *
+      * @param buf
+      */
+     void toBytes(ByteBuf buf);

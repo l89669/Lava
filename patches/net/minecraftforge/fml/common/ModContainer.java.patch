@@ -1,0 +1,60 @@
+--- ../src-base/minecraft/net/minecraftforge/fml/common/ModContainer.java
++++ ../src-work/minecraft/net/minecraftforge/fml/common/ModContainer.java
+@@ -19,6 +19,12 @@
+ 
+ package net.minecraftforge.fml.common;
+ 
++import com.google.common.collect.ImmutableMap;
++import com.google.common.eventbus.EventBus;
++import net.minecraftforge.fml.common.versioning.ArtifactVersion;
++import net.minecraftforge.fml.common.versioning.VersionRange;
++
++import javax.annotation.Nullable;
+ import java.io.File;
+ import java.net.URL;
+ import java.security.cert.Certificate;
+@@ -26,14 +32,6 @@
+ import java.util.Map;
+ import java.util.Set;
+ 
+-import net.minecraftforge.fml.common.versioning.ArtifactVersion;
+-import net.minecraftforge.fml.common.versioning.VersionRange;
+-
+-import com.google.common.collect.ImmutableMap;
+-import com.google.common.eventbus.EventBus;
+-
+-import javax.annotation.Nullable;
+-
+ /**
+  * The container that wraps around mods in the system.
+  * <p>
+@@ -44,14 +42,13 @@
+  * </p>
+  *
+  * @author cpw
+- *
+  */
+ 
+-public interface ModContainer
+-{
++public interface ModContainer {
+     public static enum Disableable {
+         YES, RESTART, NEVER, DEPENDENCIES;
+     }
++
+     /**
+      * The globally unique modid for this mod
+      */
+@@ -146,9 +143,10 @@
+     @Nullable
+     Certificate getSigningCertificate();
+ 
+-    public static final Map<String,String> EMPTY_PROPERTIES = ImmutableMap.of();
+-    Map<String,String> getCustomModProperties();
++    public static final Map<String, String> EMPTY_PROPERTIES = ImmutableMap.of();
+ 
++    Map<String, String> getCustomModProperties();
++
+     public Class<?> getCustomResourcePackClass();
+ 
+     Map<String, String> getSharedModDescriptor();

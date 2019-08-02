@@ -1,6 +1,6 @@
 --- ../src-base/minecraft/net/minecraft/world/chunk/storage/RegionFile.java
 +++ ../src-work/minecraft/net/minecraft/world/chunk/storage/RegionFile.java
-@@ -1,29 +1,28 @@
+@@ -1,29 +1,32 @@
  package net.minecraft.world.chunk.storage;
  
  import com.google.common.collect.Lists;
@@ -13,6 +13,11 @@
 -import java.io.File;
 -import java.io.IOException;
 -import java.io.RandomAccessFile;
++import net.minecraft.nbt.CompressedStreamTools;
++import net.minecraft.nbt.NBTTagCompound;
++import net.minecraft.server.MinecraftServer;
++
++import javax.annotation.Nullable;
 +import java.io.*;
 +import java.nio.ByteBuffer;
 +import java.nio.IntBuffer;
@@ -20,14 +25,13 @@
  import java.util.zip.DeflaterOutputStream;
  import java.util.zip.GZIPInputStream;
  import java.util.zip.InflaterInputStream;
- import javax.annotation.Nullable;
-+import net.minecraft.nbt.CompressedStreamTools;
-+import net.minecraft.nbt.NBTTagCompound;
- import net.minecraft.server.MinecraftServer;
+-import javax.annotation.Nullable;
+-import net.minecraft.server.MinecraftServer;
  
- public class RegionFile
- {
+-public class RegionFile
+-{
 -    // Minecraft is limited to 256 sections per chunk. So 1MB. This can easily be override.
++public class RegionFile {
 +    // Spigot start
 +    // Minecraft is limited to 256 sections per chunk. So 1MB. This can easily be overriden.
      // So we extend this to use the REAL size when the count is maxed by seeking to that section and reading the length.
@@ -36,11 +40,32 @@
 +    // Spigot end
      private static final byte[] EMPTY_SECTOR = new byte[4096];
      private final File fileName;
-+    private File getFile() { return fileName; }
++
++    private File getFile() {
++        return fileName;
++    }
++
      private RandomAccessFile dataFile;
      private final int[] offsets = new int[1024];
      private final int[] chunkTimestamps = new int[1024];
-@@ -45,7 +44,7 @@
+@@ -31,40 +34,34 @@
+     private int sizeDelta;
+     private long lastModified;
+ 
+-    public RegionFile(File fileNameIn)
+-    {
++    public RegionFile(File fileNameIn) {
+         this.fileName = fileNameIn;
+         this.sizeDelta = 0;
+ 
+-        try
+-        {
+-            if (fileNameIn.exists())
+-            {
++        try {
++            if (fileNameIn.exists()) {
+                 this.lastModified = fileNameIn.lastModified();
+             }
  
              this.dataFile = new RandomAccessFile(fileNameIn, "rw");
  
@@ -49,15 +74,42 @@
              {
                  this.dataFile.write(EMPTY_SECTOR);
                  this.dataFile.write(EMPTY_SECTOR);
-@@ -72,36 +71,54 @@
+                 this.sizeDelta += 8192;
+             }
+ 
+-            if ((this.dataFile.length() & 4095L) != 0L)
+-            {
+-                for (int i = 0; (long)i < (this.dataFile.length() & 4095L); ++i)
+-                {
++            if ((this.dataFile.length() & 4095L) != 0L) {
++                for (int i = 0; (long) i < (this.dataFile.length() & 4095L); ++i) {
+                     this.dataFile.write(0);
+                 }
+             }
+ 
+-            int i1 = (int)this.dataFile.length() / 4096;
++            int i1 = (int) this.dataFile.length() / 4096;
+             this.sectorFree = Lists.<Boolean>newArrayListWithCapacity(i1);
+ 
+-            for (int j = 0; j < i1; ++j)
+-            {
++            for (int j = 0; j < i1; ++j) {
+                 this.sectorFree.add(Boolean.valueOf(true));
+             }
+ 
+@@ -72,293 +69,436 @@
              this.sectorFree.set(1, Boolean.valueOf(false));
              this.dataFile.seek(0L);
  
+-            for (int j1 = 0; j1 < 1024; ++j1)
+-            {
+-                int k = this.dataFile.readInt();
+-                this.offsets[j1] = k;
 +            int k;
-+
+ 
 +            // Paper Start
 +            ByteBuffer header = ByteBuffer.allocate(8192);
-+            while (header.hasRemaining())  {
++            while (header.hasRemaining()) {
 +                if (this.dataFile.getChannel().read(header) == -1) {
 +                    throw new EOFException();
 +                }
@@ -66,22 +118,21 @@
 +            IntBuffer headerAsInts = header.asIntBuffer();
 +            initOversizedState();
 +            // Paper End
-             for (int j1 = 0; j1 < 1024; ++j1)
-             {
--                int k = this.dataFile.readInt();
++            for (int j1 = 0; j1 < 1024; ++j1) {
 +                k = headerAsInts.get(); // Paper
-                 this.offsets[j1] = k;
--
++                this.offsets[j1] = k;
 +                // Spigot start
                  int length = k & 255;
-                 if (length == 255)
-                 {
+-                if (length == 255)
+-                {
 -                    if ((k >> 8) <= this.sectorFree.size())
 -                    { // We're maxed out, so we need to read the proper length from the section
++                if (length == 255) {
 +                    if ((k >> 8) <= this.sectorFree.size()) {
 +                        // We're maxed out, so we need to read the proper length from the section
                          this.dataFile.seek((k >> 8) * 4096);
-                         length = (this.dataFile.readInt() + 4)/ 4096 + 1;
+-                        length = (this.dataFile.readInt() + 4)/ 4096 + 1;
++                        length = (this.dataFile.readInt() + 4) / 4096 + 1;
                          this.dataFile.seek(j1 * 4 + 4); //Go back to where we were
                      }
                  }
@@ -89,8 +140,8 @@
 +                if (k > 0 && (k >> 8) > 1 && (k >> 8) + (length) <= this.sectorFree.size()) // Paper >= 1 as 0/1 are the headers, and negative isnt valid
                  {
 -                    for (int l = 0; l < length; ++l)
-+                    for (int l = 0; l < (length); ++l)
-                     {
+-                    {
++                    for (int l = 0; l < (length); ++l) {
 +                        // Spigot end
                          this.sectorFree.set((k >> 8) + l, Boolean.valueOf(false));
                      }
@@ -105,85 +156,244 @@
 +                // Spigot end
              }
  
-             for (int k1 = 0; k1 < 1024; ++k1)
-             {
+-            for (int k1 = 0; k1 < 1024; ++k1)
+-            {
 -                int l1 = this.dataFile.readInt();
 -                this.chunkTimestamps[k1] = l1;
++            for (int k1 = 0; k1 < 1024; ++k1) {
 +                k = headerAsInts.get(); // Paper
-+                if (offsets[k1] != 0) this.chunkTimestamps[k1] = k; // Paper - don't set timestamp if it got 0'd above due to corruption
++                if (offsets[k1] != 0)
++                    this.chunkTimestamps[k1] = k; // Paper - don't set timestamp if it got 0'd above due to corruption
              }
+-        }
+-        catch (IOException ioexception)
+-        {
++        } catch (IOException ioexception) {
+             ioexception.printStackTrace();
          }
-         catch (IOException ioexception)
-@@ -138,11 +155,13 @@
-                 {
+     }
+ 
+     @Deprecated // TODO: remove (1.13)
+-    public synchronized boolean chunkExists(int x, int z)
+-    {
++    public synchronized boolean chunkExists(int x, int z) {
+         return isChunkSaved(x, z);
+     }
+ 
+     @Nullable
+ 
+-    public synchronized DataInputStream getChunkDataInputStream(int x, int z)
+-    {
+-        if (this.outOfBounds(x, z))
+-        {
++    public synchronized DataInputStream getChunkDataInputStream(int x, int z) {
++        if (this.outOfBounds(x, z)) {
+             return null;
+-        }
+-        else
+-        {
+-            try
+-            {
++        } else {
++            try {
+                 int i = this.getOffset(x, z);
+ 
+-                if (i == 0)
+-                {
++                if (i == 0) {
+                     return null;
+-                }
+-                else
+-                {
++                } else {
                      int j = i >> 8;
                      int k = i & 255;
+-                    if (k == 255)
+-                    {
 +                    // Spigot start
-                     if (k == 255)
-                     {
++                    if (k == 255) {
                          this.dataFile.seek(j * 4096);
                          k = (this.dataFile.readInt() + 4) / 4096 + 1;
                      }
 +                    // Spigot end
  
-                     if (j + k > this.sectorFree.size())
-                     {
-@@ -155,12 +174,10 @@
+-                    if (j + k > this.sectorFree.size())
+-                    {
++                    if (j + k > this.sectorFree.size()) {
+                         return null;
+-                    }
+-                    else
+-                    {
+-                        this.dataFile.seek((long)(j * 4096));
++                    } else {
++                        this.dataFile.seek((long) (j * 4096));
+                         int l = this.dataFile.readInt();
  
-                         if (l > 4096 * k)
-                         {
+-                        if (l > 4096 * k)
+-                        {
 -                            net.minecraftforge.fml.common.FMLLog.log.warn("Invalid chunk: ({}, {}) Offset: {} Invalid Size: {}>{} {}", x, z, j, l, k * 4096, fileName);
++                        if (l > 4096 * k) {
                              return null;
-                         }
-                         else if (l <= 0)
-                         {
+-                        }
+-                        else if (l <= 0)
+-                        {
 -                            net.minecraftforge.fml.common.FMLLog.log.warn("Invalid chunk: ({}, {}) Offset: {} Invalid Size: {} {}", x, z, j, l, fileName);
++                        } else if (l <= 0) {
                              return null;
+-                        }
+-                        else
+-                        {
++                        } else {
+                             byte b0 = this.dataFile.readByte();
+ 
+-                            if (b0 == 1)
+-                            {
++                            if (b0 == 1) {
+                                 byte[] abyte1 = new byte[l - 1];
+                                 this.dataFile.read(abyte1);
+                                 return new DataInputStream(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(abyte1))));
+-                            }
+-                            else if (b0 == 2)
+-                            {
++                            } else if (b0 == 2) {
+                                 byte[] abyte = new byte[l - 1];
+                                 this.dataFile.read(abyte);
+                                 return new DataInputStream(new BufferedInputStream(new InflaterInputStream(new ByteArrayInputStream(abyte))));
+-                            }
+-                            else
+-                            {
++                            } else {
+                                 return null;
+                             }
                          }
-                         else
-@@ -197,7 +214,7 @@
+                     }
+                 }
+-            }
+-            catch (IOException var9)
+-            {
++            } catch (IOException var9) {
+                 return null;
+             }
+         }
+     }
+ 
      @Nullable
-     public DataOutputStream getChunkDataOutputStream(int x, int z)
-     {
+-    public DataOutputStream getChunkDataOutputStream(int x, int z)
+-    {
 -        return this.outOfBounds(x, z) ? null : new DataOutputStream(new BufferedOutputStream(new DeflaterOutputStream(new RegionFile.ChunkBuffer(x, z))));
++    public DataOutputStream getChunkDataOutputStream(int x, int z) {
 +        return this.outOfBounds(x, z) ? null : new DataOutputStream(new ChunkBuffer(x, z)); // Paper - remove middleware, move deflate to .close() for dynamic levels
      }
  
-     protected synchronized void write(int x, int z, byte[] data, int length)
-@@ -207,17 +224,21 @@
+-    protected synchronized void write(int x, int z, byte[] data, int length)
+-    {
+-        try
+-        {
++    protected synchronized void write(int x, int z, byte[] data, int length) {
++        try {
              int i = this.getOffset(x, z);
              int j = i >> 8;
              int k = i & 255;
+-            if (k == 255)
+-            {
 +            // Spigot start
-             if (k == 255)
-             {
++            if (k == 255) {
                  this.dataFile.seek(j * 4096);
                  k = (this.dataFile.readInt() + 4) / 4096 + 1;
              }
 +            // Spigot end
              int l = (length + 5) / 4096 + 1;
  
-             if (l >= 256)
-             {
+-            if (l >= 256)
+-            {
 -                if (!FORGE_ENABLE_EXTENDED_SAVE) return;
 -                net.minecraftforge.fml.common.FMLLog.log.warn("Large Chunk Detected: ({}, {}) Size: {} {}", x, z, l, fileName);
++            if (l >= 256) {
 +                // Spigot start
 +                if (!ENABLE_EXTENDED_SAVE) return;
-+                org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.WARNING,"Large Chunk Detected: ({0}, {1}) Size: {2} {3}", new Object[]{x, z, l, this.fileName});
++                org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.WARNING, "Large Chunk Detected: ({0}, {1}) Size: {2} {3}", new Object[]{x, z, l, this.fileName});
 +                // Spigot end
              }
  
-             if (j != 0 && k == l)
-@@ -265,7 +286,7 @@
-                 if (j1 >= l)
-                 {
+-            if (j != 0 && k == l)
+-            {
++            if (j != 0 && k == l) {
+                 this.write(j, data, length);
+-            }
+-            else
+-            {
+-                for (int i1 = 0; i1 < k; ++i1)
+-                {
++            } else {
++                for (int i1 = 0; i1 < k; ++i1) {
+                     this.sectorFree.set(j + i1, Boolean.valueOf(true));
+                 }
+ 
+                 int l1 = this.sectorFree.indexOf(Boolean.valueOf(true));
+                 int j1 = 0;
+ 
+-                if (l1 != -1)
+-                {
+-                    for (int k1 = l1; k1 < this.sectorFree.size(); ++k1)
+-                    {
+-                        if (j1 != 0)
+-                        {
+-                            if (((Boolean)this.sectorFree.get(k1)).booleanValue())
+-                            {
++                if (l1 != -1) {
++                    for (int k1 = l1; k1 < this.sectorFree.size(); ++k1) {
++                        if (j1 != 0) {
++                            if (((Boolean) this.sectorFree.get(k1)).booleanValue()) {
+                                 ++j1;
+-                            }
+-                            else
+-                            {
++                            } else {
+                                 j1 = 0;
+                             }
+-                        }
+-                        else if (((Boolean)this.sectorFree.get(k1)).booleanValue())
+-                        {
++                        } else if (((Boolean) this.sectorFree.get(k1)).booleanValue()) {
+                             l1 = k1;
+                             j1 = 1;
+                         }
+ 
+-                        if (j1 >= l)
+-                        {
++                        if (j1 >= l) {
+                             break;
+                         }
+                     }
+                 }
+ 
+-                if (j1 >= l)
+-                {
++                if (j1 >= l) {
                      j = l1;
 -                    this.setOffset(x, z, l1 << 8 | (l > 255 ? 255 : l));
 +                    this.setOffset(x, z, l1 << 8 | (l > 255 ? 255 : l)); // Spigot
  
-                     for (int j2 = 0; j2 < l; ++j2)
-                     {
-@@ -287,7 +308,7 @@
+-                    for (int j2 = 0; j2 < l; ++j2)
+-                    {
++                    for (int j2 = 0; j2 < l; ++j2) {
+                         this.sectorFree.set(j + j2, Boolean.valueOf(false));
+                     }
+ 
+                     this.write(j, data, length);
+-                }
+-                else
+-                {
++                } else {
+                     this.dataFile.seek(this.dataFile.length());
+                     j = this.sectorFree.size();
+ 
+-                    for (int i2 = 0; i2 < l; ++i2)
+-                    {
++                    for (int i2 = 0; i2 < l; ++i2) {
+                         this.dataFile.write(EMPTY_SECTOR);
+                         this.sectorFree.add(Boolean.valueOf(false));
+                     }
  
                      this.sizeDelta += 4096 * l;
                      this.write(j, data, length);
@@ -192,19 +402,75 @@
                  }
              }
  
-@@ -295,7 +316,7 @@
-         }
-         catch (IOException ioexception)
-         {
--            ioexception.printStackTrace();
+-            this.setChunkTimestamp(x, z, (int)(MinecraftServer.getCurrentTimeMillis() / 1000L));
++            this.setChunkTimestamp(x, z, (int) (MinecraftServer.getCurrentTimeMillis() / 1000L));
++        } catch (IOException ioexception) {
 +            org.spigotmc.SneakyThrow.sneaky(ioexception); // Paper - we want the upper try/catch to retry this
          }
+-        catch (IOException ioexception)
+-        {
+-            ioexception.printStackTrace();
+-        }
      }
  
-@@ -344,6 +365,159 @@
+-    private void write(int sectorNumber, byte[] data, int length) throws IOException
+-    {
+-        this.dataFile.seek((long)(sectorNumber * 4096));
++    private void write(int sectorNumber, byte[] data, int length) throws IOException {
++        this.dataFile.seek((long) (sectorNumber * 4096));
+         this.dataFile.writeInt(length + 1);
+         this.dataFile.writeByte(2);
+         this.dataFile.write(data, 0, length);
+     }
+ 
+-    private boolean outOfBounds(int x, int z)
+-    {
++    private boolean outOfBounds(int x, int z) {
+         return x < 0 || x >= 32 || z < 0 || z >= 32;
+     }
+ 
+-    private int getOffset(int x, int z)
+-    {
++    private int getOffset(int x, int z) {
+         return this.offsets[x + z * 32];
+     }
+ 
+-    public boolean isChunkSaved(int x, int z)
+-    {
++    public boolean isChunkSaved(int x, int z) {
+         return this.getOffset(x, z) != 0;
+     }
+ 
+-    private void setOffset(int x, int z, int offset) throws IOException
+-    {
++    private void setOffset(int x, int z, int offset) throws IOException {
+         this.offsets[x + z * 32] = offset;
+-        this.dataFile.seek((long)((x + z * 32) * 4));
++        this.dataFile.seek((long) ((x + z * 32) * 4));
+         this.dataFile.writeInt(offset);
+     }
+ 
+-    private void setChunkTimestamp(int x, int z, int timestamp) throws IOException
+-    {
++    private void setChunkTimestamp(int x, int z, int timestamp) throws IOException {
+         this.chunkTimestamps[x + z * 32] = timestamp;
+-        this.dataFile.seek((long)(4096 + (x + z * 32) * 4));
++        this.dataFile.seek((long) (4096 + (x + z * 32) * 4));
+         this.dataFile.writeInt(timestamp);
+     }
+ 
+-    public void close() throws IOException
+-    {
+-        if (this.dataFile != null)
+-        {
++    public void close() throws IOException {
++        if (this.dataFile != null) {
+             this.dataFile.close();
          }
      }
  
+-    class ChunkBuffer extends ByteArrayOutputStream
+-    {
 +    // Paper start
 +    public synchronized void deleteChunk(int j1) {
 +        backup();
@@ -214,7 +480,7 @@
 +        int offset = (k >> 8);
 +        int len = (k & 255);
 +        org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger();
-+        String debug = "idx:" + + j1 + " - " + x + "," + z + " - offset: " + offset + " - len: " + len;
++        String debug = "idx:" + +j1 + " - " + x + "," + z + " - offset: " + offset + " - len: " + len;
 +        try {
 +            RandomAccessFile file = dataFile;
 +            file.seek(j1 * 4);
@@ -230,7 +496,9 @@
 +            logger.error("Error deleting corrupt chunk (" + debug + ") " + getFile().getAbsolutePath(), e);
 +        }
 +    }
++
 +    private boolean backedUp = false;
++
 +    private synchronized void backup() {
 +        if (backedUp) {
 +            return;
@@ -270,9 +538,11 @@
 +    private static int getChunkIndex(int x, int z) {
 +        return (x & 31) + (z & 31) * 32;
 +    }
++
 +    synchronized boolean isOversized(int x, int z) {
 +        return this.oversized[getChunkIndex(x, z)] == 1;
 +    }
++
 +    synchronized void setOversized(int x, int z, boolean oversized) throws IOException {
 +        final int offset = getChunkIndex(x, z);
 +        boolean previous = this.oversized[offset] == 1;
@@ -330,6 +600,7 @@
 +    }
 +
 +    private static final boolean USE_SPIGOT_OVERSIZED_METHOD = Boolean.getBoolean("Paper.useSpigotExtendedSaveMethod"); // Paper
++
 +    static {
 +        if (USE_SPIGOT_OVERSIZED_METHOD) {
 +            org.bukkit.Bukkit.getLogger().log(java.util.logging.Level.SEVERE, "====================================");
@@ -343,6 +614,7 @@
 +            super("Chunk " + x + "," + z + " of " + getFile().toString() + " is too large (" + sectors + "/256)");
 +        }
 +    }
++
 +    private static class DirectByteArrayOutputStream extends ByteArrayOutputStream {
 +        public DirectByteArrayOutputStream() {
 +            super();
@@ -358,14 +630,22 @@
 +    }
 +    // Paper end
 +
-     class ChunkBuffer extends ByteArrayOutputStream
-     {
++    class ChunkBuffer extends ByteArrayOutputStream {
          private final int chunkX;
-@@ -358,7 +532,34 @@
+         private final int chunkZ;
  
-         public void close() throws IOException
-         {
+-        public ChunkBuffer(int x, int z)
+-        {
++        public ChunkBuffer(int x, int z) {
+             super(8096);
+             this.chunkX = x;
+             this.chunkZ = z;
+         }
+ 
+-        public void close() throws IOException
+-        {
 -            RegionFile.this.write(this.chunkX, this.chunkZ, this.buf, this.count);
++        public void close() throws IOException {
 +            // Paper start - apply dynamic compression
 +            int origLength = this.count;
 +            byte[] buf = this.buf;
@@ -375,10 +655,11 @@
 +
 +            RegionFile.this.write(this.chunkX, this.chunkZ, bytes, length);
          }
-+        }
+     }
 +
 +    private static final byte[] compressionBuffer = new byte[1024 * 64]; // 64k fits most standard chunks input size even, ideally 1 pass through zlib
 +    private static final java.util.zip.Deflater deflater = new java.util.zip.Deflater();
++
 +    // since file IO is single threaded, no benefit to using per-region file buffers/synchronization, we can change that later if it becomes viable.
 +    private static DirectByteArrayOutputStream compressData(byte[] buf, int length) throws IOException {
 +        synchronized (deflater) {
@@ -393,7 +674,7 @@
 +            out.close();
 +            deflater.reset();
 +            return out;
-     }
- }
++        }
++    }
 +    // Paper end
-+}
+ }
