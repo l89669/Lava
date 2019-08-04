@@ -67,7 +67,7 @@
              Chunk chunk = (Chunk) data[0];
              NBTTagCompound nbttagcompound = (NBTTagCompound) data[1];
              this.loadEntities(worldIn, nbttagcompound.getCompoundTag("Level"), chunk);
-@@ -72,17 +67,14 @@
+@@ -72,64 +67,50 @@
      }
  
      @Nullable
@@ -79,16 +79,21 @@
  
 -        if (nbttagcompound == null)
 -        {
+-            DataInputStream datainputstream = RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z);
 +        if (nbttagcompound == null) {
-             DataInputStream datainputstream = RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z);
++            NBTTagCompound nbtTagCompound = RegionFileCache.getChunkInputStreamCB(this.chunkSaveLocation, x, z);
  
 -            if (datainputstream == null)
 -            {
-+            if (datainputstream == null) {
++            if (nbtTagCompound == null) {
                  return null;
              }
  
-@@ -93,43 +85,33 @@
+-            nbttagcompound = this.fixer.process(FixTypes.CHUNK, CompressedStreamTools.read(datainputstream));
+-            datainputstream.close(); // Forge: close stream after use
++            nbttagcompound = this.fixer.process(FixTypes.CHUNK, nbtTagCompound);
+         }
+ 
          return this.checkedReadChunkFromNBT__Async(worldIn, x, z, nbttagcompound);
      }
  
@@ -141,7 +146,7 @@
                      LOGGER.error("Chunk file at {},{} is in the wrong location; relocating. (Expected {}, {}, got {}, {})", Integer.valueOf(x), Integer.valueOf(z), Integer.valueOf(x), Integer.valueOf(z), Integer.valueOf(chunk.x), Integer.valueOf(chunk.z));
                      nbttagcompound.setInteger("xPos", x);
                      nbttagcompound.setInteger("zPos", z);
-@@ -137,10 +119,8 @@
+@@ -137,10 +118,8 @@
                      // Have to move tile entities since we don't load them at this stage
                      NBTTagList _tileEntities = nbttagcompound.getTagList("TileEntities", 10);
  
@@ -154,7 +159,7 @@
                              NBTTagCompound _nbt = (NBTTagCompound) _tileEntities.getCompoundTagAt(te);
                              _nbt.setInteger("x", x * 16 + (_nbt.getInteger("x") - chunk.x * 16));
                              _nbt.setInteger("z", z * 16 + (_nbt.getInteger("z") - chunk.z * 16));
-@@ -160,12 +140,10 @@
+@@ -160,12 +139,10 @@
          }
      }
  
@@ -169,7 +174,7 @@
              NBTTagCompound nbttagcompound = new NBTTagCompound();
              NBTTagCompound nbttagcompound1 = new NBTTagCompound();
              nbttagcompound.setTag("Level", nbttagcompound1);
-@@ -175,60 +153,44 @@
+@@ -175,60 +152,44 @@
              net.minecraftforge.common.ForgeChunkManager.storeChunkNBT(chunkIn, nbttagcompound1);
              net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.world.ChunkDataEvent.Save(chunkIn, nbttagcompound));
              this.addChunkToPending(chunkIn.getPos(), nbttagcompound);
@@ -245,7 +250,7 @@
                  this.chunksBeingSaved.remove(chunkpos);
              }
  
-@@ -236,62 +198,48 @@
+@@ -236,62 +197,48 @@
          }
      }
  
@@ -329,7 +334,7 @@
                          }
                      }
                  }
-@@ -301,8 +249,7 @@
+@@ -301,8 +248,7 @@
          });
      }
  
@@ -339,7 +344,7 @@
          compound.setInteger("xPos", chunkIn.x);
          compound.setInteger("zPos", chunkIn.z);
          compound.setLong("LastUpdate", worldIn.getTotalWorldTime());
-@@ -314,31 +261,25 @@
+@@ -314,31 +260,25 @@
          NBTTagList nbttaglist = new NBTTagList();
          boolean flag = worldIn.provider.hasSkyLight();
  
@@ -377,7 +382,7 @@
                      nbttagcompound.setByteArray("SkyLight", new byte[extendedblockstorage.getBlockLight().getData().length]);
                  }
  
-@@ -351,22 +292,16 @@
+@@ -351,22 +291,16 @@
          chunkIn.setHasEntities(false);
          NBTTagList nbttaglist1 = new NBTTagList();
  
@@ -408,7 +413,7 @@
                      net.minecraftforge.fml.common.FMLLog.log.error("An Entity type {} has thrown an exception trying to write state. It will not persist. Report this to the mod author",
                              entity.getClass().getName(), e);
                  }
-@@ -376,15 +311,11 @@
+@@ -376,15 +310,11 @@
          compound.setTag("Entities", nbttaglist1);
          NBTTagList nbttaglist2 = new NBTTagList();
  
@@ -429,7 +434,7 @@
                  net.minecraftforge.fml.common.FMLLog.log.error("A TileEntity type {} has throw an exception trying to write state. It will not persist. Report this to the mod author",
                          tileentity.getClass().getName(), e);
              }
-@@ -393,20 +324,18 @@
+@@ -393,20 +323,18 @@
          compound.setTag("TileEntities", nbttaglist2);
          List<NextTickListEntry> list = worldIn.getPendingBlockUpdates(chunkIn, false);
  
@@ -453,7 +458,7 @@
                  nbttagcompound1.setInteger("p", nextticklistentry.priority);
                  nbttaglist3.appendTag(nbttagcompound1);
              }
-@@ -414,21 +343,16 @@
+@@ -414,21 +342,16 @@
              compound.setTag("TileTicks", nbttaglist3);
          }
  
@@ -479,7 +484,7 @@
          int i = compound.getInteger("xPos");
          int j = compound.getInteger("zPos");
          Chunk chunk = new Chunk(worldIn, i, j);
-@@ -441,8 +365,7 @@
+@@ -441,8 +364,7 @@
          ExtendedBlockStorage[] aextendedblockstorage = new ExtendedBlockStorage[16];
          boolean flag = worldIn.provider.hasSkyLight();
  
@@ -489,7 +494,7 @@
              NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(l);
              int i1 = nbttagcompound.getByte("Y");
              ExtendedBlockStorage extendedblockstorage = new ExtendedBlockStorage(i1 << 4, flag);
-@@ -452,8 +375,7 @@
+@@ -452,8 +374,7 @@
              extendedblockstorage.getData().setDataFromNBT(abyte, nibblearray, nibblearray1);
              extendedblockstorage.setBlockLight(new NibbleArray(nbttagcompound.getByteArray("BlockLight")));
  
@@ -499,7 +504,7 @@
                  extendedblockstorage.setSkyLight(new NibbleArray(nbttagcompound.getByteArray("SkyLight")));
              }
  
-@@ -463,8 +385,7 @@
+@@ -463,8 +384,7 @@
  
          chunk.setStorageArrays(aextendedblockstorage);
  
@@ -509,7 +514,7 @@
              chunk.setBiomeArray(compound.getByteArray("Biomes"));
          }
  
-@@ -476,12 +397,10 @@
+@@ -476,12 +396,10 @@
          return chunk;
      }
  
@@ -524,7 +529,7 @@
              NBTTagCompound nbttagcompound1 = nbttaglist1.getCompoundTagAt(j1);
              readChunkEntity(nbttagcompound1, worldIn, chunk);
              chunk.setHasEntities(true);
-@@ -489,32 +408,25 @@
+@@ -489,32 +407,25 @@
  
          NBTTagList nbttaglist2 = compound.getTagList("TileEntities", 10);
  
@@ -563,7 +568,7 @@
                      block = Block.getBlockById(nbttagcompound3.getInteger("i"));
                  }
  
-@@ -524,28 +436,21 @@
+@@ -524,28 +435,21 @@
      }
  
      @Nullable
@@ -598,7 +603,7 @@
                          entity1.startRiding(entity, true);
                      }
                  }
-@@ -556,34 +461,24 @@
+@@ -556,34 +460,24 @@
      }
  
      @Nullable
@@ -641,7 +646,7 @@
                              entity1.startRiding(entity, true);
                          }
                      }
-@@ -595,54 +490,42 @@
+@@ -595,54 +489,42 @@
      }
  
      @Nullable
@@ -713,7 +718,7 @@
                          entity1.startRiding(entity, true);
                      }
                  }
-@@ -652,8 +535,7 @@
+@@ -652,8 +534,7 @@
          }
      }
  
