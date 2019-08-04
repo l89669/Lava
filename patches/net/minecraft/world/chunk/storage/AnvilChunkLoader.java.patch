@@ -20,7 +20,7 @@
  import net.minecraft.nbt.NBTTagCompound;
  import net.minecraft.nbt.NBTTagList;
  import net.minecraft.tileentity.TileEntity;
-@@ -34,8 +24,15 @@
+@@ -34,34 +24,37 @@
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
  
@@ -36,9 +36,11 @@
 +
 +public class AnvilChunkLoader implements IChunkLoader, IThreadedFileIO {
      private static final Logger LOGGER = LogManager.getLogger();
-     private final Map<ChunkPos, NBTTagCompound> chunksToSave = Maps.<ChunkPos, NBTTagCompound>newConcurrentMap();
-     private final Set<ChunkPos> chunksBeingSaved = Collections.<ChunkPos>newSetFromMap(Maps.newConcurrentMap());
-@@ -43,25 +40,21 @@
+-    private final Map<ChunkPos, NBTTagCompound> chunksToSave = Maps.<ChunkPos, NBTTagCompound>newConcurrentMap();
+-    private final Set<ChunkPos> chunksBeingSaved = Collections.<ChunkPos>newSetFromMap(Maps.newConcurrentMap());
++    private final Map<ChunkPos, NBTTagCompound> chunksToSave = Maps.newConcurrentMap();
++    private final Set<ChunkPos> chunksBeingSaved = Collections.newSetFromMap(Maps.newConcurrentMap());
+     public final File chunkSaveLocation;
      private final DataFixer fixer;
      private boolean flushing;
  
