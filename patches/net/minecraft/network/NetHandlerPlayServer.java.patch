@@ -1344,7 +1344,7 @@
 -        try
 -        {
 -            this.netManager.sendPacket(packetIn);
-+        if (packetIn == null) {
++        if (packetIn == null || this.processedDisconnect) { // Spigot
 +            return;
 +        } else if (packetIn instanceof SPacketSpawnPosition) {
 +            SPacketSpawnPosition packet6 = (SPacketSpawnPosition) packetIn;

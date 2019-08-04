@@ -1,19 +1,23 @@
 --- ../src-base/minecraft/net/minecraft/entity/item/EntityItemFrame.java
 +++ ../src-work/minecraft/net/minecraft/entity/item/EntityItemFrame.java
-@@ -1,6 +1,5 @@
+@@ -1,6 +1,6 @@
  package net.minecraft.entity.item;
  
 -import javax.annotation.Nullable;
++import com.google.common.base.Charsets;
  import net.minecraft.entity.Entity;
  import net.minecraft.entity.EntityHanging;
  import net.minecraft.entity.player.EntityPlayer;
-@@ -25,110 +24,92 @@
+@@ -24,111 +24,95 @@
+ import net.minecraft.world.storage.MapData;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.event.CraftEventFactory;
  
 -public class EntityItemFrame extends EntityHanging
 -{
 +import javax.annotation.Nullable;
++import java.util.UUID;
 +
 +public class EntityItemFrame extends EntityHanging {
      private static final DataParameter<ItemStack> ITEM = EntityDataManager.<ItemStack>createKey(EntityItemFrame.class, DataSerializers.ITEM_STACK);
@@ -37,7 +41,8 @@
 -    {
 +    protected void entityInit() {
          this.getDataManager().register(ITEM, ItemStack.EMPTY);
-         this.getDataManager().register(ROTATION, Integer.valueOf(0));
+-        this.getDataManager().register(ROTATION, Integer.valueOf(0));
++        this.getDataManager().register(ROTATION, 0);
      }
  
 -    public float getCollisionBorderSize()
@@ -60,7 +65,7 @@
 -            {
 +        } else if (!source.isExplosion() && !this.getDisplayedItem().isEmpty()) {
 +            if (!this.world.isRemote) {
-+                if (org.bukkit.craftbukkit.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, source, amount, false) || this.isDead) {
++                if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, source, amount, false) || this.isDead) {
 +                    return true;
 +                }
                  this.dropItemOrSelf(source.getTrueSource(), false);
@@ -145,7 +150,7 @@
                  itemstack = itemstack.copy();
                  this.removeFrameFromMap(itemstack);
                  this.entityDropItem(itemstack, 0.0F);
-@@ -136,35 +117,28 @@
+@@ -136,35 +120,28 @@
          }
      }
  
@@ -156,11 +161,12 @@
 -            if (stack.getItem() instanceof net.minecraft.item.ItemMap)
 -            {
 -                MapData mapdata = ((ItemMap)stack.getItem()).getMapData(stack, this.world);
+-                mapdata.mapDecorations.remove("frame-" + this.getEntityId());
 +    private void removeFrameFromMap(ItemStack stack) {
 +        if (!stack.isEmpty()) {
 +            if (stack.getItem() instanceof net.minecraft.item.ItemMap) {
 +                MapData mapdata = ((ItemMap) stack.getItem()).getMapData(stack, this.world);
-                 mapdata.mapDecorations.remove("frame-" + this.getEntityId());
++                mapdata.mapDecorations.remove(UUID.nameUUIDFromBytes(("frame-" + this.getEntityId()).getBytes(Charsets.US_ASCII))); // Spigot
              }
  
 -            stack.setItemFrame((EntityItemFrame)null);
@@ -191,7 +197,7 @@
              stack = stack.copy();
              stack.setCount(1);
              stack.setItemFrame(this);
-@@ -173,78 +147,63 @@
+@@ -173,78 +150,63 @@
          this.getDataManager().set(ITEM, stack);
          this.getDataManager().setDirty(ITEM);
  
@@ -288,7 +294,7 @@
                  this.itemDropChance = compound.getFloat("ItemDropChance");
              }
          }
-@@ -252,26 +211,19 @@
+@@ -252,26 +214,19 @@
          super.readEntityFromNBT(compound);
      }
  
@@ -321,7 +327,7 @@
                  this.playSound(SoundEvents.ENTITY_ITEMFRAME_ROTATE_ITEM, 1.0F, 1.0F);
                  this.setItemRotation(this.getRotation() + 1);
              }
-@@ -280,8 +232,7 @@
+@@ -280,8 +235,7 @@
          return true;
      }
  
