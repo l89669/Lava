@@ -3121,51 +3121,7 @@
                  return tileentity2;
              }
          }
-@@ -2424,35 +2278,28 @@
-         return null;
-     }
- 
--    public void setTileEntity(BlockPos pos, @Nullable TileEntity tileEntityIn)
--    {
-+    public void setTileEntity(BlockPos pos, @Nullable TileEntity tileEntityIn) {
-         pos = pos.toImmutable(); // Forge - prevent mutable BlockPos leaks
--        if (!this.isOutsideBuildHeight(pos))
--        {
--            if (tileEntityIn != null && !tileEntityIn.isInvalid())
--            {
--                if (this.processingLoadedTiles)
--                {
-+        if (!this.isOutsideBuildHeight(pos)) {
-+            if (tileEntityIn != null && !tileEntityIn.isInvalid()) {
-+                if (this.processingLoadedTiles) {
-                     tileEntityIn.setPos(pos);
-                     if (tileEntityIn.getWorld() != this)
-                         tileEntityIn.setWorld(this); // Forge - set the world early as vanilla doesn't set it until next tick
-                     Iterator<TileEntity> iterator1 = this.addedTileEntityList.iterator();
- 
--                    while (iterator1.hasNext())
--                    {
-+                    while (iterator1.hasNext()) {
-                         TileEntity tileentity2 = iterator1.next();
- 
--                        if (tileentity2.getPos().equals(pos))
--                        {
-+                        if (tileentity2.getPos().equals(pos)) {
-                             tileentity2.invalidate();
-                             iterator1.remove();
-                         }
-                     }
- 
-+                    tileEntityIn.setWorld(this); // Spigot - No null worlds
-                     this.addedTileEntityList.add(tileEntityIn);
--                }
--                else
--                {
-+                } else {
-                     Chunk chunk = this.getChunkFromBlockCoords(pos);
-                     if (chunk != null) chunk.addTileEntity(pos, tileEntityIn);
-                     this.addTileEntity(tileEntityIn);
-@@ -2461,21 +2308,16 @@
+@@ -2463,21 +2317,16 @@
          }
      }
  
@@ -3191,7 +3147,7 @@
                  this.addedTileEntityList.remove(tileentity2);
                  this.loadedTileEntityList.remove(tileentity2);
                  this.tickableTileEntities.remove(tileentity2);
-@@ -2486,98 +2328,75 @@
+@@ -2488,98 +2337,75 @@
          this.updateComparatorOutputLevel(pos, getBlockState(pos).getBlock()); //Notify neighbors of changes
      }
  
@@ -3311,7 +3267,7 @@
                          --j2;
                          this.worldInfo.setCleanWeatherTime(j2);
                          this.worldInfo.setThunderTime(this.worldInfo.isThundering() ? 1 : 2);
-@@ -2586,48 +2405,34 @@
+@@ -2588,48 +2414,34 @@
  
                      int k2 = this.worldInfo.getThunderTime();
  
@@ -3370,7 +3326,7 @@
                              this.worldInfo.setRaining(!this.worldInfo.isRaining());
                          }
                      }
-@@ -2635,91 +2440,78 @@
+@@ -2637,91 +2449,78 @@
  
                  this.prevThunderingStrength = this.thunderingStrength;
  
@@ -3490,7 +3446,7 @@
                          return true;
                      }
                  }
-@@ -2729,37 +2521,27 @@
+@@ -2731,37 +2530,27 @@
          }
      }
  
@@ -3536,7 +3492,7 @@
                      return true;
                  }
              }
-@@ -2768,12 +2550,10 @@
+@@ -2770,12 +2559,10 @@
          }
      }
  
@@ -3551,7 +3507,7 @@
              flag |= this.checkLightFor(EnumSkyBlock.SKY, pos);
          }
  
-@@ -2781,14 +2561,10 @@
+@@ -2783,14 +2570,10 @@
          return flag;
      }
  
@@ -3569,7 +3525,7 @@
              IBlockState iblockstate1 = this.getBlockState(pos);
              int j2 = lightType == EnumSkyBlock.SKY ? 0 : iblockstate1.getBlock().getLightValue(iblockstate1, this, pos);
              int k2 = iblockstate1.getBlock().getLightOpacity(iblockstate1, this, pos);
-@@ -2798,80 +2574,64 @@
+@@ -2800,80 +2583,64 @@
                  k2 = 1;
              }
  
@@ -3672,7 +3628,7 @@
                      int i4 = this.lightUpdateBlockList[j2++];
                      int j4 = (i4 & 63) - 32 + j3;
                      int k4 = (i4 >> 6 & 63) - 32 + k3;
-@@ -2880,22 +2640,18 @@
+@@ -2882,22 +2649,18 @@
                      BlockPos blockpos1 = new BlockPos(j4, k4, l4);
                      int j5 = this.getLightFor(lightType, blockpos1);
  
@@ -3699,7 +3655,7 @@
                                      int j6 = j4 + enumfacing.getFrontOffsetX();
                                      int k6 = k4 + enumfacing.getFrontOffsetY();
                                      int l6 = l4 + enumfacing.getFrontOffsetZ();
-@@ -2904,8 +2660,7 @@
+@@ -2906,8 +2669,7 @@
                                      int i7 = Math.max(1, bs.getBlock().getLightOpacity(bs, this, blockpos$pooledmutableblockpos));
                                      j5 = this.getLightFor(lightType, blockpos$pooledmutableblockpos);
  
@@ -3709,7 +3665,7 @@
                                          this.lightUpdateBlockList[k2++] = j6 - j3 + 32 | k6 - k3 + 32 << 6 | l6 - l3 + 32 << 12 | i5 - i7 << 18;
                                      }
                                  }
-@@ -2922,8 +2677,7 @@
+@@ -2924,8 +2686,7 @@
              this.profiler.endSection();
              this.profiler.startSection("checkedPosition < toCheckCount");
  
@@ -3719,7 +3675,7 @@
                  int j7 = this.lightUpdateBlockList[j2++];
                  int k7 = (j7 & 63) - 32 + j3;
                  int l7 = (j7 >> 6 & 63) - 32 + k3;
-@@ -2932,46 +2686,37 @@
+@@ -2934,46 +2695,37 @@
                  int j8 = this.getLightFor(lightType, blockpos2);
                  int k8 = this.getRawLight(blockpos2, lightType);
  
@@ -3775,7 +3731,7 @@
                                  this.lightUpdateBlockList[k2++] = k7 - j3 + 32 + (l7 - k3 + 32 << 6) + (i8 + 1 - l3 + 32 << 12);
                              }
                          }
-@@ -2984,42 +2729,34 @@
+@@ -2986,42 +2738,34 @@
          }
      }
  
@@ -3826,7 +3782,7 @@
                      this.getChunkFromChunkCoords(j3, k3).getEntitiesWithinAABBForEntity(entityIn, boundingBox, list, predicate);
                  }
              }
-@@ -3028,55 +2765,44 @@
+@@ -3030,55 +2774,44 @@
          return list;
      }
  
@@ -3895,7 +3851,7 @@
                      this.getChunkFromChunkCoords(j3, k3).getEntitiesOfTypeWithinAABB(clazz, aabb, list, filter);
                  }
              }
-@@ -3086,22 +2812,18 @@
+@@ -3088,22 +2821,18 @@
      }
  
      @Nullable
@@ -3922,7 +3878,7 @@
                      t = t1;
                      d0 = d1;
                  }
-@@ -3112,33 +2834,35 @@
+@@ -3114,33 +2843,35 @@
      }
  
      @Nullable
@@ -3972,7 +3928,7 @@
                  ++j2;
              }
          }
-@@ -3146,106 +2870,88 @@
+@@ -3148,106 +2879,88 @@
          return j2;
      }
  
@@ -4116,7 +4072,7 @@
                              j2 = Math.max(j2, this.getStrongPower(pos.east(), EnumFacing.EAST));
                              return j2 >= 15 ? j2 : j2;
                          }
-@@ -3255,60 +2961,42 @@
+@@ -3257,60 +2970,42 @@
          }
      }
  
@@ -4190,7 +4146,7 @@
                  j2 = k2;
              }
          }
-@@ -3317,40 +3005,39 @@
+@@ -3319,40 +3014,39 @@
      }
  
      @Nullable
@@ -4244,7 +4200,7 @@
                      d0 = d1;
                      entityplayer = entityplayer1;
                  }
-@@ -3360,18 +3047,14 @@
+@@ -3362,18 +3056,14 @@
          return entityplayer;
      }
  
@@ -4267,7 +4223,7 @@
                      return true;
                  }
              }
-@@ -3381,58 +3064,48 @@
+@@ -3383,58 +3073,48 @@
      }
  
      @Nullable
@@ -4340,7 +4296,7 @@
                      d0 = d1;
                      entityplayer = entityplayer1;
                  }
-@@ -3443,14 +3116,11 @@
+@@ -3445,14 +3125,11 @@
      }
  
      @Nullable
@@ -4358,7 +4314,7 @@
                  return entityplayer;
              }
          }
-@@ -3459,14 +3129,11 @@
+@@ -3461,14 +3138,11 @@
      }
  
      @Nullable
@@ -4376,7 +4332,7 @@
                  return entityplayer;
              }
          }
-@@ -3475,237 +3142,194 @@
+@@ -3477,237 +3151,194 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -4678,7 +4634,7 @@
              CrashReport crashreport3 = CrashReport.makeCrashReport(throwable3, "Playing level event");
              CrashReportCategory crashreportcategory3 = crashreport3.makeCategory("Level event being played");
              crashreportcategory3.addCrashSection("Block coordinates", CrashReportCategory.getCoordinateInfo(pos));
-@@ -3716,48 +3340,37 @@
+@@ -3718,48 +3349,37 @@
          }
      }
  
@@ -4738,7 +4694,7 @@
              crashreportcategory3.addCrashSectionThrowable("Level Data Unobtainable", throwable3);
          }
  
-@@ -3765,24 +3378,19 @@
+@@ -3767,24 +3387,19 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -4768,7 +4724,7 @@
              this.calendar.setTimeInMillis(MinecraftServer.getCurrentTimeMillis());
          }
  
-@@ -3790,33 +3398,26 @@
+@@ -3792,33 +3407,26 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -4809,7 +4765,7 @@
                          iblockstate1.getBlock().onNeighborChange(this, blockpos1, pos);
                      }
                  }
-@@ -3824,13 +3425,11 @@
+@@ -3826,13 +3434,11 @@
          }
      }
  
@@ -4825,7 +4781,7 @@
              f = this.getCurrentMoonPhaseFactor();
              j2 = this.getChunkFromBlockCoords(pos).getInhabitedTime();
          }
-@@ -3838,77 +3437,68 @@
+@@ -3840,77 +3446,68 @@
          return new DifficultyInstance(this.getDifficulty(), this.getWorldTime(), j2, f);
      }
  
@@ -4920,7 +4876,7 @@
          if (!this.isValid(pos)) return _default;
  
          Chunk chunk = getChunkFromBlockCoords(pos);
-@@ -3921,23 +3511,21 @@
+@@ -3923,23 +3520,21 @@
       *
       * @return
       */
@@ -4948,7 +4904,7 @@
          if (!this.isValid(pos)) return 0;
          return getChunkFromBlockCoords(pos).getBlockLightOpacity(pos);
      }
-@@ -3945,13 +3533,10 @@
+@@ -3947,13 +3542,10 @@
      /**
       * Returns a count of entities that classify themselves as the specified creature type.
       */
@@ -4965,7 +4921,7 @@
                  count++;
              }
          }
-@@ -3959,61 +3544,93 @@
+@@ -3961,61 +3553,93 @@
      }
  
      @Deprecated // remove in 1.13

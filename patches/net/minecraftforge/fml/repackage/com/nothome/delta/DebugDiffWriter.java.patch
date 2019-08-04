@@ -18,8 +18,10 @@
      private void writeBuf() {
          System.err.print("DATA: ");
          byte[] ba = os.toByteArray();
-@@ -76,4 +78,3 @@
+@@ -74,6 +76,4 @@
+     public void close() throws IOException {
+         System.err.println("CLOSE");
      }
- 
+-
  }
 -
