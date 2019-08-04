@@ -1,0 +1,30 @@
+--- ../src-base/minecraft/net/minecraftforge/common/ForgeModContainer.java
++++ ../src-work/minecraft/net/minecraftforge/common/ForgeModContainer.java
+@@ -35,7 +35,6 @@
+ import java.util.List;
+ import java.util.Map;
+ 
+-import org.apache.commons.io.IOUtils;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
+ 
+@@ -440,16 +439,9 @@
+     public void modConstruction(FMLConstructionEvent evt)
+     {
+         InputStream is = ForgeModContainer.class.getResourceAsStream("/META-INF/vanilla_annotations.json");
+-        try
+-        {
+-            if (is != null)
+-                JsonAnnotationLoader.loadJson(is, null, evt.getASMHarvestedData());
+-            log.debug("Loading Vanilla annotations: " + is);
+-        }
+-        finally
+-        {
+-            IOUtils.closeQuietly(is);
+-        }
++        if (is != null)
++            JsonAnnotationLoader.loadJson(is, null, evt.getASMHarvestedData());
++        log.debug("Loading Vanilla annotations: " + is);
+ 
+         List<String> all = Lists.newArrayList();
+         for (ASMData asm : evt.getASMHarvestedData().getAll(ICrashReportDetail.class.getName().replace('.', '/')))

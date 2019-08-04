@@ -1,0 +1,13 @@
+--- ../src-base/minecraft/net/minecraftforge/common/ForgeChunkManager.java
++++ ../src-work/minecraft/net/minecraftforge/common/ForgeChunkManager.java
+@@ -585,8 +585,8 @@
+                 }
+                 if (tickets.size() > maxTicketLength)
+                 {
+-                    FMLLog.log.warn("The mod {} has too many open chunkloading tickets: {} (max: {}). Excess will be dropped.", modId, tickets.size(), maxTicketLength);
+-                    tickets = tickets.subList(0, maxTicketLength);
++                    FMLLog.log.warn("The mod {} has too many open chunkloading tickets {}. Excess will be dropped", modId, tickets.size());
++                    tickets.subList(maxTicketLength, tickets.size()).clear();
+                 }
+                 ForgeChunkManager.tickets.get(world).putAll(modId, tickets);
+                 loadingCallback.ticketsLoaded(ImmutableList.copyOf(tickets), world);

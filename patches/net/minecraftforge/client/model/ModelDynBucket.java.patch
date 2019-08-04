@@ -190,7 +190,7 @@
  
          ResourceLocation base = baseLocation;
          ResourceLocation liquid = liquidLocation;
-@@ -248,41 +237,34 @@
+@@ -248,93 +237,70 @@
          return new ModelDynBucket(base, liquid, cover, fluid, flipGas, tint);
      }
  
@@ -224,22 +224,36 @@
 -        {
 +        public void register(TextureMap map) {
              // only create these textures if they are not added by a resource pack
- 
--            if (getResource(new ResourceLocation(ForgeVersion.MOD_ID, "textures/items/bucket_cover.png")) == null)
+-            try (IResource cover = getResource(new ResourceLocation(ForgeVersion.MOD_ID, "textures/items/bucket_cover.png"));
+-                 IResource base = getResource(new ResourceLocation(ForgeVersion.MOD_ID, "textures/items/bucket_base.png")))
 -            {
+-                if (cover == null)
+-                {
+-                    ResourceLocation bucketCover = new ResourceLocation(ForgeVersion.MOD_ID, "items/bucket_cover");
+-                    BucketCoverSprite bucketCoverSprite = new BucketCoverSprite(bucketCover);
+-                    map.setTextureEntry(bucketCoverSprite);
+-                }
+ 
+-                if (base == null)
+-                {
+-                    ResourceLocation bucketBase = new ResourceLocation(ForgeVersion.MOD_ID, "items/bucket_base");
+-                    BucketBaseSprite bucketBaseSprite = new BucketBaseSprite(bucketBase);
+-                    map.setTextureEntry(bucketBaseSprite);
+-                }
 +            if (getResource(new ResourceLocation(ForgeVersion.MOD_ID, "textures/items/bucket_cover.png")) == null) {
-                 ResourceLocation bucketCover = new ResourceLocation(ForgeVersion.MOD_ID, "items/bucket_cover");
-                 BucketCoverSprite bucketCoverSprite = new BucketCoverSprite(bucketCover);
-                 map.setTextureEntry(bucketCoverSprite);
++                ResourceLocation bucketCover = new ResourceLocation(ForgeVersion.MOD_ID, "items/bucket_cover");
++                BucketCoverSprite bucketCoverSprite = new BucketCoverSprite(bucketCover);
++                map.setTextureEntry(bucketCoverSprite);
              }
- 
--            if (getResource(new ResourceLocation(ForgeVersion.MOD_ID, "textures/items/bucket_base.png")) == null)
+-            catch (IOException e)
 -            {
+-                FMLLog.log.error("Failed to close resource", e);
++
 +            if (getResource(new ResourceLocation(ForgeVersion.MOD_ID, "textures/items/bucket_base.png")) == null) {
-                 ResourceLocation bucketBase = new ResourceLocation(ForgeVersion.MOD_ID, "items/bucket_base");
-                 BucketBaseSprite bucketBaseSprite = new BucketBaseSprite(bucketBase);
-                 map.setTextureEntry(bucketBaseSprite);
-@@ -290,44 +272,35 @@
++                ResourceLocation bucketBase = new ResourceLocation(ForgeVersion.MOD_ID, "items/bucket_base");
++                BucketBaseSprite bucketBaseSprite = new BucketBaseSprite(bucketBase);
++                map.setTextureEntry(bucketBaseSprite);
+             }
          }
  
          @Nullable
@@ -292,7 +306,7 @@
              final TextureAtlasSprite sprite = textureGetter.apply(bucket);
              width = sprite.getIconWidth();
              height = sprite.getIconHeight();
-@@ -341,32 +314,27 @@
+@@ -348,32 +314,27 @@
      /**
       * Creates a bucket cover sprite from the vanilla resource.
       */
@@ -330,7 +344,7 @@
              final TextureAtlasSprite sprite = textureGetter.apply(bucket);
              final TextureAtlasSprite alphaMask = textureGetter.apply(bucketCoverMask);
              width = sprite.getIconWidth();
-@@ -375,18 +343,16 @@
+@@ -382,18 +343,16 @@
              pixels[0] = new int[width * height];
  
              try (
@@ -353,7 +367,7 @@
                          final int alphaMultiplier = alphaPixels[0][p] >>> 24;
                          final int oldPixel = oldPixels[0][p];
                          final int oldPixelAlpha = oldPixel >>> 24;
-@@ -394,9 +360,7 @@
+@@ -401,9 +360,7 @@
                          pixels[0][p] = (oldPixel & 0xFFFFFF) + (newAlpha << 24);
                      }
                  }
@@ -364,7 +378,7 @@
                  FMLLog.log.error("Failed to close resource", e);
              }
  
-@@ -406,33 +370,29 @@
+@@ -413,33 +370,29 @@
          }
      }
  
@@ -405,7 +419,7 @@
                  IModel parent = model.parent.process(ImmutableMap.of("fluid", name));
                  Function<ResourceLocation, TextureAtlasSprite> textureGetter;
                  textureGetter = location -> Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(location.toString());
-@@ -447,8 +407,7 @@
+@@ -454,8 +407,7 @@
      }
  
      // the dynamic bucket is based on the empty bucket
@@ -415,7 +429,7 @@
          private final ModelDynBucket parent;
          private final Map<String, IBakedModel> cache; // contains all the baked models since they'll never change
          private final VertexFormat format;
-@@ -459,8 +418,7 @@
+@@ -466,8 +418,7 @@
                         VertexFormat format,
                         ImmutableMap<TransformType, TRSRTransformation> transforms,
                         Map<String, IBakedModel> cache,

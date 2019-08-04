@@ -15,7 +15,6 @@
 -import java.util.Map.Entry;
 -
 -import javax.annotation.Nullable;
--import javax.imageio.ImageIO;
 -
 +import com.google.common.base.Strings;
  import net.minecraft.client.Minecraft;
@@ -31,6 +30,7 @@
 -import net.minecraft.client.renderer.BufferBuilder;
  import net.minecraft.client.renderer.texture.DynamicTexture;
  import net.minecraft.client.renderer.texture.TextureManager;
+-import net.minecraft.client.renderer.texture.TextureUtil;
  import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
  import net.minecraft.client.resources.I18n;
  import net.minecraft.client.resources.IResourcePack;
@@ -388,7 +388,8 @@
 +                } else {
                      InputStream logoResource = getClass().getResourceAsStream(logoFile);
                      if (logoResource != null)
-                         logo = ImageIO.read(logoResource);
+-                        logo = TextureUtil.readBufferedImage(logoResource);
++                        logo = ImageIO.read(logoResource);
                  }
 -                if (logo != null)
 -                {

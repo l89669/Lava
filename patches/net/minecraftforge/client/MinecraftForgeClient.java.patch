@@ -1,0 +1,14 @@
+--- ../src-base/minecraft/net/minecraftforge/client/MinecraftForgeClient.java
++++ ../src-work/minecraft/net/minecraftforge/client/MinecraftForgeClient.java
+@@ -148,9 +148,7 @@
+         if (supplier != null)
+             return supplier.get();
+ 
+-        try (IResource iresource1 = resourceManager.getResource(resourceLocation))
+-        {
+-            return TextureUtil.readBufferedImage(iresource1.getInputStream());
+-        }
++        IResource iresource1 = resourceManager.getResource(resourceLocation);
++        return TextureUtil.readBufferedImage(iresource1.getInputStream());
+     }
+ }

@@ -224,14 +224,14 @@
              return this.groupList;
          }
  
-@@ -222,56 +194,44 @@
+@@ -222,55 +194,44 @@
          }
  
          //Partial reading of the OBJ format. Documentation taken from http://paulbourke.net/dataformats/obj/
 -        public OBJModel parse() throws IOException
 -        {
 +        public OBJModel parse() throws IOException {
-             String currentLine = "";
++            String currentLine = "";
              Material material = new Material();
              material.setName(Material.DEFAULT_NAME);
              int usemtlCounter = 0;
@@ -241,9 +241,11 @@
 -            {
 +            for (; ; ) {
                  lineNum++;
-                 currentLine = objReader.readLine();
+-                String currentLine = objReader.readLine();
++                currentLine = objReader.readLine();
                  if (currentLine == null) break;
-                 currentLine.trim();
+-                currentLine = currentLine.trim();
++                currentLine.trim();
                  if (currentLine.isEmpty() || currentLine.startsWith("#")) continue;
  
 -                try
@@ -291,7 +293,7 @@
                      {
                          float[] coords = parseFloats(splitData);
                          TextureCoordinate texCoord = new TextureCoordinate(coords[0],
-@@ -280,16 +240,14 @@
+@@ -279,16 +240,14 @@
                          if (texCoord.u < 0.0f || texCoord.u > 1.0f || texCoord.v < 0.0f || texCoord.v > 1.0f)
                              throw new UVsOutOfBoundsException(this.objFrom);
                          this.texCoords.add(texCoord);
@@ -310,7 +312,7 @@
                              String[] pts = splitData[i].split("/");
  
                              int vert = Integer.parseInt(pts[0]);
-@@ -310,69 +268,47 @@
+@@ -309,69 +268,47 @@
                          Vertex[] va = v.toArray(new Vertex[v.size()]);
  
                          Face face = new Face(va, material.name);
@@ -395,7 +397,7 @@
                      throw new RuntimeException(String.format("OBJLoader.Parser: Exception parsing line #%d: `%s`", lineNum, currentLine), e);
                  }
              }
-@@ -381,8 +317,7 @@
+@@ -380,52 +317,45 @@
          }
      }
  
@@ -405,7 +407,10 @@
          private static final Pattern WHITE_SPACE = Pattern.compile("\\s+");
          private Set<String> unknownMaterialCommands = new HashSet<String>();
          private Map<String, Material> materials = new HashMap<String, Material>();
-@@ -393,42 +328,34 @@
+         private Map<String, Group> groups = new HashMap<String, Group>();
++        private InputStreamReader mtlStream;
++        private BufferedReader mtlReader;
+ 
  //        private float[] minUVBounds = new float[] {0.0f, 0.0f};
  //        private float[] maxUVBounds = new float[] {1.0f, 1.0f};
  
@@ -457,7 +462,16 @@
                      mats.put(e.getKey(), e.getValue());
                  }
              }
-@@ -461,23 +388,19 @@
+@@ -433,6 +363,8 @@
+             ret.unknownMaterialCommands = this.unknownMaterialCommands;
+             ret.materials = mats;
+             ret.groups = this.groups;
++            ret.mtlStream = this.mtlStream;
++            ret.mtlReader = this.mtlReader;
+ //            ret.minUVBounds = this.minUVBounds;
+ //            ret.maxUVBounds = this.maxUVBounds;
+             return ret;
+@@ -456,203 +388,164 @@
  //            this.maxUVBounds[1] = maxV;
  //        }
  
@@ -483,9 +497,14 @@
 -        {
 +        public void changeMaterialColor(String name, int color) {
              Vector4f colorVec = new Vector4f();
-             colorVec.w = (color >> 24 & 255) / 255;
-             colorVec.x = (color >> 16 & 255) / 255;
-@@ -486,18 +409,15 @@
+-            colorVec.w = (color >> 24 & 255) / 255f;
+-            colorVec.x = (color >> 16 & 255) / 255f;
+-            colorVec.y = (color >> 8 & 255) / 255f;
+-            colorVec.z = (color & 255) / 255f;
++            colorVec.w = (color >> 24 & 255) / 255;
++            colorVec.x = (color >> 16 & 255) / 255;
++            colorVec.y = (color >> 8 & 255) / 255;
++            colorVec.z = (color & 255) / 255;
              this.materials.get(name).setColor(colorVec);
          }
  
@@ -507,94 +526,146 @@
              this.materials.clear();
              boolean hasSetTexture = false;
              boolean hasSetColor = false;
-@@ -514,8 +434,7 @@
-             this.materials.put(Material.WHITE_NAME, material);
-             this.materials.put(Material.DEFAULT_NAME, new Material(Texture.WHITE));
+             String domain = from.getResourceDomain();
+             if (!path.contains("/"))
+                 path = from.getResourcePath().substring(0, from.getResourcePath().lastIndexOf("/") + 1) + path;
++            mtlStream = new InputStreamReader(manager.getResource(new ResourceLocation(domain, path)).getInputStream(), StandardCharsets.UTF_8);
++            mtlReader = new BufferedReader(mtlStream);
  
--            for (;;)
+-            ResourceLocation mtlLocation = new ResourceLocation(domain, path);
+-            try (IResource resource = manager.getResource(mtlLocation))
 -            {
-+            for (; ; ) {
-                 currentLine = mtlReader.readLine();
-                 if (currentLine == null) break;
-                 currentLine.trim();
-@@ -525,64 +444,45 @@
-                 String key = fields[0];
-                 String data = fields[1];
+-                BufferedReader mtlReader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
++            String currentLine = "";
++            Material material = new Material();
++            material.setName(Material.WHITE_NAME);
++            material.setTexture(Texture.WHITE);
++            this.materials.put(Material.WHITE_NAME, material);
++            this.materials.put(Material.DEFAULT_NAME, new Material(Texture.WHITE));
  
--                if (key.equalsIgnoreCase("newmtl"))
+-                Material material = new Material();
+-                material.setName(Material.WHITE_NAME);
+-                material.setTexture(Texture.WHITE);
+-                this.materials.put(Material.WHITE_NAME, material);
+-                this.materials.put(Material.DEFAULT_NAME, new Material(Texture.WHITE));
++            for (; ; ) {
++                currentLine = mtlReader.readLine();
++                if (currentLine == null) break;
++                currentLine.trim();
++                if (currentLine.isEmpty() || currentLine.startsWith("#")) continue;
+ 
+-                for (;;)
 -                {
-+                if (key.equalsIgnoreCase("newmtl")) {
-                     hasSetColor = false;
-                     hasSetTexture = false;
-                     material = new Material();
-                     material.setName(data);
-                     this.materials.put(data, material);
--                }
--                else if (key.equalsIgnoreCase("Ka") || key.equalsIgnoreCase("Kd") || key.equalsIgnoreCase("Ks"))
--                {
--                    if (key.equalsIgnoreCase("Kd") || !hasSetColor)
+-                    String currentLine = mtlReader.readLine();
+-                    if (currentLine == null) break;
+-                    currentLine = currentLine.trim();
+-                    if (currentLine.isEmpty() || currentLine.startsWith("#")) continue;
++                String[] fields = WHITE_SPACE.split(currentLine, 2);
++                String key = fields[0];
++                String data = fields[1];
+ 
+-                    String[] fields = WHITE_SPACE.split(currentLine, 2);
+-                    String key = fields[0];
+-                    String data = fields[1];
+-
+-                    if (key.equalsIgnoreCase("newmtl"))
 -                    {
+-                        hasSetColor = false;
+-                        hasSetTexture = false;
+-                        material = new Material();
+-                        material.setName(data);
+-                        this.materials.put(data, material);
++                if (key.equalsIgnoreCase("newmtl")) {
++                    hasSetColor = false;
++                    hasSetTexture = false;
++                    material = new Material();
++                    material.setName(data);
++                    this.materials.put(data, material);
 +                } else if (key.equalsIgnoreCase("Ka") || key.equalsIgnoreCase("Kd") || key.equalsIgnoreCase("Ks")) {
 +                    if (key.equalsIgnoreCase("Kd") || !hasSetColor) {
-                         String[] rgbStrings = WHITE_SPACE.split(data, 3);
-                         Vector4f color = new Vector4f(Float.parseFloat(rgbStrings[0]), Float.parseFloat(rgbStrings[1]), Float.parseFloat(rgbStrings[2]), 1.0f);
-                         hasSetColor = true;
-                         material.setColor(color);
--                    }
--                    else
--                    {
++                        String[] rgbStrings = WHITE_SPACE.split(data, 3);
++                        Vector4f color = new Vector4f(Float.parseFloat(rgbStrings[0]), Float.parseFloat(rgbStrings[1]), Float.parseFloat(rgbStrings[2]), 1.0f);
++                        hasSetColor = true;
++                        material.setColor(color);
 +                    } else {
-                         FMLLog.log.info("OBJModel: A color has already been defined for material '{}' in '{}'. The color defined by key '{}' will not be applied!", material.getName(), new ResourceLocation(domain, path).toString(), key);
++                        FMLLog.log.info("OBJModel: A color has already been defined for material '{}' in '{}'. The color defined by key '{}' will not be applied!", material.getName(), new ResourceLocation(domain, path).toString(), key);
                      }
--                }
--                else if (key.equalsIgnoreCase("map_Ka") || key.equalsIgnoreCase("map_Kd") || key.equalsIgnoreCase("map_Ks"))
--                {
--                    if (key.equalsIgnoreCase("map_Kd") || !hasSetTexture)
+-                    else if (key.equalsIgnoreCase("Ka") || key.equalsIgnoreCase("Kd") || key.equalsIgnoreCase("Ks"))
 -                    {
--                        if (data.contains(" "))
+-                        if (key.equalsIgnoreCase("Kd") || !hasSetColor)
 -                        {
+-                            String[] rgbStrings = WHITE_SPACE.split(data, 3);
+-                            Vector4f color = new Vector4f(Float.parseFloat(rgbStrings[0]), Float.parseFloat(rgbStrings[1]), Float.parseFloat(rgbStrings[2]), 1.0f);
+-                            hasSetColor = true;
+-                            material.setColor(color);
 +                } else if (key.equalsIgnoreCase("map_Ka") || key.equalsIgnoreCase("map_Kd") || key.equalsIgnoreCase("map_Ks")) {
 +                    if (key.equalsIgnoreCase("map_Kd") || !hasSetTexture) {
 +                        if (data.contains(" ")) {
-                             String[] mapStrings = WHITE_SPACE.split(data);
-                             String texturePath = mapStrings[mapStrings.length - 1];
-                             Texture texture = new Texture(texturePath);
-                             hasSetTexture = true;
-                             material.setTexture(texture);
++                            String[] mapStrings = WHITE_SPACE.split(data);
++                            String texturePath = mapStrings[mapStrings.length - 1];
++                            Texture texture = new Texture(texturePath);
++                            hasSetTexture = true;
++                            material.setTexture(texture);
++                        } else {
++                            Texture texture = new Texture(data);
++                            hasSetTexture = true;
++                            material.setTexture(texture);
+                         }
+-                        else
+-                        {
+-                            FMLLog.log.info("OBJModel: A color has already been defined for material '{}' in '{}'. The color defined by key '{}' will not be applied!", material.getName(), mtlLocation, key);
+-                        }
++                    } else {
++                        FMLLog.log.info("OBJModel: A texture has already been defined for material '{}' in '{}'. The texture defined by key '{}' will not be applied!", material.getName(), new ResourceLocation(domain, path).toString(), key);
+                     }
+-                    else if (key.equalsIgnoreCase("map_Ka") || key.equalsIgnoreCase("map_Kd") || key.equalsIgnoreCase("map_Ks"))
+-                    {
+-                        if (key.equalsIgnoreCase("map_Kd") || !hasSetTexture)
+-                        {
+-                            if (data.contains(" "))
+-                            {
+-                                String[] mapStrings = WHITE_SPACE.split(data);
+-                                String texturePath = mapStrings[mapStrings.length - 1];
+-                                Texture texture = new Texture(texturePath);
+-                                hasSetTexture = true;
+-                                material.setTexture(texture);
+-                            }
+-                            else
+-                            {
+-                                Texture texture = new Texture(data);
+-                                hasSetTexture = true;
+-                                material.setTexture(texture);
+-                            }
 -                        }
 -                        else
 -                        {
-+                        } else {
-                             Texture texture = new Texture(data);
-                             hasSetTexture = true;
-                             material.setTexture(texture);
-                         }
--                    }
--                    else
--                    {
-+                    } else {
-                         FMLLog.log.info("OBJModel: A texture has already been defined for material '{}' in '{}'. The texture defined by key '{}' will not be applied!", material.getName(), new ResourceLocation(domain, path).toString(), key);
-                     }
--                }
--                else if (key.equalsIgnoreCase("d") || key.equalsIgnoreCase("Tr"))
--                {
+-                            FMLLog.log.info("OBJModel: A texture has already been defined for material '{}' in '{}'. The texture defined by key '{}' will not be applied!", material.getName(), mtlLocation, key);
+-                        }
 +                } else if (key.equalsIgnoreCase("d") || key.equalsIgnoreCase("Tr")) {
-                     //d <-optional key here> float[0.0:1.0, 1.0]
-                     //Tr r g b OR Tr spectral map file OR Tr xyz r g b (CIEXYZ colorspace)
-                     String[] splitData = WHITE_SPACE.split(data);
-                     float alpha = Float.parseFloat(splitData[splitData.length - 1]);
-                     material.getColor().setW(alpha);
--                }
--                else
--                {
--                    if (!unknownMaterialCommands.contains(key))
--                    {
++                    //d <-optional key here> float[0.0:1.0, 1.0]
++                    //Tr r g b OR Tr spectral map file OR Tr xyz r g b (CIEXYZ colorspace)
++                    String[] splitData = WHITE_SPACE.split(data);
++                    float alpha = Float.parseFloat(splitData[splitData.length - 1]);
++                    material.getColor().setW(alpha);
 +                } else {
 +                    if (!unknownMaterialCommands.contains(key)) {
-                         unknownMaterialCommands.add(key);
-                         FMLLog.log.info("OBJLoader.MaterialLibrary: key '{}' (model: '{}') is not currently supported, skipping", key, new ResourceLocation(domain, path));
++                        unknownMaterialCommands.add(key);
++                        FMLLog.log.info("OBJLoader.MaterialLibrary: key '{}' (model: '{}') is not currently supported, skipping", key, new ResourceLocation(domain, path));
                      }
-@@ -591,74 +491,61 @@
+-                    else if (key.equalsIgnoreCase("d") || key.equalsIgnoreCase("Tr"))
+-                    {
+-                        //d <-optional key here> float[0.0:1.0, 1.0]
+-                        //Tr r g b OR Tr spectral map file OR Tr xyz r g b (CIEXYZ colorspace)
+-                        String[] splitData = WHITE_SPACE.split(data);
+-                        float alpha = Float.parseFloat(splitData[splitData.length - 1]);
+-                        material.getColor().setW(alpha);
+-                    }
+-                    else if (unknownMaterialCommands.add(key))
+-                    {
+-                        FMLLog.log.info("OBJLoader.MaterialLibrary: key '{}' (model: '{}') is not currently supported, skipping", key, mtlLocation);
+-                    }
+                 }
+             }
          }
      }
  
@@ -682,7 +753,7 @@
              StringBuilder builder = new StringBuilder(String.format("%nMaterial:%n"));
              builder.append(String.format("    Name: %s%n", this.name));
              builder.append(String.format("    Color: %s%n", this.color.toString()));
-@@ -667,84 +554,70 @@
+@@ -661,84 +554,70 @@
          }
      }
  
@@ -782,7 +853,7 @@
              this(verts, Material.DEFAULT_NAME);
          }
  
-@@ -778,40 +651,33 @@
+@@ -772,40 +651,33 @@
  //            checkData();
  //        }
  
@@ -830,7 +901,7 @@
              return this.verts;
          }
  
-@@ -842,14 +708,12 @@
+@@ -836,14 +708,12 @@
  //            }
  //        }
  
@@ -847,7 +918,7 @@
                  Vertex v = verts[i];
  //                Normal n = norms != null ? norms[i] : null;
  //                TextureCoordinate t = texCoords != null ? texCoords[i] : null;
-@@ -859,8 +723,7 @@
+@@ -853,8 +723,7 @@
                  transform.transformPosition(pos);
                  vertices[i] = new Vertex(pos, v.getMaterial());
  
@@ -857,7 +928,7 @@
                      Vector3f normal = new Vector3f(v.getNormal().getData());
                      transform.transformNormal(normal);
                      vertices[i].setNormal(new Normal(normal));
-@@ -875,8 +738,7 @@
+@@ -869,8 +738,7 @@
              return new Face(vertices, this.materialName);
          }
  
@@ -867,7 +938,7 @@
              Vector3f a = this.verts[2].getPos3();
              a.sub(this.verts[0].getPos3());
              Vector3f b = this.verts[3].getPos3();
-@@ -887,61 +749,50 @@
+@@ -881,61 +749,50 @@
          }
      }
  
@@ -940,7 +1011,7 @@
              return this.texCoord;
          }
  
-@@ -950,19 +801,16 @@
+@@ -944,19 +801,16 @@
  //            return this.texCoord.u >= 0.0f && this.texCoord.u <= 1.0f && this.texCoord.v >= 0.0f && this.texCoord.v <= 1.0f;
  //        }
  
@@ -963,7 +1034,7 @@
              StringBuilder builder = new StringBuilder();
              builder.append(String.format("v:%n"));
              builder.append(String.format("    position: %s %s %s%n", position.x, position.y, position.z));
-@@ -971,22 +819,18 @@
+@@ -965,22 +819,18 @@
          }
      }
  
@@ -990,7 +1061,7 @@
              this(vector3f.x, vector3f.y, vector3f.z);
          }
  
-@@ -996,45 +840,37 @@
+@@ -990,45 +840,37 @@
              this.z = z;
          }
  
@@ -1044,7 +1115,7 @@
              TextureCoordinate[] texCoords = new TextureCoordinate[4];
              texCoords[0] = new TextureCoordinate(0.0f, 0.0f, 1.0f);
              texCoords[1] = new TextureCoordinate(1.0f, 0.0f, 1.0f);
-@@ -1045,170 +881,137 @@
+@@ -1039,170 +881,137 @@
      }
  
      @Deprecated
@@ -1249,7 +1320,7 @@
              if (this == obj)
                  return true;
              if (obj == null)
-@@ -1217,62 +1020,58 @@
+@@ -1211,62 +1020,58 @@
                  return false;
              OBJState other = (OBJState) obj;
              return Objects.equal(visibilityMap, other.visibilityMap) &&
@@ -1333,7 +1404,7 @@
          private final OBJModel model;
          private IModelState state;
          private final VertexFormat format;
-@@ -1280,8 +1079,7 @@
+@@ -1274,8 +1079,7 @@
          private ImmutableMap<String, TextureAtlasSprite> textures;
          private TextureAtlasSprite sprite = ModelLoader.White.INSTANCE;
  
@@ -1343,7 +1414,7 @@
              this.model = model;
              this.state = state;
              if (this.state instanceof OBJState) this.updateStateVisibilityMap((OBJState) this.state);
-@@ -1289,28 +1087,22 @@
+@@ -1283,28 +1087,22 @@
              this.textures = textures;
          }
  
@@ -1378,7 +1449,7 @@
                          newState = new ModelStateComposition(this.state, newState);
                          return buildQuads(newState);
                      }
-@@ -1319,82 +1111,60 @@
+@@ -1313,82 +1111,60 @@
              return quads;
          }
  
@@ -1480,7 +1551,7 @@
                  UnpackedBakedQuad.Builder builder = new UnpackedBakedQuad.Builder(format);
                  builder.setContractUVs(true);
                  builder.setQuadOrientation(EnumFacing.getFacingFromVector(f.getNormal().x, f.getNormal().y, f.getNormal().z));
-@@ -1409,12 +1179,9 @@
+@@ -1403,12 +1179,9 @@
              return ImmutableList.copyOf(quads);
          }
  
@@ -1496,7 +1567,7 @@
                      case POSITION:
                          builder.put(e, v.getPos().x, v.getPos().y, v.getPos().z, v.getPos().w);
                          break;
-@@ -1432,7 +1199,7 @@
+@@ -1426,7 +1199,7 @@
                          if (!v.hasTextureCoordinate())
                              builder.put(e,
                                      sprite.getInterpolatedU(defUV.u * 16),
@@ -1505,7 +1576,7 @@
                                      0, 1);
                          else
                              builder.put(e,
-@@ -1453,26 +1220,22 @@
+@@ -1447,26 +1220,22 @@
          }
  
          @Override
@@ -1536,7 +1607,7 @@
              return this.sprite;
          }
  
-@@ -1499,93 +1262,72 @@
+@@ -1493,93 +1262,72 @@
              return this;
          }*/
  

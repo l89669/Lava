@@ -53,7 +53,7 @@
  import net.minecraftforge.client.model.pipeline.UnpackedBakedQuad;
  import net.minecraftforge.common.model.IModelPart;
  import net.minecraftforge.common.model.IModelState;
-@@ -66,35 +51,27 @@
+@@ -66,100 +51,84 @@
  import net.minecraftforge.common.model.animation.IClip;
  import net.minecraftforge.common.model.animation.IJoint;
  import net.minecraftforge.common.property.IExtendedBlockState;
@@ -97,9 +97,9 @@
      INSTANCE;
  
      private IResourceManager manager;
-@@ -102,71 +79,56 @@
+ 
      private final Set<String> enabledDomains = new HashSet<>();
-     private final Map<ResourceLocation, B3DModel> cache = new HashMap<>();
++    private final Map<ResourceLocation, B3DModel> cache = new HashMap<>();
  
 -    public void addDomain(String domain)
 -    {
@@ -112,7 +112,7 @@
 -    {
 +    public void onResourceManagerReload(IResourceManager manager) {
          this.manager = manager;
-         cache.clear();
++        cache.clear();
      }
  
      @Override
@@ -128,49 +128,57 @@
 -    {
 +    public IModel loadModel(ResourceLocation modelLocation) throws Exception {
          ResourceLocation file = new ResourceLocation(modelLocation.getResourceDomain(), modelLocation.getResourcePath());
--        if(!cache.containsKey(file))
+-        B3DModel model;
+-        IResource resource = null;
+-        try
 -        {
-+        if (!cache.containsKey(file)) {
-             IResource resource = null;
 -            try
 -            {
--                try
--                {
+-                resource = manager.getResource(file);
++        if (!cache.containsKey(file)) {
++            IResource resource = null;
 +            try {
 +                try {
-                     resource = manager.getResource(file);
--                }
--                catch(FileNotFoundException e)
--                {
--                    if(modelLocation.getResourcePath().startsWith("models/block/"))
++                    resource = manager.getResource(file);
 +                } catch (FileNotFoundException e) {
 +                    if (modelLocation.getResourcePath().startsWith("models/block/"))
-                         resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/item/" + file.getResourcePath().substring("models/block/".length())));
--                    else if(modelLocation.getResourcePath().startsWith("models/item/"))
++                        resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/item/" + file.getResourcePath().substring("models/block/".length())));
 +                    else if (modelLocation.getResourcePath().startsWith("models/item/"))
-                         resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/block/" + file.getResourcePath().substring("models/item/".length())));
-                     else throw e;
-                 }
-                 B3DModel.Parser parser = new B3DModel.Parser(resource.getInputStream());
-                 B3DModel model = parser.parse();
-                 cache.put(file, model);
--            }
--            catch(IOException e)
--            {
++                        resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/block/" + file.getResourcePath().substring("models/item/".length())));
++                    else throw e;
++                }
++                B3DModel.Parser parser = new B3DModel.Parser(resource.getInputStream());
++                B3DModel model = parser.parse();
++                cache.put(file, model);
 +            } catch (IOException e) {
-                 cache.put(file, null);
-                 throw e;
--            }
--            finally
--            {
++                cache.put(file, null);
++                throw e;
 +            } finally {
-                 IOUtils.closeQuietly(resource);
++                IOUtils.closeQuietly(resource);
              }
+-            catch(FileNotFoundException e)
+-            {
+-                if(modelLocation.getResourcePath().startsWith("models/block/"))
+-                    resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/item/" + file.getResourcePath().substring("models/block/".length())));
+-                else if(modelLocation.getResourcePath().startsWith("models/item/"))
+-                    resource = manager.getResource(new ResourceLocation(file.getResourceDomain(), "models/block/" + file.getResourcePath().substring("models/item/".length())));
+-                else throw e;
+-            }
+-            B3DModel.Parser parser = new B3DModel.Parser(resource.getInputStream());
+-            model = parser.parse();
          }
-         B3DModel model = cache.get(file);
+-        catch(IOException e)
+-        {
+-            throw e;
+-        }
+-        finally
+-        {
+-            IOUtils.closeQuietly(resource);
+-        }
 -        if(model == null) throw new ModelLoaderRegistry.LoaderException("Error loading model previously: " + file);
 -        if(!(model.getRoot().getKind() instanceof Mesh))
 -        {
++        B3DModel model = cache.get(file);
 +        if (model == null) throw new ModelLoaderRegistry.LoaderException("Error loading model previously: " + file);
 +        if (!(model.getRoot().getKind() instanceof Mesh)) {
              return new ModelWrapper(modelLocation, model, ImmutableSet.of(), true, true, 1);
@@ -184,7 +192,7 @@
          @Nullable
          private final Animation animation;
          private final int frame;
-@@ -175,23 +137,19 @@
+@@ -168,23 +137,19 @@
          @Nullable
          private final IModelState parent;
  
@@ -212,7 +220,7 @@
              this.animation = animation;
              this.frame = frame;
              this.nextFrame = nextFrame;
-@@ -200,111 +158,88 @@
+@@ -193,111 +158,88 @@
          }
  
          @Nullable
@@ -355,7 +363,7 @@
                      // parent model-global current pose
                      TRSRTransformation pm = cache.getUnchecked(Triple.of(animation, node.getParent(), frame));
                      ret = ret.compose(pm);
-@@ -328,12 +263,9 @@
+@@ -321,12 +263,9 @@
                  // TODO cache
                  TRSRTransformation invBind = new NodeJoint(node).getInvBindPose();
                  ret = ret.compose(invBind);
@@ -370,7 +378,7 @@
                      // parent model-global current pose
                      TRSRTransformation pm = cache.getUnchecked(Triple.of(animation, node.getParent(), frame));
                      ret = ret.compose(pm);
-@@ -349,24 +281,20 @@
+@@ -342,24 +281,20 @@
          }
      }
  
@@ -399,7 +407,7 @@
                  TRSRTransformation parent = new NodeJoint(node.getParent()).getInvBindPose();
                  pose = pose.compose(parent);
              }
-@@ -374,27 +302,23 @@
+@@ -367,27 +302,23 @@
          }
  
          @Override
@@ -432,7 +440,7 @@
              if (this == obj) return true;
              if (!super.equals(obj)) return false;
              if (getClass() != obj.getClass()) return false;
-@@ -403,8 +327,7 @@
+@@ -396,8 +327,7 @@
          }
      }
  
@@ -442,7 +450,7 @@
          private final ResourceLocation modelLocation;
          private final B3DModel model;
          private final ImmutableSet<String> meshes;
-@@ -413,13 +336,11 @@
+@@ -406,13 +336,11 @@
          private final boolean gui3d;
          private final int defaultKey;
  
@@ -458,7 +466,7 @@
              this.modelLocation = modelLocation;
              this.model = model;
              this.meshes = meshes;
-@@ -429,46 +350,37 @@
+@@ -422,46 +350,37 @@
              this.defaultKey = defaultKey;
          }
  
@@ -515,7 +523,7 @@
                      builder.put(e.getKey(), bakedTextureGetter.apply(e.getValue()));
                  }
              }
-@@ -477,21 +389,16 @@
+@@ -470,21 +389,16 @@
          }
  
          @Override
@@ -542,7 +550,7 @@
                      builder.put(e);
                  }
              }
-@@ -499,52 +406,37 @@
+@@ -492,52 +406,37 @@
          }
  
          @Override
@@ -606,7 +614,7 @@
                      FMLLog.log.fatal("unknown keyframe definition '{}' for b3d model '{}'", e.toString(), modelLocation);
                      return this;
                  }
-@@ -553,44 +445,36 @@
+@@ -546,44 +445,36 @@
          }
  
          @Override
@@ -659,7 +667,7 @@
          private final Node<?> node;
          private final IModelState state;
          private final boolean smooth;
-@@ -602,30 +486,25 @@
+@@ -595,30 +486,25 @@
  
          private ImmutableList<BakedQuad> quads;
  
@@ -705,7 +713,7 @@
              this.node = node;
              this.state = state;
              this.smooth = smooth;
-@@ -637,45 +516,35 @@
+@@ -630,45 +516,35 @@
          }
  
          @Override
@@ -763,7 +771,7 @@
                  ImmutableList.Builder<BakedQuad> builder = ImmutableList.builder();
                  generateQuads(builder, node, modelState, ImmutableList.of());
                  return builder.build();
-@@ -683,49 +552,41 @@
+@@ -676,49 +552,41 @@
              return quads;
          }
  
@@ -830,7 +838,7 @@
                      else sprite = this.textures.get(textures.get(0).getPath());
                      quadBuilder.setTexture(sprite);
                      putVertexData(quadBuilder, f.getV1(), f.getNormal(), sprite);
-@@ -737,92 +598,74 @@
+@@ -730,92 +598,74 @@
              }
          }
  
