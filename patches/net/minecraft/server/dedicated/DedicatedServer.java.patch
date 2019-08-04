@@ -349,7 +349,12 @@
                      worldtype = WorldType.DEFAULT;
                  }
  
-@@ -265,43 +258,53 @@
+@@ -261,47 +254,57 @@
+                 this.setBuildLimit(this.settings.getIntProperty("max-build-height", 256));
+                 this.setBuildLimit((this.getBuildLimit() + 8) / 16 * 16);
+                 this.setBuildLimit(MathHelper.clamp(this.getBuildLimit(), 64, 256));
+-                this.settings.setProperty("max-build-height", Integer.valueOf(this.getBuildLimit()));
++                this.settings.setProperty("max-build-height", this.getBuildLimit());
                  TileEntitySkull.setProfileCache(this.getPlayerProfileCache());
                  TileEntitySkull.setSessionService(this.getMinecraftSessionService());
                  PlayerProfileCache.setOnlineMode(this.isServerInOnlineMode());
@@ -357,7 +362,7 @@
 -                LOGGER.info("Preparing level \"{}\"", (Object)this.getFolderName());
 +                if (!net.minecraftforge.fml.common.FMLCommonHandler.instance().handleServerAboutToStart(this))
 +                    return false;
-+                LOGGER.info("Preparing level \"{}\"", (Object) this.getFolderName());
++                LOGGER.info("Preparing level \"{}\"", this.getFolderName());
                  this.loadAllWorlds(this.getFolderName(), this.getFolderName(), k, worldtype, s2);
 -                long i1 = System.nanoTime() - j;
 -                String s3 = String.format("%.3fs", (double)i1 / 1.0E9D);
@@ -365,11 +370,11 @@
 -                this.currentTime = getCurrentTimeMillis();
 +                long i1 = System.nanoTime() - ServerLaunchWrapper.beginTime;
 +                String s3 = String.format("%.3fs", (double) i1 / 1.0E9D);
-+                LOGGER.info("Done ({})! For help, type \"help\" or \"?\"", (Object) s3);
++                LOGGER.info("Done ({})! For help, type \"help\" or \"?\"", s3);
  
 -                if (this.settings.hasProperty("announce-player-achievements"))
 -                {
-+                LOGGER.info(String.format("Starting Minecraft server on {0}:{1}", this.getServerHostname().isEmpty() ? "0.0.0.0" : this.getServerHostname(), String.valueOf(this.getServerPort())));
++                LOGGER.info(String.format("Starting Minecraft server on {}:{}", this.getServerHostname().isEmpty() ? "0.0.0.0" : this.getServerHostname(), String.valueOf(this.getServerPort())));
 +                if (this.settings.hasProperty("announce-player-achievements")) {
                      this.worlds[0].getGameRules().setOrCreateGameRule("announceAdvancements", this.settings.getBooleanProperty("announce-player-achievements", true) ? "true" : "false");
                      this.settings.removeProperty("announce-player-achievements");
